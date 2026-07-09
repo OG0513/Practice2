@@ -72,10 +72,88 @@
   </main>
 
   <!-- ============================================= -->
-  <!-- EXPERIENCE SCREEN (populated in future steps)  -->
+  <!-- EXPERIENCE SCREEN                               -->
+  <!-- Revealed after "Start Celebration" is pressed.  -->
+  <!-- Built as a stack of ".scene" blocks so future    -->
+  <!-- versions can append new interactive objects      -->
+  <!-- (gifts, cake, gallery...) without restructuring. -->
   <!-- ============================================= -->
-  <section class="experience" id="experience" aria-hidden="true">
-    <!-- Interactive celebration content will be built here step by step -->
+  <section class="experience" id="experience" aria-hidden="true" aria-labelledby="experienceHeading">
+    <div class="experience__inner">
+
+      <!-- Decorative floating elements (non-content) -->
+      <div class="floaters floaters--experience" aria-hidden="true">
+        <span class="floater floater--star ef1">✦</span>
+        <span class="floater floater--sparkle ef2">✨</span>
+        <span class="floater floater--flower ef3">🌷</span>
+        <span class="floater floater--sparkle ef4">✨</span>
+      </div>
+
+      <header class="experience__intro">
+        <p class="experience__eyebrow">✨ Your Celebration Awaits ✨</p>
+        <h2 class="experience__heading" id="experienceHeading">
+          Open Your Card, <span id="experienceName">Beautiful</span>
+        </h2>
+        <p class="experience__lead">
+          Tap the card below to reveal something written just for you.
+        </p>
+      </header>
+
+      <!-- ============================================= -->
+      <!-- SCENE: BIRTHDAY CARD                           -->
+      <!-- ============================================= -->
+      <div class="scene scene--card">
+        <div
+          class="greeting-card"
+          id="greetingCard"
+          role="button"
+          tabindex="0"
+          aria-pressed="false"
+          aria-label="Birthday card, closed. Press to open and read your message."
+        >
+          <!-- INSIDE: the real message. Always in normal document flow
+               and never hidden from assistive tech, regardless of the
+               visual open/closed animation state of the cover above it. -->
+          <div class="greeting-card__inside">
+            <div class="greeting-card__message">
+              <p class="greeting-card__greeting">Dear <span id="cardName">Beautiful</span>,</p>
+              <p class="greeting-card__body" id="cardMessage">
+                Wishing you a day filled with warm light, soft laughter, and every
+                little thing that makes you smile. May this new year of your life
+                be as radiant and wonderful as you are.
+              </p>
+              <p class="greeting-card__signature" id="cardSignature">With all my love 💛</p>
+            </div>
+
+            <button
+              class="greeting-card__close"
+              id="closeCardBtn"
+              type="button"
+              tabindex="-1"
+              aria-label="Close the card"
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          </div>
+
+          <!-- COVER: purely decorative overlay implementing the open/close
+               mechanic. See ABSOLUTE POSITIONING note in style.css §9 —
+               this is the one sanctioned exception: an internal, aria-hidden
+               visual layer, not primary content. -->
+          <div class="greeting-card__cover" aria-hidden="true">
+            <span class="greeting-card__seal">🎂</span>
+            <p class="greeting-card__cover-title">Happy Birthday</p>
+            <p class="greeting-card__cover-hint">tap to open</p>
+          </div>
+        </div>
+
+        <p class="scene__hint" id="cardStatusHint" aria-live="polite">tap the card to open it</p>
+      </div>
+
+      <!-- Future scenes (gift boxes, cake & candles, flowers, gallery, etc.)
+           will be appended here as additional .scene blocks in later versions. -->
+
+    </div>
   </section>
 
   <script src="script.js"></script>
