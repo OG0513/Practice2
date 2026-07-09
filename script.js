@@ -1,30 +1,34 @@
 /* =====================================================
    BIRTHDAY WEBSITE — MAIN SCRIPT
-   Version 4: Illustrated Restyle — calm particles + palette
+   Version 4: + Cake & Candles
 ===================================================== */
 
 'use strict';
 
 /* -----------------------------------------------------
    1. CONFIG — Personalize the celebration here
-   Emoji removed from default text to match the new
-   illustrated aesthetic — feel free to add your own
-   personal touches back into these strings, this is
-   just the starting placeholder copy.
 ----------------------------------------------------- */
 const CONFIG = {
   name: 'Beautiful',
-  subtitle: "Today the world gets a little brighter — because it's your day.",
-  particleCount: 16, // ambient dust/petals — kept modest so the scene reads calm, not busy
+  subtitle: "Today the world gets a little brighter — because it's your day. 🎂",
+  particleCount: 22, // scales down automatically on small screens, see initParticles()
 
   card: {
     message:
       "Wishing you a day filled with warm light, soft laughter, and every " +
       "little thing that makes you smile. May this new year of your life " +
       "be as radiant and wonderful as you are.",
-    signature: 'With all my love',
+    signature: 'With all my love 💛',
   },
 
+  // Version 4 — Cake & Candles
+  cake: {
+    candleCount: 5, // Set this to the birthday person's age, or leave as a decorative number
+    wishPrompt: 'Close your eyes and make a wish… then tap again to blow out the candles.',
+    wishGrantedMessage: "Wish sent — here's to a beautiful year ahead! 🎉",
+  },
+
+  // Shared / utility settings
   confettiPiecesPerBurst: 40,
 };
 
@@ -49,6 +53,12 @@ const dom = {
 
   giftRow: document.getElementById('giftRow'),
   confettiLayer: document.getElementById('confettiLayer'),
+
+  // Version 4
+  birthdayCake: document.getElementById('birthdayCake'),
+  cakeCandles: document.getElementById('cakeCandles'),
+  cakeMessage: document.getElementById('cakeMessage'),
+  cakeStatusHint: document.getElementById('cakeStatusHint'),
 };
 
 /* -----------------------------------------------------
@@ -65,14 +75,7 @@ function applyPersonalization() {
 }
 
 /* -----------------------------------------------------
-   4. AMBIENT PARTICLES — Fireflies + Falling Petals
-   -----------------------------------------------------
-   Replaces the old plain-dot particle system. Roughly
-   2-in-5 particles are petals (fall, sway, rotate);
-   the rest are fireflies (rise gently, no glow — just
-   a small warm dot). Both are plain CSS shapes, no
-   emoji/images, and both skip entirely under
-   prefers-reduced-motion.
+   4. FLOATING PARTICLES
 ----------------------------------------------------- */
 function initParticles() {
   const prefersReducedMotion = window.matchMedia(
@@ -90,29 +93,20 @@ function initParticles() {
 
   for (let i = 0; i < count; i++) {
     const particle = document.createElement('span');
-    const isPetal = Math.random() < 0.4;
-    particle.className = isPetal ? 'particle particle--petal' : 'particle particle--firefly';
+    particle.className = 'particle';
 
+    const size = Math.random() * 6 + 3;
     const left = Math.random() * 100;
-    const duration = Math.random() * 10 + 12; // 12s–22s, slow and calm
-    const delay = Math.random() * 14;
-    const drift = Math.random() * 70 - 35;
+    const duration = Math.random() * 10 + 10;
+    const delay = Math.random() * 12;
+    const drift = Math.random() * 80 - 40;
 
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
     particle.style.left = `${left}%`;
     particle.style.animationDuration = `${duration}s`;
     particle.style.animationDelay = `${delay}s`;
     particle.style.setProperty('--drift', `${drift}px`);
-
-    if (isPetal) {
-      const width = Math.random() * 3 + 7; // 7px–10px
-      particle.style.width = `${width}px`;
-      particle.style.height = `${width * 0.7}px`;
-      particle.style.setProperty('--spin', `${Math.random() * 160 + 80}deg`);
-    } else {
-      const size = Math.random() * 3 + 3; // 3px–6px, small firefly dots
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-    }
 
     fragment.appendChild(particle);
   }
@@ -137,13 +131,13 @@ function startCelebration() {
 
     dom.experience.setAttribute('tabindex', '-1');
     dom.experience.focus({ preventScroll: true });
+
+    console.log('🎉 Celebration started!');
   }, 600);
 }
 
 /* -----------------------------------------------------
    6. BIRTHDAY CARD — Open/Close Interaction
-   (unchanged from V2/V3 — only the visuals it controls
-   were restyled, the logic itself didn't need to change)
 ----------------------------------------------------- */
 function initBirthdayCard() {
   const card = dom.greetingCard;
@@ -201,9 +195,8 @@ function initBirthdayCard() {
 
 /* -----------------------------------------------------
    7. CONFETTI BURST — Reusable Celebration Utility
-   Same mechanics as V3; only the color palette changed.
 ----------------------------------------------------- */
-const CONFETTI_COLORS = ['#93555c', '#b9924e', '#8a76a0', '#d8dfe8', '#f0d6d2'];
+const CONFETTI_COLORS = ['#ff8fab', '#f5c66b', '#b98be0', '#c9e4ff', '#ffc2d1'];
 
 function triggerConfetti(originXPercent = 50) {
   const prefersReducedMotion = window.matchMedia(
@@ -246,8 +239,6 @@ function triggerConfetti(originXPercent = 50) {
 
 /* -----------------------------------------------------
    8. GIFT BOXES — Open Interaction
-   (unchanged from V3 — only the visuals it controls
-   were restyled)
 ----------------------------------------------------- */
 function initGiftBoxes() {
   const gifts = document.querySelectorAll('.gift');
@@ -290,7 +281,132 @@ function initGiftBoxes() {
 }
 
 /* -----------------------------------------------------
-   9. EVENT LISTENERS
+   9. CAKE & CANDLES — Rendering + Interaction
+   -----------------------------------------------------
+   renderCakeCandles() builds the candle elements from
+   CONFIG.cake.candleCount (kept separate from initCake()
+   so the candle count could be re-rendered independently
+   in a future version, e.g. if an age input is added).
+
+   initCake() runs a simple two-state cycle on the .cake
+   button: unlit → lit ("make a wish") → unlit-with-wish
+   ("wish granted" + confetti) → lit again, and so on.
+   This is intentionally repeatable, unlike the gift boxes.
+----------------------------------------------------- */
+const CANDLE_COLORS = ['#ff8fab', '#f5c66b', '#b98be0', '#ffb997'];
+
+function renderCakeCandles() {
+  if (!dom.cakeCandles) return;
+
+  dom.cakeCandles.innerHTML = ''; // safe: this container only ever holds generated candles
+
+  const count = Math.max(1, CONFIG.cake.candleCount);
+  const fragment = document.createDocumentFragment();
+
+  for (let i = 0; i < count; i++) {
+    const candle = document.createElement('span');
+    candle.className = 'candle';
+
+    const color = CANDLE_COLORS[i % CANDLE_COLORS.length];
+    // Gentle height variance so a row of candles doesn't look robotically uniform
+    const scale = i % 3 === 1 ? 1.15 : i % 3 === 2 ? 0.9 : 1;
+
+    candle.style.setProperty('--candle-color', color);
+    candle.style.setProperty('--candle-scale', String(scale));
+
+    candle.innerHTML =
+      '<span class="candle__flame"></span>' +
+      '<span class="candle__wick"></span>' +
+      '<span class="candle__stick"></span>';
+
+    fragment.appendChild(candle);
+  }
+
+  dom.cakeCandles.appendChild(fragment);
+}
+
+function initCake() {
+  const cake = dom.birthdayCake;
+  if (!cake) return;
+
+  renderCakeCandles();
+
+  let isLit = false;
+  let hasWished = false;
+
+  // Keeps the message, the small hint line, and the button's own
+  // aria-label all in sync with the current state.
+  function refreshCakeState() {
+    if (isLit) {
+      cake.setAttribute('aria-pressed', 'true');
+      cake.setAttribute(
+        'aria-label',
+        'Birthday cake, candles lit. Press to blow them out and make your wish come true.'
+      );
+      if (dom.cakeMessage) dom.cakeMessage.textContent = CONFIG.cake.wishPrompt;
+      if (dom.cakeStatusHint) dom.cakeStatusHint.textContent = 'tap again to blow out the candles';
+    } else {
+      cake.setAttribute('aria-pressed', 'false');
+      cake.setAttribute(
+        'aria-label',
+        hasWished
+          ? 'Birthday cake, candles blown out. Press to light them again and make another wish.'
+          : 'Birthday cake, candles unlit. Press to light them and make a wish.'
+      );
+      if (dom.cakeMessage) {
+        dom.cakeMessage.textContent = hasWished ? CONFIG.cake.wishGrantedMessage : '';
+      }
+      if (dom.cakeStatusHint) {
+        dom.cakeStatusHint.textContent = hasWished
+          ? 'tap to light them again'
+          : 'tap the cake to light the candles';
+      }
+    }
+  }
+
+  function handleCakeActivate() {
+    if (!isLit) {
+      // Light the candles
+      isLit = true;
+      cake.classList.add('is-lit');
+      refreshCakeState();
+      return;
+    }
+
+    // Blow the candles out: play the puff animation, then settle into
+    // the "wish made" unlit state and celebrate with confetti.
+    isLit = false;
+    hasWished = true;
+    cake.classList.remove('is-lit');
+    cake.classList.add('is-puffing');
+
+    window.setTimeout(() => {
+      cake.classList.remove('is-puffing');
+    }, 500);
+
+    refreshCakeState();
+
+    // Confetti centered on the cake's actual position on screen
+    const rect = cake.getBoundingClientRect();
+    const originXPercent = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+    triggerConfetti(originXPercent);
+  }
+
+  cake.addEventListener('click', handleCakeActivate);
+
+  cake.addEventListener('keydown', (event) => {
+    const isActivationKey = event.key === 'Enter' || event.key === ' ';
+    if (isActivationKey) {
+      event.preventDefault(); // stop Space from scrolling the page
+      handleCakeActivate();
+    }
+  });
+
+  refreshCakeState(); // sets the initial "tap to light" hint
+}
+
+/* -----------------------------------------------------
+   10. EVENT LISTENERS
 ----------------------------------------------------- */
 function bindEvents() {
   if (dom.startBtn) {
@@ -305,7 +421,7 @@ function bindEvents() {
 }
 
 /* -----------------------------------------------------
-   10. INIT — Runs once DOM is ready
+   11. INIT — Runs once DOM is ready
 ----------------------------------------------------- */
 function init() {
   applyPersonalization();
@@ -313,6 +429,7 @@ function init() {
   bindEvents();
   initBirthdayCard();
   initGiftBoxes();
+  initCake(); // Version 4
 }
 
 document.addEventListener('DOMContentLoaded', init);
