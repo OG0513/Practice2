@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Happy Birthday ✨ | A Magical Celebration</title>
+  <meta name="description" content="A magical, personalized birthday celebration experience." />
+
+  <!-- Google Fonts: Elegant display + clean body font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================= -->
+  <!-- BACKGROUND LAYERS (decorative, non-content)    -->
+  <!-- ============================================= -->
+  <div class="bg-gradient" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--one" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--two" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--three" aria-hidden="true"></div>
+
+  <!-- Floating decorative particles container (populated by JS) -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- ============================================= -->
+  <!-- LANDING SCREEN                                 -->
+  <!-- ============================================= -->
+  <main class="landing" id="landing">
+
+    <!-- Floating decorations around the hero (decorative only) -->
+    <div class="floaters" aria-hidden="true">
+      <span class="floater floater--star f1">✦</span>
+      <span class="floater floater--star f2">✧</span>
+      <span class="floater floater--balloon f3">🎈</span>
+      <span class="floater floater--balloon f4">🎈</span>
+      <span class="floater floater--sparkle f5">✨</span>
+      <span class="floater floater--sparkle f6">✨</span>
+      <span class="floater floater--flower f7">🌸</span>
+      <span class="floater floater--flower f8">🌷</span>
+    </div>
+
+    <section class="hero" role="region" aria-label="Birthday greeting">
+      <p class="hero__eyebrow">✨ A Little Celebration, Just For You ✨</p>
+
+      <h1 class="hero__title">
+        <span class="hero__title-line">Happy Birthday</span>
+        <span class="hero__title-name" id="birthdayName">Beautiful</span>
+      </h1>
+
+      <p class="hero__subtitle" id="birthdaySubtitle">
+        Today the world gets a little brighter — because it's your day. 🎂
+      </p>
+
+      <button class="start-btn" id="startBtn" type="button" aria-label="Start the birthday celebration">
+        <span class="start-btn__glow" aria-hidden="true"></span>
+        <span class="start-btn__text">
+          <span class="start-btn__icon" aria-hidden="true">🎉</span>
+          Start Celebration
+        </span>
+      </button>
+
+      <p class="hero__hint">tap the button to begin ✨</p>
+    </section>
+
+  </main>
+
+  <!-- ============================================= -->
+  <!-- EXPERIENCE SCREEN (populated in future steps)  -->
+  <!-- ============================================= -->
+  <section class="experience" id="experience" aria-hidden="true">
+    <!-- Interactive celebration content will be built here step by step -->
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
