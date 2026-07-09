@@ -1,28 +1,30 @@
 /* =====================================================
    BIRTHDAY WEBSITE — MAIN SCRIPT
-   Version 3: + Gift Boxes + Reusable Confetti Utility
+   Version 4: Illustrated Restyle — calm particles + palette
 ===================================================== */
 
 'use strict';
 
 /* -----------------------------------------------------
    1. CONFIG — Personalize the celebration here
+   Emoji removed from default text to match the new
+   illustrated aesthetic — feel free to add your own
+   personal touches back into these strings, this is
+   just the starting placeholder copy.
 ----------------------------------------------------- */
 const CONFIG = {
   name: 'Beautiful',
-  subtitle: "Today the world gets a little brighter — because it's your day. 🎂",
-  particleCount: 22, // scales down automatically on small screens, see initParticles()
+  subtitle: "Today the world gets a little brighter — because it's your day.",
+  particleCount: 16, // ambient dust/petals — kept modest so the scene reads calm, not busy
 
   card: {
     message:
       "Wishing you a day filled with warm light, soft laughter, and every " +
       "little thing that makes you smile. May this new year of your life " +
       "be as radiant and wonderful as you are.",
-    signature: 'With all my love 💛',
+    signature: 'With all my love',
   },
 
-  // Version 3 — Gift Boxes. Order matches the boxes left-to-right in HTML;
-  // add/remove objects here to add/remove boxes without touching markup logic.
   confettiPiecesPerBurst: 40,
 };
 
@@ -45,7 +47,6 @@ const dom = {
   closeCardBtn: document.getElementById('closeCardBtn'),
   cardStatusHint: document.getElementById('cardStatusHint'),
 
-  // Version 3
   giftRow: document.getElementById('giftRow'),
   confettiLayer: document.getElementById('confettiLayer'),
 };
@@ -64,7 +65,14 @@ function applyPersonalization() {
 }
 
 /* -----------------------------------------------------
-   4. FLOATING PARTICLES
+   4. AMBIENT PARTICLES — Fireflies + Falling Petals
+   -----------------------------------------------------
+   Replaces the old plain-dot particle system. Roughly
+   2-in-5 particles are petals (fall, sway, rotate);
+   the rest are fireflies (rise gently, no glow — just
+   a small warm dot). Both are plain CSS shapes, no
+   emoji/images, and both skip entirely under
+   prefers-reduced-motion.
 ----------------------------------------------------- */
 function initParticles() {
   const prefersReducedMotion = window.matchMedia(
@@ -82,20 +90,29 @@ function initParticles() {
 
   for (let i = 0; i < count; i++) {
     const particle = document.createElement('span');
-    particle.className = 'particle';
+    const isPetal = Math.random() < 0.4;
+    particle.className = isPetal ? 'particle particle--petal' : 'particle particle--firefly';
 
-    const size = Math.random() * 6 + 3;
     const left = Math.random() * 100;
-    const duration = Math.random() * 10 + 10;
-    const delay = Math.random() * 12;
-    const drift = Math.random() * 80 - 40;
+    const duration = Math.random() * 10 + 12; // 12s–22s, slow and calm
+    const delay = Math.random() * 14;
+    const drift = Math.random() * 70 - 35;
 
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
     particle.style.left = `${left}%`;
     particle.style.animationDuration = `${duration}s`;
     particle.style.animationDelay = `${delay}s`;
     particle.style.setProperty('--drift', `${drift}px`);
+
+    if (isPetal) {
+      const width = Math.random() * 3 + 7; // 7px–10px
+      particle.style.width = `${width}px`;
+      particle.style.height = `${width * 0.7}px`;
+      particle.style.setProperty('--spin', `${Math.random() * 160 + 80}deg`);
+    } else {
+      const size = Math.random() * 3 + 3; // 3px–6px, small firefly dots
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+    }
 
     fragment.appendChild(particle);
   }
@@ -120,13 +137,13 @@ function startCelebration() {
 
     dom.experience.setAttribute('tabindex', '-1');
     dom.experience.focus({ preventScroll: true });
-
-    console.log('🎉 Celebration started!');
   }, 600);
 }
 
 /* -----------------------------------------------------
    6. BIRTHDAY CARD — Open/Close Interaction
+   (unchanged from V2/V3 — only the visuals it controls
+   were restyled, the logic itself didn't need to change)
 ----------------------------------------------------- */
 function initBirthdayCard() {
   const card = dom.greetingCard;
@@ -184,26 +201,15 @@ function initBirthdayCard() {
 
 /* -----------------------------------------------------
    7. CONFETTI BURST — Reusable Celebration Utility
-   -----------------------------------------------------
-   Spawns short-lived colored rectangles that fall from
-   near the top of the viewport. Every future "reveal"
-   moment (cake lighting, final celebration screen, etc.)
-   should call triggerConfetti() rather than reimplementing
-   this — keeps the effect visually consistent and the
-   codebase free of duplicate particle logic.
-
-   Pieces remove themselves from the DOM once their fall
-   animation ends, so bursts never accumulate in memory.
+   Same mechanics as V3; only the color palette changed.
 ----------------------------------------------------- */
-const CONFETTI_COLORS = ['#ff8fab', '#f5c66b', '#b98be0', '#c9e4ff', '#ffc2d1'];
+const CONFETTI_COLORS = ['#93555c', '#b9924e', '#8a76a0', '#d8dfe8', '#f0d6d2'];
 
 function triggerConfetti(originXPercent = 50) {
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   ).matches;
 
-  // Reduced-motion users still get the *event* (message reveal etc.),
-  // just without the extra confetti animation layered on top.
   if (prefersReducedMotion || !dom.confettiLayer) return;
 
   const fragment = document.createDocumentFragment();
@@ -213,13 +219,12 @@ function triggerConfetti(originXPercent = 50) {
     piece.className = 'confetti-piece';
 
     const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-    // Spread horizontally around the trigger point, clamped to stay on-screen
     const left = Math.min(100, Math.max(0, originXPercent + (Math.random() * 40 - 20)));
-    const duration = Math.random() * 1.5 + 2; // 2s–3.5s fall time
+    const duration = Math.random() * 1.5 + 2;
     const delay = Math.random() * 0.3;
-    const drift = Math.random() * 160 - 80; // -80px to 80px horizontal drift while falling
-    const spin = Math.random() * 720 - 360; // varied rotation direction/amount
-    const size = Math.random() * 4 + 6; // 6px–10px
+    const drift = Math.random() * 160 - 80;
+    const spin = Math.random() * 720 - 360;
+    const size = Math.random() * 4 + 6;
 
     piece.style.left = `${left}%`;
     piece.style.background = color;
@@ -230,8 +235,6 @@ function triggerConfetti(originXPercent = 50) {
     piece.style.setProperty('--confetti-drift', `${drift}px`);
     piece.style.setProperty('--confetti-spin', `${spin}deg`);
 
-    // Self-cleanup: remove the piece once its own fall animation finishes,
-    // so the confetti layer never accumulates stale nodes across bursts.
     const totalLifetime = (duration + delay) * 1000 + 100;
     window.setTimeout(() => piece.remove(), totalLifetime);
 
@@ -243,13 +246,8 @@ function triggerConfetti(originXPercent = 50) {
 
 /* -----------------------------------------------------
    8. GIFT BOXES — Open Interaction
-   -----------------------------------------------------
-   Each .gift element is independent and self-toggling,
-   following the same open-only-via-tap, ARIA-synced
-   pattern as the birthday card. Opening a gift also
-   fires a confetti burst centered on that gift's
-   position, since a first-time surprise reveal deserves
-   a little extra delight.
+   (unchanged from V3 — only the visuals it controls
+   were restyled)
 ----------------------------------------------------- */
 function initGiftBoxes() {
   const gifts = document.querySelectorAll('.gift');
@@ -269,16 +267,12 @@ function initGiftBoxes() {
       );
 
       if (isOpen) {
-        // Fire confetti centered on this specific gift's horizontal position,
-        // so the burst feels attached to the object the user just opened.
         const rect = gift.getBoundingClientRect();
         const originXPercent = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
         triggerConfetti(originXPercent);
       }
     }
 
-    // Tapping only ever opens — once opened, a gift stays open (it's a keepsake reveal,
-    // not a toggle like the card, so there's no close button to manage here).
     gift.addEventListener('click', () => {
       if (!gift.classList.contains('is-open')) {
         setGiftOpen(true);
@@ -318,7 +312,7 @@ function init() {
   initParticles();
   bindEvents();
   initBirthdayCard();
-  initGiftBoxes(); // Version 3
+  initGiftBoxes();
 }
 
 document.addEventListener('DOMContentLoaded', init);
