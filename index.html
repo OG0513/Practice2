@@ -17,13 +17,6 @@
 </head>
 <body>
 
-  <!-- ============================================= -->
-  <!-- ILLUSTRATED WORLD BACKGROUND (Version 6)       -->
-  <!-- Replaces the old animated gradient + glow blobs -->
-  <!-- with a static-ish illustrated sky and a garden   -->
-  <!-- strip along the bottom. Fixed behind everything;  -->
-  <!-- purely decorative, so it's one aria-hidden block. -->
-  <!-- ============================================= -->
   <div class="world" id="world" aria-hidden="true">
 
     <div class="sky">
@@ -66,84 +59,177 @@
       </svg>
     </div>
 
-    <div class="garden-strip" id="gardenStrip">
-      <div class="garden-strip__ground"></div>
+    <!-- ============================================= -->
+    <!-- GARDEN — 4 depth layers (Version 7)             -->
+    <!-- Furthest (4) to closest (1). Each layer is an    -->
+    <!-- organic SVG terrain silhouette + a content div    -->
+    <!-- for whatever lives at that depth. Layers 1 and 4  -->
+    <!-- carry a slight CSS blur for a depth-of-field feel; -->
+    <!-- 2 and 3 stay crisp — that's the in-focus band.     -->
+    <!-- All four bleed past the left/right viewport edges  -->
+    <!-- so the field never appears to end abruptly.        -->
+    <!-- ============================================= -->
+    <div class="garden" id="garden">
 
-      <svg class="garden-flower" style="left:8%; --petal-color:#ff8fab; --center-color:#f5c66b; --sway-mult:0.7; --flower-scale:1.05;" viewBox="0 0 40 90" focusable="false">
-        <path class="garden-flower__stem" d="M20,90 C20,64 20,42 20,26" />
-        <path class="garden-flower__leaf" d="M20,68 C10,64 6,72 10,78 C15,80 20,76 20,68 Z" />
-        <g class="garden-flower__bloom" transform="translate(20,20)">
-          <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
-          <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
-          <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
-          <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
-          <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
-          <circle class="garden-flower__center" cx="0" cy="0" r="5" />
-        </g>
-      </svg>
+      <!-- Layer 4: background vegetation, furthest, most blur -->
+      <div class="garden-layer garden-layer--4">
+        <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="gardenLayer4Gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#dcebc9" />
+              <stop offset="100%" stop-color="#b9d69e" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M -20,170 C 60,150 140,185 230,165 C 340,142 420,178 520,160 C 610,145 700,175 790,155 C 880,138 950,160 1020,150 L 1020,420 L -20,420 Z"
+            fill="url(#gardenLayer4Gradient)"
+            stroke="rgba(255,255,255,0.35)"
+            stroke-width="4"
+          />
+        </svg>
+        <div class="garden-layer__contents">
+          <!-- Small background plants land here in a future version -->
+        </div>
+      </div>
 
-      <svg class="garden-flower" style="left:22%; --petal-color:#d9c9f5; --center-color:#fff8f2; --sway-mult:0.85; --flower-scale:0.85;" viewBox="0 0 40 90" focusable="false">
-        <path class="garden-flower__stem" d="M20,90 C20,66 20,46 20,30" />
-        <g class="garden-flower__bloom" transform="translate(20,24)">
-          <circle class="garden-flower__petal" cx="0" cy="-8" r="6" />
-          <circle class="garden-flower__petal" cx="7" cy="-2" r="6" />
-          <circle class="garden-flower__petal" cx="4" cy="6" r="6" />
-          <circle class="garden-flower__petal" cx="-4" cy="6" r="6" />
-          <circle class="garden-flower__petal" cx="-7" cy="-2" r="6" />
-          <circle class="garden-flower__center" cx="0" cy="0" r="4" />
-        </g>
-      </svg>
+      <!-- Layer 3: smaller flowers, small bushes, tiny rocks -->
+      <div class="garden-layer garden-layer--3">
+        <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="gardenLayer3Gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#cce4ac" />
+              <stop offset="100%" stop-color="#9fc978" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M -20,140 C 40,190 120,110 210,150 C 300,185 380,120 470,155 C 560,185 650,130 740,160 C 830,185 900,140 1020,165 L 1020,420 L -20,420 Z"
+            fill="url(#gardenLayer3Gradient)"
+            stroke="rgba(255,255,255,0.3)"
+            stroke-width="3"
+          />
+        </svg>
+        <div class="garden-layer__contents">
+          <!-- Small bushes + tiny rocks land here in a future version -->
+        </div>
+      </div>
 
-      <svg class="garden-flower" style="left:47%; --petal-color:#f5c66b; --center-color:#ff8fab; --sway-mult:0.55; --flower-scale:1.2;" viewBox="0 0 40 90" focusable="false">
-        <path class="garden-flower__stem" d="M20,90 C20,60 20,38 20,22" />
-        <path class="garden-flower__leaf" d="M20,66 C30,62 34,70 30,76 C25,78 20,74 20,66 Z" />
-        <g class="garden-flower__bloom" transform="translate(20,16)">
-          <circle class="garden-flower__petal" cx="0" cy="-10" r="8" />
-          <circle class="garden-flower__petal" cx="9" cy="-3" r="8" />
-          <circle class="garden-flower__petal" cx="6" cy="8" r="8" />
-          <circle class="garden-flower__petal" cx="-6" cy="8" r="8" />
-          <circle class="garden-flower__petal" cx="-9" cy="-3" r="8" />
-          <circle class="garden-flower__center" cx="0" cy="0" r="5.5" />
-        </g>
-      </svg>
+      <!-- Layer 2: MAIN flower field — existing flowers + creatures live
+           here unchanged; this is the in-focus, crisp band -->
+      <div class="garden-layer garden-layer--2">
+        <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="gardenLayer2Gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#bfe3ab" />
+              <stop offset="45%" stop-color="#9bcf85" />
+              <stop offset="100%" stop-color="#7fbd6d" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M -20,190 C 70,160 150,210 260,195 C 370,178 430,240 550,255 C 660,240 730,190 830,168 C 900,155 960,120 1020,145 L 1020,420 L -20,420 Z"
+            fill="url(#gardenLayer2Gradient)"
+            stroke="rgba(255,255,255,0.4)"
+            stroke-width="4"
+          />
+        </svg>
+        <div class="garden-layer__contents" id="gardenStrip">
+          <svg class="garden-flower" style="left:8%; --petal-color:#ff8fab; --center-color:#f5c66b; --sway-mult:0.7; --flower-scale:1.05;" viewBox="0 0 40 90" focusable="false">
+            <path class="garden-flower__stem" d="M20,90 C20,64 20,42 20,26" />
+            <path class="garden-flower__leaf" d="M20,68 C10,64 6,72 10,78 C15,80 20,76 20,68 Z" />
+            <g class="garden-flower__bloom" transform="translate(20,20)">
+              <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
+              <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
+              <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
+              <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
+              <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
+              <circle class="garden-flower__center" cx="0" cy="0" r="5" />
+            </g>
+          </svg>
 
-      <svg class="garden-flower" style="left:68%; --petal-color:#ff8fab; --center-color:#fff8f2; --sway-mult:0.75; --flower-scale:0.9;" viewBox="0 0 40 90" focusable="false">
-        <path class="garden-flower__stem" d="M20,90 C20,65 20,44 20,28" />
-        <g class="garden-flower__bloom" transform="translate(20,22)">
-          <circle class="garden-flower__petal" cx="0" cy="-8" r="6.5" />
-          <circle class="garden-flower__petal" cx="7.5" cy="-2" r="6.5" />
-          <circle class="garden-flower__petal" cx="4.5" cy="6.5" r="6.5" />
-          <circle class="garden-flower__petal" cx="-4.5" cy="6.5" r="6.5" />
-          <circle class="garden-flower__petal" cx="-7.5" cy="-2" r="6.5" />
-          <circle class="garden-flower__center" cx="0" cy="0" r="4.5" />
-        </g>
-      </svg>
+          <svg class="garden-flower" style="left:22%; --petal-color:#d9c9f5; --center-color:#fff8f2; --sway-mult:0.85; --flower-scale:0.85;" viewBox="0 0 40 90" focusable="false">
+            <path class="garden-flower__stem" d="M20,90 C20,66 20,46 20,30" />
+            <g class="garden-flower__bloom" transform="translate(20,24)">
+              <circle class="garden-flower__petal" cx="0" cy="-8" r="6" />
+              <circle class="garden-flower__petal" cx="7" cy="-2" r="6" />
+              <circle class="garden-flower__petal" cx="4" cy="6" r="6" />
+              <circle class="garden-flower__petal" cx="-4" cy="6" r="6" />
+              <circle class="garden-flower__petal" cx="-7" cy="-2" r="6" />
+              <circle class="garden-flower__center" cx="0" cy="0" r="4" />
+            </g>
+          </svg>
 
-      <svg class="garden-flower" style="left:86%; --petal-color:#d9c9f5; --center-color:#f5c66b; --sway-mult:0.65; --flower-scale:1.0;" viewBox="0 0 40 90" focusable="false">
-        <path class="garden-flower__stem" d="M20,90 C20,62 20,40 20,24" />
-        <path class="garden-flower__leaf" d="M20,70 C10,66 6,74 10,80 C15,82 20,78 20,70 Z" />
-        <g class="garden-flower__bloom" transform="translate(20,18)">
-          <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
-          <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
-          <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
-          <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
-          <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
-          <circle class="garden-flower__center" cx="0" cy="0" r="5" />
-        </g>
-      </svg>
+          <svg class="garden-flower" style="left:47%; --petal-color:#f5c66b; --center-color:#ff8fab; --sway-mult:0.55; --flower-scale:1.2;" viewBox="0 0 40 90" focusable="false">
+            <path class="garden-flower__stem" d="M20,90 C20,60 20,38 20,22" />
+            <path class="garden-flower__leaf" d="M20,66 C30,62 34,70 30,76 C25,78 20,74 20,66 Z" />
+            <g class="garden-flower__bloom" transform="translate(20,16)">
+              <circle class="garden-flower__petal" cx="0" cy="-10" r="8" />
+              <circle class="garden-flower__petal" cx="9" cy="-3" r="8" />
+              <circle class="garden-flower__petal" cx="6" cy="8" r="8" />
+              <circle class="garden-flower__petal" cx="-6" cy="8" r="8" />
+              <circle class="garden-flower__petal" cx="-9" cy="-3" r="8" />
+              <circle class="garden-flower__center" cx="0" cy="0" r="5.5" />
+            </g>
+          </svg>
 
-      <!-- Butterflies + fireflies are generated by JS (see initButterflies() /
-           initFireflies() in script.js) and injected here, confined to this
-           container only — so they stay above the garden, never in the sky. -->
-      <div class="creature-layer" id="creatureLayer"></div>
+          <svg class="garden-flower" style="left:68%; --petal-color:#ff8fab; --center-color:#fff8f2; --sway-mult:0.75; --flower-scale:0.9;" viewBox="0 0 40 90" focusable="false">
+            <path class="garden-flower__stem" d="M20,90 C20,65 20,44 20,28" />
+            <g class="garden-flower__bloom" transform="translate(20,22)">
+              <circle class="garden-flower__petal" cx="0" cy="-8" r="6.5" />
+              <circle class="garden-flower__petal" cx="7.5" cy="-2" r="6.5" />
+              <circle class="garden-flower__petal" cx="4.5" cy="6.5" r="6.5" />
+              <circle class="garden-flower__petal" cx="-4.5" cy="6.5" r="6.5" />
+              <circle class="garden-flower__petal" cx="-7.5" cy="-2" r="6.5" />
+              <circle class="garden-flower__center" cx="0" cy="0" r="4.5" />
+            </g>
+          </svg>
+
+          <svg class="garden-flower" style="left:86%; --petal-color:#d9c9f5; --center-color:#f5c66b; --sway-mult:0.65; --flower-scale:1.0;" viewBox="0 0 40 90" focusable="false">
+            <path class="garden-flower__stem" d="M20,90 C20,62 20,40 20,24" />
+            <path class="garden-flower__leaf" d="M20,70 C10,66 6,74 10,80 C15,82 20,78 20,70 Z" />
+            <g class="garden-flower__bloom" transform="translate(20,18)">
+              <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
+              <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
+              <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
+              <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
+              <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
+              <circle class="garden-flower__center" cx="0" cy="0" r="5" />
+            </g>
+          </svg>
+
+          <!-- Butterflies + fireflies are generated by JS (see initButterflies() /
+               initFireflies() in script.js) — completely unchanged from Version 6,
+               zero JS edits needed for this version. -->
+          <div class="creature-layer" id="creatureLayer"></div>
+        </div>
+      </div>
+
+      <!-- Layer 1: closest foreground — largest presence, slight blur,
+           intentionally bleeds past the garden's own bottom edge -->
+      <div class="garden-layer garden-layer--1">
+        <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="gardenLayer1Gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6fb85c" />
+              <stop offset="100%" stop-color="#4a9440" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M -20,230 C 60,270 140,210 240,250 C 330,285 410,225 520,260 C 620,290 700,235 800,255 C 890,270 950,225 1020,245 L 1020,440 L -20,440 Z"
+            fill="url(#gardenLayer1Gradient)"
+            stroke="rgba(255,255,255,0.3)"
+            stroke-width="4"
+          />
+        </svg>
+        <div class="garden-layer__contents">
+          <!-- Large foreground flowers + tall grass land here in a future version -->
+        </div>
+      </div>
+
     </div>
 
   </div>
 
-  <!-- Floating particle sparkles (unrelated to the world above; kept as-is) -->
   <div class="particles" id="particles" aria-hidden="true"></div>
 
-  <!-- Confetti burst layer — reused by every "reveal" object -->
   <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
   <main class="landing" id="landing">
@@ -202,9 +288,6 @@
         </p>
       </header>
 
-      <!-- ============================================= -->
-      <!-- SCENE: BIRTHDAY CARD                           -->
-      <!-- ============================================= -->
       <div class="scene scene--card">
         <div
           class="greeting-card"
@@ -246,9 +329,6 @@
         <p class="scene__hint" id="cardStatusHint" aria-live="polite">tap the card to open it</p>
       </div>
 
-      <!-- ============================================= -->
-      <!-- SCENE: GIFT BOXES                               -->
-      <!-- ============================================= -->
       <div class="scene scene--gifts">
         <header class="scene__header">
           <h2 class="scene__title">A Few Surprises For You 🎁</h2>
@@ -326,9 +406,6 @@
         </div>
       </div>
 
-      <!-- ============================================= -->
-      <!-- SCENE: CAKE & CANDLES                          -->
-      <!-- ============================================= -->
       <div class="scene scene--cake">
         <header class="scene__header">
           <h2 class="scene__title">Make A Wish</h2>
@@ -368,9 +445,6 @@
 
         <p class="scene__hint" id="cakeStatusHint">tap the cake to light the candles</p>
       </div>
-
-      <!-- Future scenes (flowers detail, teddy bear, gallery, etc.)
-           will be appended here as additional .scene blocks. -->
 
     </div>
   </section>
