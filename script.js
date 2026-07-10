@@ -1,6 +1,7 @@
 /* =====================================================
    BIRTHDAY WEBSITE — MAIN SCRIPT
-   Version 5: + Environment Engine (Wind + Light Foundations)
+   Version 6: + Illustrated World (Sky, Garden Strip,
+   Butterflies, Fireflies — no birds)
 ===================================================== */
 
 'use strict';
@@ -27,11 +28,15 @@ const CONFIG = {
     wishGrantedMessage: "Wish sent — here's to a beautiful year ahead! 🎉",
   },
 
-  // Version 5 — Environment System (wind + light)
   environment: {
-    startMode: 'day', // 'day' | 'night' — which lighting state the site boots into.
-                       // A visible Day/Night button lands in a future version and will
-                       // call toggleLightMode(), already defined below, with no changes here.
+    startMode: 'day',
+  },
+
+  // Version 6 — Illustrated World: butterflies + fireflies, both confined
+  // to the garden strip (see CSS .creature-layer).
+  world: {
+    butterflyCount: 2,
+    fireflyCount: 10, // scales down slightly on small screens, see initFireflies()
   },
 
   confettiPiecesPerBurst: 40,
@@ -63,6 +68,11 @@ const dom = {
   cakeCandles: document.getElementById('cakeCandles'),
   cakeMessage: document.getElementById('cakeMessage'),
   cakeStatusHint: document.getElementById('cakeStatusHint'),
+
+  // Version 6
+  world: document.getElementById('world'),
+  gardenStrip: document.getElementById('gardenStrip'),
+  creatureLayer: document.getElementById('creatureLayer'),
 };
 
 /* -----------------------------------------------------
@@ -394,50 +404,26 @@ function initCake() {
 
 /* -----------------------------------------------------
    10. ENVIRONMENT SYSTEM — Wind + Light (Foundation)
-   -----------------------------------------------------
-   Shared "ambient state" for the whole site, exposed as
-   CSS custom properties on <html> so any element in the
-   stylesheet can react to one consistent wind direction/
-   strength and lighting mode instead of animating on its
-   own separate loop.
-
-   This version is deliberately mostly invisible — it's
-   the plumbing, laid down first so the next versions
-   (illustrated sky, swaying garden, fireflies, butterflies,
-   day/night toggle, cake lighting) all read from the same
-   source instead of each reinventing its own motion/color
-   logic. The one visible tie-in today is the existing
-   floating decorations (@keyframes floatDrift in style.css),
-   which now sway with this shared wind.
 ----------------------------------------------------- */
-
-// --- Wind ---
 const WIND_CONFIG = {
-  updateIntervalMs: 120, // ~8 updates/sec — smooth enough for slow ambient sway,
-                          // far cheaper than a 60fps loop for something this subtle
-  baseAngleDeg: -6,       // gentle constant "prevailing" lean
-  swayDeg: 14,            // how far the angle wanders around that base
+  updateIntervalMs: 120,
+  baseAngleDeg: -6,
+  swayDeg: 14,
   strengthMin: 0.25,
   strengthMax: 0.85,
 };
 
 let windElapsedStart = null;
 
-/**
- * Combines a few slow sine waves with mismatched periods/phases into one
- * signal. A single sine would visibly "loop" on a short, predictable
- * cycle; summing several avoids that mechanical feel without needing a
- * full noise/Perlin implementation.
- */
 function computeWindState(elapsedSeconds) {
   const wave =
     Math.sin(elapsedSeconds * 0.10) * 0.5 +
     Math.sin(elapsedSeconds * 0.037 + 1.3) * 0.3 +
-    Math.sin(elapsedSeconds * 0.081 + 4.1) * 0.2; // settles roughly within -1..1
+    Math.sin(elapsedSeconds * 0.081 + 4.1) * 0.2;
 
   const angle = WIND_CONFIG.baseAngleDeg + wave * WIND_CONFIG.swayDeg;
 
-  const strengthWave = (Math.sin(elapsedSeconds * 0.06 + 2.2) + 1) / 2; // 0..1
+  const strengthWave = (Math.sin(elapsedSeconds * 0.06 + 2.2) + 1) / 2;
   const strength =
     WIND_CONFIG.strengthMin + strengthWave * (WIND_CONFIG.strengthMax - WIND_CONFIG.strengthMin);
 
@@ -451,9 +437,6 @@ function initWindSystem() {
   ).matches;
 
   if (prefersReducedMotion) {
-    // Set once, then stop — a gentle fixed lean rather than a perfectly
-    // static 0, so reduced-motion visitors still see a natural-looking
-    // (just unanimated) scene rather than everything snapping upright.
     root.style.setProperty('--wind-angle', `${WIND_CONFIG.baseAngleDeg}deg`);
     root.style.setProperty('--wind-strength', '0.3');
     return;
@@ -469,21 +452,16 @@ function initWindSystem() {
     root.style.setProperty('--wind-strength', strength.toFixed(3));
   }
 
-  tick(); // apply an initial value immediately, rather than waiting for the first interval
+  tick();
   window.setInterval(tick, WIND_CONFIG.updateIntervalMs);
 }
 
-// --- Light ---
 const LIGHT_PRESETS = {
   day: {
     sunColor: '#fff1d0',
     ambientColor: 'rgba(255, 233, 184, 0.35)',
     shadowColor: 'rgba(120, 90, 60, 0.22)',
   },
-  // Not visually connected to anything yet — there's no sky or moon to
-  // show it off. Defined now so the future Day/Night button, illustrated
-  // sky, and glowing night-flowers can read these variables the day
-  // they're built, with zero changes needed in this function.
   night: {
     sunColor: '#b9c4e8',
     ambientColor: 'rgba(90, 100, 160, 0.35)',
@@ -505,8 +483,6 @@ function applyLightMode(mode) {
   currentLightMode = mode;
 }
 
-// Exposed now so a future Day/Night button can call this directly —
-// no changes to this file will be needed when that button is added.
 function toggleLightMode() {
   applyLightMode(currentLightMode === 'day' ? 'night' : 'day');
 }
@@ -521,7 +497,187 @@ function initEnvironmentSystem() {
 }
 
 /* -----------------------------------------------------
-   11. EVENT LISTENERS
+   11. ILLUSTRATED WORLD — Butterflies + Fireflies
+   -----------------------------------------------------
+   Both live inside #creatureLayer, scoped in CSS to the
+   upper portion of the garden strip only — so they stay
+   "above the flowers," never drifting into the sky.
+
+   Each creature runs its OWN independent timer, started
+   with a randomized initial delay, rather than one shared
+   loop driving all of them — that's what keeps their
+   movement, blinking, and pausing from ever synchronizing.
+----------------------------------------------------- */
+
+function getCreatureLayerBounds() {
+  if (!dom.creatureLayer) return null;
+  const rect = dom.creatureLayer.getBoundingClientRect();
+  return { width: rect.width, height: rect.height };
+}
+
+// --- Butterflies ---
+const BUTTERFLY_WING_COLORS = ['#ff8fab', '#b98be0', '#f5c66b'];
+
+function createButterflyElement(index) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'butterfly';
+  wrapper.style.setProperty(
+    '--wing-color',
+    BUTTERFLY_WING_COLORS[index % BUTTERFLY_WING_COLORS.length]
+  );
+  wrapper.innerHTML =
+    '<svg viewBox="-40 -30 80 60" focusable="false">' +
+      '<g class="butterfly__wing butterfly__wing--left">' +
+        '<path d="M -2,-2 C -22,-26 -40,-14 -34,4 C -28,20 -10,18 -2,6 Z" />' +
+      '</g>' +
+      '<g class="butterfly__wing butterfly__wing--right">' +
+        '<path d="M 2,-2 C 22,-26 40,-14 34,4 C 28,20 10,18 2,6 Z" />' +
+      '</g>' +
+      '<ellipse class="butterfly__body" cx="0" cy="0" rx="2.4" ry="14" />' +
+    '</svg>';
+  return wrapper;
+}
+
+function flyButterflyToRandomPoint(el, prefersReducedMotion) {
+  if (prefersReducedMotion) return;
+
+  const bounds = getCreatureLayerBounds();
+  if (!bounds) return;
+
+  const targetX = Math.random() * Math.max(0, bounds.width - 40);
+  const targetY = Math.random() * Math.max(0, bounds.height - 40) * 0.8; // stay in the upper 80% of the band
+
+  const prevX = parseFloat(el.dataset.x || targetX);
+  const facingRight = targetX >= prevX;
+  const duration = Math.random() * 3 + 3.5; // 3.5s–6.5s per flight leg
+
+  el.style.transition = `transform ${duration}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+  el.style.transform = `translate(${targetX}px, ${targetY}px) scaleX(${facingRight ? 1 : -1})`;
+  el.dataset.x = targetX;
+  el.classList.remove('is-resting');
+
+  const willRest = Math.random() < 0.4; // sometimes "land" before flying again
+  const pauseDuration = willRest ? Math.random() * 2500 + 1500 : Math.random() * 900 + 300;
+
+  window.setTimeout(() => {
+    if (willRest) el.classList.add('is-resting');
+    window.setTimeout(() => {
+      flyButterflyToRandomPoint(el, prefersReducedMotion);
+    }, pauseDuration);
+  }, duration * 1000);
+}
+
+function initButterflies() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!dom.creatureLayer) return;
+
+  for (let i = 0; i < CONFIG.world.butterflyCount; i++) {
+    const el = createButterflyElement(i);
+    dom.creatureLayer.appendChild(el);
+
+    const bounds = getCreatureLayerBounds();
+    if (bounds) {
+      const startX = Math.random() * Math.max(0, bounds.width - 40);
+      const startY = Math.random() * Math.max(0, bounds.height - 40) * 0.8;
+      el.style.transform = `translate(${startX}px, ${startY}px)`;
+      el.dataset.x = startX;
+    }
+
+    if (prefersReducedMotion) continue; // stays put; wing-flap is frozen by the global reduced-motion rule too
+
+    window.setTimeout(() => {
+      flyButterflyToRandomPoint(el, prefersReducedMotion);
+    }, Math.random() * 3000);
+  }
+}
+
+// --- Fireflies ---
+function createFireflyElement() {
+  const el = document.createElement('span');
+  el.className = 'firefly';
+
+  const size = Math.random() * 3 + 4; // 4px–7px
+  const blinkDuration = Math.random() * 2 + 1.8; // 1.8s–3.8s
+  const blinkDelay = Math.random() * 3;
+
+  el.style.setProperty('--firefly-size', `${size}px`);
+  el.style.setProperty('--blink-duration', `${blinkDuration}s`);
+  el.style.setProperty('--blink-delay', `${blinkDelay}s`);
+  el.style.setProperty('--blink-min', (Math.random() * 0.2 + 0.15).toFixed(2));
+  el.style.setProperty('--blink-max', (Math.random() * 0.15 + 0.85).toFixed(2));
+
+  return el;
+}
+
+function scheduleFireflyMove(el, prefersReducedMotion) {
+  if (prefersReducedMotion) return;
+
+  const bounds = getCreatureLayerBounds();
+  if (!bounds) return;
+
+  const targetX = Math.random() * bounds.width;
+  const targetY = Math.random() * bounds.height;
+  const willTeleport = Math.random() < 0.2; // occasionally vanish and reappear instead of drifting
+  const moveDuration = Math.random() * 4 + 3; // 3s–7s, independent per firefly
+  const pauseDuration = Math.random() * 2500 + 800;
+
+  if (willTeleport) {
+    // Pause blinking so our own opacity fade can take effect (a running
+    // CSS animation otherwise keeps overriding opacity every frame),
+    // fade out, relocate while invisible, fade back in, then hand
+    // blinking control back to the keyframe animation.
+    el.style.animationPlayState = 'paused';
+    el.style.opacity = '0';
+
+    window.setTimeout(() => {
+      el.style.setProperty('--move-duration', '0.01s');
+      el.style.transform = `translate(${targetX}px, ${targetY}px)`;
+      el.style.opacity = '1';
+
+      window.setTimeout(() => {
+        el.style.animationPlayState = 'running';
+      }, 450);
+    }, 450);
+  } else {
+    el.style.setProperty('--move-duration', `${moveDuration}s`);
+    el.style.transform = `translate(${targetX}px, ${targetY}px)`;
+  }
+
+  const totalDelay = (willTeleport ? 900 : moveDuration * 1000) + pauseDuration;
+  window.setTimeout(() => scheduleFireflyMove(el, prefersReducedMotion), totalDelay);
+}
+
+function initFireflies() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!dom.creatureLayer) return;
+
+  const isSmallScreen = window.innerWidth < 480;
+  const count = isSmallScreen
+    ? Math.round(CONFIG.world.fireflyCount * 0.6)
+    : CONFIG.world.fireflyCount;
+
+  for (let i = 0; i < count; i++) {
+    const el = createFireflyElement();
+    dom.creatureLayer.appendChild(el);
+
+    const bounds = getCreatureLayerBounds();
+    if (bounds) {
+      el.style.transform = `translate(${Math.random() * bounds.width}px, ${Math.random() * bounds.height}px)`;
+    }
+
+    if (prefersReducedMotion) continue; // stays put; blink is frozen by the global reduced-motion rule too
+
+    window.setTimeout(() => scheduleFireflyMove(el, prefersReducedMotion), Math.random() * 4000);
+  }
+}
+
+function initIllustratedWorld() {
+  initButterflies();
+  initFireflies();
+}
+
+/* -----------------------------------------------------
+   12. EVENT LISTENERS
 ----------------------------------------------------- */
 function bindEvents() {
   if (dom.startBtn) {
@@ -536,7 +692,7 @@ function bindEvents() {
 }
 
 /* -----------------------------------------------------
-   12. INIT — Runs once DOM is ready
+   13. INIT — Runs once DOM is ready
 ----------------------------------------------------- */
 function init() {
   applyPersonalization();
@@ -545,7 +701,8 @@ function init() {
   initBirthdayCard();
   initGiftBoxes();
   initCake();
-  initEnvironmentSystem(); // Version 5
+  initEnvironmentSystem();
+  initIllustratedWorld(); // Version 6
 }
 
 document.addEventListener('DOMContentLoaded', init);
