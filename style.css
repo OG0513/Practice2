@@ -90,13 +90,9 @@ button {
 }
 
 /* =====================================================
-   3. ILLUSTRATED WORLD — Sky + Garden (Version 8: procedural flowers)
+   3. ILLUSTRATED WORLD — Sky + Garden (Version 9: grass + props)
 ===================================================== */
 .flower-sprite-defs {
-  /* Zero-size, invisible library of <symbol> definitions.
-     Standard "hidden sprite sheet" pattern — nothing here
-     ever renders directly; every flower on screen is a
-     <use> pointing back into this one block. */
   position: absolute;
   width: 0;
   height: 0;
@@ -206,6 +202,10 @@ button {
 
 .garden-layer--4 { height: 50%; z-index: 1; }
 .garden-layer--4 .garden-layer__terrain { filter: blur(4px); }
+/* Version 9: now that Layer 4 has real content (ferns, bushes, grass),
+   this blur gives it the "very soft blur on background vegetation"
+   the depth spec called for — previously this rule had nothing to blur. */
+.garden-layer--4 .garden-layer__contents { filter: blur(2px); }
 
 .garden-layer--3 { height: 62%; z-index: 2; }
 
@@ -213,27 +213,14 @@ button {
 
 .garden-layer--1 { height: 92%; z-index: 4; bottom: -4%; }
 .garden-layer--1 .garden-layer__terrain { filter: blur(1.2px); }
-.garden-layer--1 .garden-layer__contents {
-  /* "Slight blur on the closest objects" — the terrain silhouette above
-     already gets it; this extends a lighter touch to the actual flowers
-     living in this layer too, so the whole nearest band feels shallow-
-     depth-of-field rather than only its ground shape being soft. */
-  filter: blur(0.6px);
-}
+.garden-layer--1 .garden-layer__contents { filter: blur(0.6px); }
 
 .garden-layer__contents {
   position: absolute;
   inset: 0;
 }
 
-/* --- Procedural flowers (Version 8) ---
-   One shared geometry per species lives in the sprite sheet above;
-   every instance below is a <use> + this positioning/coloring layer.
-   height/width variation = --flower-scale. stem angle = --stem-lean
-   (rotates only the stem+leaf group). bloom rotation = --bloom-rotation
-   (rotates only the bloom, independent of the stem). sway strength =
-   --sway-mult. Wind timing stagger = per-instance transition-delay/
-   duration, set inline by generateFlowerField() in script.js. */
+/* --- Procedural flowers (unchanged from Version 8) --- */
 .garden-flower {
   position: absolute;
   bottom: 4%;
@@ -276,9 +263,99 @@ button {
   fill: var(--center-color, #f5c66b);
 }
 
-/* --- Creature layer: butterflies + fireflies (unchanged from Version 6) ---
-   Explicit z-index added so butterflies/fireflies reliably render above
-   the procedurally-injected flowers regardless of DOM insertion order. */
+/* --- Grass (Version 9) ---
+   One reused pattern (see index.html sprite-defs), tiled across a small
+   set of vertical band <rect>s per layer. Each band's transform-delay
+   is staggered by its index (see generateGrass() in script.js), so a
+   wind gust visibly sweeps left-to-right across the field instead of
+   every band snapping to the new angle at once. */
+.grass-strip {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.garden-layer--1 .grass-strip { height: 26%; }
+.garden-layer--2 .grass-strip { height: 14%; }
+.garden-layer--3 .grass-strip { height: 11%; }
+.garden-layer--4 .grass-strip { height: 8%; }
+
+.grass-band {
+  fill: url(#grassBladePattern);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  /* skewX (not rotate) approximates real grass bending — base anchored,
+     tip leaning — and reads as more "blade-like" than a rigid rotation */
+  transform: skewX(calc(var(--wind-angle) * var(--grass-sway-mult, 1.3)));
+  transition-property: transform;
+  transition-timing-function: ease-out;
+  transition-duration: 0.35s;
+  transition-delay: var(--grass-band-delay, 0s);
+}
+
+/* Sway multiplier + tint per depth layer — "tall grass bends the most"
+   (layer 1 has the highest multiplier of anything in the scene), and
+   atmospheric-perspective tinting (closer = richer, farther = paler)
+   achieved via CSS filter on ONE shared pattern rather than 4 separate
+   pattern definitions. */
+.garden-layer--1 .grass-band { --grass-sway-mult: 1.6; filter: brightness(0.92) saturate(1.15); }
+.garden-layer--2 .grass-band { --grass-sway-mult: 1.3; }
+.garden-layer--3 .grass-band { --grass-sway-mult: 1.05; filter: brightness(1.08) saturate(0.85); }
+.garden-layer--4 .grass-band { --grass-sway-mult: 0.75; filter: brightness(1.2) saturate(0.6); }
+
+/* --- Garden props: bushes, ferns, mushrooms, stones, logs (Version 9) ---
+   Same instancing pattern as flowers: one symbol per species, many
+   lightweight <use> instances. Only bush/fern sway (flexible foliage);
+   mushroom/stone/log stay rigid — solid objects shouldn't move in wind. */
+.garden-prop {
+  position: absolute;
+  bottom: 2%;
+  height: auto;
+  transform-origin: bottom center;
+  transform: scale(var(--prop-scale, 1)) rotate(var(--prop-rotation, 0deg));
+  filter: drop-shadow(0 3px 5px rgba(60, 45, 30, 0.15));
+  pointer-events: none;
+}
+
+.garden-prop--sways {
+  transform: scale(var(--prop-scale, 1)) rotate(calc(var(--wind-angle) * var(--prop-sway-mult, 0.6)));
+  transition: transform 0.4s ease-out;
+}
+
+.garden-prop--bush { width: clamp(34px, 7vw, 64px); }
+.garden-prop--fern { width: clamp(20px, 4.5vw, 42px); }
+.garden-prop--mushroom { width: clamp(14px, 3vw, 24px); }
+.garden-prop--stone { width: clamp(18px, 4vw, 34px); }
+.garden-prop--log { width: clamp(28px, 6vw, 58px); }
+
+.prop-bush__foliage { fill: var(--bush-color, #5a9c46); }
+.prop-bush__accent { fill: var(--bush-accent, #7ec95e); opacity: 0.7; }
+.prop-bush__shadow { fill: rgba(60, 45, 30, 0.15); }
+
+.prop-fern__fronds {
+  stroke: var(--fern-color, #3f7a35);
+  stroke-width: 2.5;
+  stroke-dasharray: 1.5 2.5; /* suggests small leaflets along each frond without extra shapes */
+}
+
+.prop-mushroom__cap { fill: var(--mushroom-cap, #d1524a); }
+.prop-mushroom__stem { fill: #f3e6d8; }
+.prop-mushroom__spot { fill: #fff8ee; opacity: 0.9; }
+.prop-mushroom__shadow { fill: rgba(60, 45, 30, 0.18); }
+
+.prop-stone__body { fill: var(--stone-color, #9a9086); }
+.prop-stone__highlight { stroke: rgba(255, 255, 255, 0.4); stroke-width: 2; fill: none; stroke-linecap: round; }
+.prop-stone__shadow { fill: rgba(60, 45, 30, 0.18); }
+
+.prop-log__body { fill: var(--log-color, #8a6141); }
+.prop-log__end { fill: var(--log-end-color, #a9825c); }
+.prop-log__ring { fill: none; stroke: rgba(90, 60, 30, 0.35); stroke-width: 1.3; }
+.prop-log__shadow { fill: rgba(60, 45, 30, 0.18); }
+
+/* --- Creature layer: butterflies + fireflies (unchanged from Version 6) --- */
 .creature-layer {
   position: absolute;
   inset: 0 0 20% 0;
