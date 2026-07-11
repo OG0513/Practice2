@@ -1,6 +1,7 @@
 /* =====================================================
    BIRTHDAY WEBSITE — MAIN SCRIPT
-   Version 8: + Procedural Flower Field (9 species, ~70 flowers)
+   Version 9: + Procedural Grass (pattern-tiled, wave ripple)
+   + Garden Props (bushes, ferns, mushrooms, stones, logs)
 ===================================================== */
 
 'use strict';
@@ -493,20 +494,7 @@ function initEnvironmentSystem() {
 }
 
 /* -----------------------------------------------------
-   11. PROCEDURAL FLOWER FIELD (Version 8)
-   -----------------------------------------------------
-   Each species' actual petal/stem geometry lives ONCE in
-   the <symbol> sprite sheet in index.html. Every flower
-   instance created here is a lightweight <use> pointing
-   back at one of those 9 symbols, styled per-instance via
-   CSS custom properties — nothing about the shape itself
-   is duplicated, only position/color/size/rotation/timing.
-
-   Distribution uses a small number of randomly-placed
-   "cluster centers," with each flower's position jittered
-   around one of them (or, occasionally, placed completely
-   independently as a "loner") — producing natural-looking
-   dense patches and gaps rather than an even scatter.
+   11. PROCEDURAL FLOWER FIELD (Version 8, unchanged)
 ----------------------------------------------------- */
 
 const FLOWER_SPECIES = [
@@ -583,7 +571,7 @@ const FLOWER_SPECIES = [
 ];
 
 const FLOWER_FIELD_CONFIG = {
-  layerSplit: { 1: 8, 2: 42, 3: 20 }, // ~70 total — within the 60-100 brief, chosen for perf headroom
+  layerSplit: { 1: 8, 2: 42, 3: 20 },
   clusterCount: 7,
   clusterSpreadPercent: 9,
   loneFlowerChance: 0.15,
@@ -591,9 +579,6 @@ const FLOWER_FIELD_CONFIG = {
 };
 
 function jitterGaussianish(spread) {
-  // Sum of 3 uniforms approximates a bell curve (central limit theorem),
-  // so positions cluster naturally around a center with soft falloff
-  // instead of a hard-edged uniform blob.
   const sum = Math.random() + Math.random() + Math.random() - 1.5;
   return (sum / 1.5) * spread;
 }
@@ -609,7 +594,7 @@ function buildClusterCenters(count) {
 function pickFlowerLeftPercent(clusterCenters) {
   const useCluster = Math.random() > FLOWER_FIELD_CONFIG.loneFlowerChance;
   if (!useCluster || clusterCenters.length === 0) {
-    return Math.random() * 100; // an occasional "loner," scattered independently
+    return Math.random() * 100;
   }
   const center = clusterCenters[Math.floor(Math.random() * clusterCenters.length)];
   return center + jitterGaussianish(FLOWER_FIELD_CONFIG.clusterSpreadPercent);
@@ -620,8 +605,6 @@ function createFlowerInstance(layerNumber, clusterCenters) {
   const colorway = species.palette[Math.floor(Math.random() * species.palette.length)];
 
   let leftPercent = pickFlowerLeftPercent(clusterCenters);
-  // Layer 1 (closest) is allowed to bleed past 0–100 so a few large
-  // flowers are genuinely cropped by the viewport edge, per the brief.
   const minLeft = layerNumber === 1 ? -8 : 1;
   const maxLeft = layerNumber === 1 ? 108 : 99;
   leftPercent = Math.min(maxLeft, Math.max(minLeft, leftPercent));
@@ -629,8 +612,6 @@ function createFlowerInstance(layerNumber, clusterCenters) {
   const layerScale = layerNumber === 1 ? 1.5 : layerNumber === 3 ? 0.55 : 1;
   const scale = species.baseScale * layerScale * (0.75 + Math.random() * 0.5);
 
-  // Heavier/larger instances sway less; smaller ones sway more — combines
-  // each species' inherent tendency with this specific instance's size.
   const sizeFactor = Math.min(1.4, Math.max(0.6, scale));
   const swayMult = (species.baseSway / sizeFactor) * (0.85 + Math.random() * 0.3);
 
@@ -640,10 +621,6 @@ function createFlowerInstance(layerNumber, clusterCenters) {
   const bloomRotation = (Math.random() * 30 - 15).toFixed(1);
   const stemLean = (Math.random() * 14 - 7).toFixed(1);
 
-  // Staggers each flower's reaction to the shared --wind-angle value so
-  // the field doesn't sway in perfect lockstep — an approximation of
-  // "different wind timing" at flower scale; true spatial wave
-  // propagation across the field arrives with the grass system.
   const transitionDelay = (Math.random() * 0.5).toFixed(2);
   const transitionDuration = (0.25 + Math.random() * 0.3).toFixed(2);
 
@@ -695,10 +672,212 @@ function generateFlowerField() {
 }
 
 /* -----------------------------------------------------
-   12. ILLUSTRATED WORLD — Butterflies + Fireflies
+   12. PROCEDURAL GRASS FIELD (Version 9)
    -----------------------------------------------------
-   Unchanged from Version 6/7. Not yet aware of individual
-   flower positions — that lands in a future version.
+   The actual blade geometry lives ONCE, as an SVG <pattern>
+   in index.html's sprite-defs. This function only creates a
+   handful of <rect> "bands" per layer that reference it —
+   the pattern tiling itself (native, GPU-composited) is what
+   produces the visual density of many blades, not this JS.
+
+   Each band gets a staggered transition-delay based on its
+   index, so a wind gust visibly ripples across the strip
+   left-to-right instead of every band snapping together —
+   the practical, performant version of "wind propagates
+   gradually, not every blade moves simultaneously."
+----------------------------------------------------- */
+
+const GRASS_CONFIG = {
+  layers: [
+    { layer: 1, bandCount: 14 },
+    { layer: 2, bandCount: 12 },
+    { layer: 3, bandCount: 10 },
+    { layer: 4, bandCount: 8 },
+  ],
+  maxStaggerSeconds: 0.6,
+  smallScreenBandMultiplier: 0.7,
+};
+
+function createGrassStrip(bandCount) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.classList.add('grass-strip');
+  svg.setAttribute('viewBox', '0 0 1000 100');
+  // "none" (rather than preserving aspect ratio) matches how the
+  // terrain silhouettes beneath it already stretch to fill their box —
+  // consistent behavior across every ground-level shape in the scene.
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('focusable', 'false');
+
+  const bandWidth = 1000 / bandCount;
+
+  for (let i = 0; i < bandCount; i++) {
+    const band = document.createElementNS(svgNS, 'rect');
+    band.setAttribute('x', (i * bandWidth).toFixed(2));
+    band.setAttribute('y', '0');
+    band.setAttribute('width', bandWidth.toFixed(2));
+    band.setAttribute('height', '100');
+    band.classList.add('grass-band');
+
+    // Staggering by index (not randomized) makes the ripple travel in one
+    // consistent, readable direction across the field rather than a
+    // random flicker.
+    const delay = (i / bandCount) * GRASS_CONFIG.maxStaggerSeconds;
+    band.style.setProperty('--grass-band-delay', `${delay.toFixed(3)}s`);
+
+    svg.appendChild(band);
+  }
+
+  return svg;
+}
+
+function generateGrass() {
+  const isSmallScreen = window.innerWidth < 480;
+
+  GRASS_CONFIG.layers.forEach(({ layer, bandCount }) => {
+    const container = document.querySelector(`.garden-layer--${layer} .garden-layer__contents`);
+    if (!container) return;
+
+    const adjustedCount = isSmallScreen
+      ? Math.max(4, Math.round(bandCount * GRASS_CONFIG.smallScreenBandMultiplier))
+      : bandCount;
+
+    const strip = createGrassStrip(adjustedCount);
+    // Inserted as the FIRST child so grass always paints behind
+    // whatever props/flowers get appended into this same container next.
+    container.insertBefore(strip, container.firstChild);
+  });
+}
+
+/* -----------------------------------------------------
+   13. PROCEDURAL GARDEN PROPS (Version 9)
+   -----------------------------------------------------
+   Bushes, ferns, mushrooms, stones, logs — same reused-
+   symbol / lightweight-<use> pattern as the flower field.
+   One generic createPropInstance() handles every species
+   rather than five near-duplicate functions.
+
+   sways:true species (bush, fern) get a wind rotation, same
+   mechanism as flowers. sways:false species (mushroom, stone,
+   log) are rigid — solid objects shouldn't move in a breeze.
+----------------------------------------------------- */
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+const PROP_SPECIES = {
+  bush: {
+    symbol: 'prop-bush', sways: true, swayMult: 0.5, viewBox: [0, 0, 80, 60],
+    colorVars: () => ({
+      '--bush-color': pick(['#5a9c46', '#4a8c3a', '#6bab52']),
+      '--bush-accent': pick(['#7ec95e', '#8fd671']),
+    }),
+  },
+  fern: {
+    symbol: 'prop-fern', sways: true, swayMult: 0.85, viewBox: [0, 0, 60, 90],
+    colorVars: () => ({ '--fern-color': pick(['#3f7a35', '#4a8c3a', '#356b2d']) }),
+  },
+  mushroom: {
+    symbol: 'prop-mushroom', sways: false, viewBox: [0, 0, 30, 34],
+    colorVars: () => ({ '--mushroom-cap': pick(['#d1524a', '#c96b3f', '#a9506f']) }),
+  },
+  stone: {
+    symbol: 'prop-stone', sways: false, viewBox: [0, 0, 40, 24],
+    colorVars: () => ({ '--stone-color': pick(['#9a9086', '#8a8f7e', '#a89a88']) }),
+  },
+  log: {
+    symbol: 'prop-log', sways: false, viewBox: [0, 0, 90, 32],
+    colorVars: () => ({
+      '--log-color': pick(['#8a6141', '#7a5636']),
+      '--log-end-color': pick(['#a9825c', '#96714f']),
+    }),
+  },
+};
+
+const PROP_FIELD_CONFIG = {
+  // Which species land in which depth layer, and roughly how many —
+  // matches the exact placeholders left in index.html back in Version 7/8.
+  layerProps: {
+    1: [{ species: 'stone', count: 3 }, { species: 'log', count: 1 }],
+    3: [{ species: 'bush', count: 6 }, { species: 'stone', count: 5 }, { species: 'mushroom', count: 4 }],
+    4: [{ species: 'fern', count: 8 }, { species: 'bush', count: 4 }],
+  },
+  smallScreenMultiplier: 0.6,
+};
+
+function createPropInstance(speciesKey) {
+  const species = PROP_SPECIES[speciesKey];
+  const [, , vbWidth, vbHeight] = species.viewBox;
+
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el.setAttribute('viewBox', species.viewBox.join(' '));
+  el.setAttribute('focusable', 'false');
+  el.classList.add('garden-prop', `garden-prop--${speciesKey}`);
+  if (species.sways) el.classList.add('garden-prop--sways');
+
+  const leftPercent = Math.random() * 100;
+  const bottomPercent = Math.random() * 8 + 2;
+  const scale = 0.75 + Math.random() * 0.6;
+  // Static props get a slight natural resting tilt; swaying ones start
+  // upright so the wind's own rotation is what reads as movement.
+  const rotation = species.sways ? 0 : (Math.random() * 8 - 4);
+
+  el.style.left = `${leftPercent.toFixed(2)}%`;
+  el.style.bottom = `${bottomPercent.toFixed(2)}%`;
+  el.style.setProperty('--prop-scale', scale.toFixed(2));
+  el.style.setProperty('--prop-rotation', `${rotation.toFixed(1)}deg`);
+
+  if (species.sways) {
+    const swayMult = species.swayMult * (0.85 + Math.random() * 0.3);
+    el.style.setProperty('--prop-sway-mult', swayMult.toFixed(2));
+    el.style.transitionDelay = `${(Math.random() * 0.4).toFixed(2)}s`;
+  }
+
+  const colorVars = species.colorVars();
+  Object.entries(colorVars).forEach(([key, value]) => {
+    el.style.setProperty(key, value);
+  });
+
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', `#${species.symbol}`);
+  use.setAttribute('width', vbWidth);
+  use.setAttribute('height', vbHeight);
+  el.appendChild(use);
+
+  return el;
+}
+
+function generateProps() {
+  const isSmallScreen = window.innerWidth < 480;
+  const multiplier = isSmallScreen ? PROP_FIELD_CONFIG.smallScreenMultiplier : 1;
+
+  Object.entries(PROP_FIELD_CONFIG.layerProps).forEach(([layerNumber, speciesList]) => {
+    const container = document.querySelector(`.garden-layer--${layerNumber} .garden-layer__contents`);
+    if (!container) return;
+
+    const fragment = document.createDocumentFragment();
+    speciesList.forEach(({ species, count }) => {
+      const adjustedCount = Math.max(1, Math.round(count * multiplier));
+      for (let i = 0; i < adjustedCount; i++) {
+        fragment.appendChild(createPropInstance(species));
+      }
+    });
+
+    // Appended after grass (already in the container) but before
+    // flowers get added next — props sit on the grass, flowers rise
+    // above/through both.
+    container.appendChild(fragment);
+  });
+}
+
+/* -----------------------------------------------------
+   14. ILLUSTRATED WORLD — Butterflies + Fireflies
+   -----------------------------------------------------
+   Unchanged from Version 6/7/8. Still not wind-aware and
+   still not aware of specific flower positions — that's
+   Version 10 territory (night mode + flower-seeking
+   creatures), not forgotten here.
 ----------------------------------------------------- */
 
 function getCreatureLayerBounds() {
@@ -863,7 +1042,7 @@ function initIllustratedWorld() {
 }
 
 /* -----------------------------------------------------
-   13. EVENT LISTENERS
+   15. EVENT LISTENERS
 ----------------------------------------------------- */
 function bindEvents() {
   if (dom.startBtn) {
@@ -878,7 +1057,12 @@ function bindEvents() {
 }
 
 /* -----------------------------------------------------
-   14. INIT — Runs once DOM is ready
+   16. INIT — Runs once DOM is ready
+   -----------------------------------------------------
+   Garden population order matters for correct visual
+   stacking (paint order = DOM insertion order, except
+   .creature-layer which has its own explicit z-index):
+   grass (back) → props (middle) → flowers (front).
 ----------------------------------------------------- */
 function init() {
   applyPersonalization();
@@ -888,7 +1072,9 @@ function init() {
   initGiftBoxes();
   initCake();
   initEnvironmentSystem();
-  generateFlowerField(); // Version 8
+  generateGrass();        // Version 9
+  generateProps();        // Version 9
+  generateFlowerField();  // Version 8
   initIllustratedWorld();
 }
 
