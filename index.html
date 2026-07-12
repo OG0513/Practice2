@@ -20,6 +20,12 @@
   <svg class="flower-sprite-defs" aria-hidden="true" focusable="false">
     <defs>
 
+      <!-- Shared glow blur — one real SVG filter, referenced by every
+           flower's night-time glow aura (see .garden-flower__glow). -->
+      <filter id="softGlowBlur" x="-150%" y="-150%" width="400%" height="400%">
+        <feGaussianBlur stdDeviation="3.2" />
+      </filter>
+
       <symbol id="flower-wildflower" viewBox="0 0 40 100">
         <g class="garden-flower__stem-group">
           <path class="garden-flower__stem" d="M20,100 C20,74 20,52 20,34" />
@@ -27,6 +33,10 @@
         </g>
         <g transform="translate(20,26)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="18" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="9" />
+            </g>
             <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
             <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
             <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
@@ -45,6 +55,10 @@
         </g>
         <g transform="translate(20,30)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="17" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="8" />
+            </g>
             <circle class="garden-flower__petal" cx="0" cy="0" r="9" opacity="0.5" />
             <circle class="garden-flower__petal" cx="0" cy="0" r="6.5" opacity="0.7" />
             <circle class="garden-flower__petal" cx="-2" cy="-1.5" r="4.2" opacity="0.95" />
@@ -59,6 +73,10 @@
         </g>
         <g transform="translate(20,30)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="-2" r="17" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="-2" r="8" />
+            </g>
             <path class="garden-flower__petal" d="M-8,4 C-9,-6 -5,-14 0,-16 C5,-14 9,-6 8,4 C8,8 4,10 0,10 C-4,10 -8,8 -8,4 Z" />
             <path class="garden-flower__center" d="M-3,3 C-3,-2 -1,-6 0,-7 C1,-6 3,-2 3,3 Z" opacity="0.5" />
           </g>
@@ -72,6 +90,10 @@
         </g>
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="16" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="8" />
+            </g>
             <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="2.4" ry="7" />
             <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="2.4" ry="7" transform="rotate(45)" />
             <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="2.4" ry="7" transform="rotate(90)" />
@@ -93,6 +115,10 @@
         </g>
         <g transform="translate(20,22)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="21" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="10" />
+            </g>
             <ellipse class="garden-flower__petal" cx="0" cy="-13" rx="3.4" ry="9" />
             <ellipse class="garden-flower__petal" cx="0" cy="-13" rx="3.4" ry="9" transform="rotate(45)" />
             <ellipse class="garden-flower__petal" cx="0" cy="-13" rx="3.4" ry="9" transform="rotate(90)" />
@@ -113,6 +139,10 @@
         </g>
         <g transform="translate(30,36)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="-3" cy="0" r="15" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="-3" cy="0" r="7" />
+            </g>
             <path class="garden-flower__petal" d="M-5,-10 C-8,-4 -7,3 0,8 C7,3 8,-4 5,-10 C2,-6 -2,-6 -5,-10 Z" />
             <path class="garden-flower__petal" d="M-9,-2 C-11,4 -9,10 -3,14 C1,10 2,5 0,0 C-3,1 -7,0 -9,-2 Z" opacity="0.85" transform="translate(-4,5) scale(0.7)" />
           </g>
@@ -126,6 +156,10 @@
         </g>
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="18" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="9" />
+            </g>
             <ellipse class="garden-flower__petal" cx="0" cy="-8" rx="8" ry="7" />
             <ellipse class="garden-flower__petal" cx="8" cy="0" rx="7" ry="8" />
             <ellipse class="garden-flower__petal" cx="0" cy="8" rx="8" ry="7" />
@@ -141,6 +175,10 @@
         </g>
         <g transform="translate(20,15)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="-4" r="17" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="-4" r="8" />
+            </g>
             <circle class="garden-flower__petal" cx="0" cy="-14" r="3" />
             <circle class="garden-flower__petal" cx="-2.5" cy="-9" r="3" />
             <circle class="garden-flower__petal" cx="2.5" cy="-9" r="3" />
@@ -160,6 +198,10 @@
         </g>
         <g transform="translate(20,30)">
           <g class="garden-flower__bloom">
+            <g class="garden-flower__glow-wrap">
+              <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="-4" r="14" />
+              <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="-4" r="7" />
+            </g>
             <circle class="garden-flower__petal" cx="0" cy="-4" r="2" />
             <circle class="garden-flower__petal" cx="10" cy="-10" r="1.8" />
             <circle class="garden-flower__petal" cx="-11" cy="-8" r="1.8" />
@@ -170,17 +212,6 @@
         </g>
       </symbol>
 
-      <!-- ============================================= -->
-      <!-- GRASS + GARDEN PROPS (Version 9)                -->
-      <!-- Same "reused-definition" pattern as the flowers  -->
-      <!-- above: one pattern tile and 5 prop symbols, each  -->
-      <!-- defined ONCE, referenced many times.               -->
-      <!-- ============================================= -->
-
-      <!-- One grass-blade tile (5 blades, varied height/lean/color),
-           tiled by generateGrass() across a handful of band <rect>s
-           per layer. Native SVG pattern tiling = the visual density
-           of "thousands of blades" without thousands of DOM nodes. -->
       <pattern id="grassBladePattern" width="70" height="100" patternUnits="userSpaceOnUse">
         <path class="grass-blade" d="M8,100 C5,70 5,35 8,5 C11,35 11,70 8,100 Z" fill="#5a9c46" />
         <path class="grass-blade" d="M22,100 C19,75 20,45 24,20 C28,45 25,75 22,100 Z" fill="#4a8c3a" transform="rotate(-5 22 100)" />
@@ -237,6 +268,39 @@
     </defs>
   </svg>
 
+  <!-- ============================================= -->
+  <!-- SMALL "WAY BACK TO DAY" TOGGLE (Version 10)     -->
+  <!-- Real, accessible button — lives outside the      -->
+  <!-- aria-hidden .world div on purpose, since nothing  -->
+  <!-- inside an aria-hidden container can be reachable   -->
+  <!-- by assistive tech. Deliberately small/subtle, low  -->
+  <!-- opacity until hovered/focused — not the prominent  -->
+  <!-- top-right toggle from earlier drafts.              -->
+  <!-- ============================================= -->
+  <button
+    class="celestial-toggle"
+    id="celestialToggle"
+    type="button"
+    aria-label="Switch to night view"
+  >
+    <svg class="celestial-toggle__sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="5" fill="currentColor" />
+      <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <line x1="12" y1="1.5" x2="12" y2="4.5" />
+        <line x1="12" y1="19.5" x2="12" y2="22.5" />
+        <line x1="1.5" y1="12" x2="4.5" y2="12" />
+        <line x1="19.5" y1="12" x2="22.5" y2="12" />
+        <line x1="4.4" y1="4.4" x2="6.5" y2="6.5" />
+        <line x1="17.5" y1="17.5" x2="19.6" y2="19.6" />
+        <line x1="4.4" y1="19.6" x2="6.5" y2="17.5" />
+        <line x1="17.5" y1="6.5" x2="19.6" y2="4.4" />
+      </g>
+    </svg>
+    <svg class="celestial-toggle__moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 1 0 10.5 10.5Z" />
+    </svg>
+  </button>
+
   <div class="world" id="world" aria-hidden="true">
 
     <div class="sky">
@@ -250,6 +314,23 @@
         </defs>
         <circle cx="100" cy="100" r="95" fill="url(#sunGlowGradient)" />
         <circle cx="100" cy="100" r="42" fill="#fff4d9" />
+      </svg>
+
+      <!-- Moon (Version 10) — same slot as the sun, crossfades in
+           via .is-night on <body>. See §3 in style.css. -->
+      <svg class="sky__moon" viewBox="0 0 200 200" focusable="false">
+        <defs>
+          <radialGradient id="moonGlowGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#eef1ff; stop-opacity:0.9" />
+            <stop offset="50%" style="stop-color:#c7d0f5; stop-opacity:0.5" />
+            <stop offset="100%" style="stop-color:#c7d0f5; stop-opacity:0" />
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="url(#moonGlowGradient)" />
+        <circle cx="100" cy="100" r="40" fill="#f4f2ec" />
+        <circle cx="88" cy="88" r="7" fill="#dcd9ce" opacity="0.6" />
+        <circle cx="112" cy="102" r="5" fill="#dcd9ce" opacity="0.5" />
+        <circle cx="95" cy="115" r="4" fill="#dcd9ce" opacity="0.5" />
       </svg>
 
       <svg class="sky__cloud sky__cloud--1" viewBox="0 0 200 90" focusable="false">
@@ -277,11 +358,47 @@
           <ellipse cx="85" cy="62" rx="55" ry="20" />
         </g>
       </svg>
+
+      <!-- Star field (Version 10) — 20 hand-placed stars, hidden by day,
+           fade in at night. Static/hand-authored rather than JS-generated
+           since they don't need any behavior beyond twinkling. -->
+      <div class="sky__stars" aria-hidden="true">
+        <span class="star" style="top:5%; left:15%; --star-size:2px; --twinkle-delay:0.3s; --twinkle-duration:3.4s;"></span>
+        <span class="star" style="top:12%; left:35%; --star-size:1.5px; --twinkle-delay:1.1s; --twinkle-duration:2.8s;"></span>
+        <span class="star" style="top:8%; left:60%; --star-size:2.5px; --twinkle-delay:0.6s; --twinkle-duration:3.8s;"></span>
+        <span class="star" style="top:18%; left:78%; --star-size:1.8px; --twinkle-delay:2.0s; --twinkle-duration:3.1s;"></span>
+        <span class="star" style="top:22%; left:5%; --star-size:2px; --twinkle-delay:0.9s; --twinkle-duration:4.0s;"></span>
+        <span class="star" style="top:28%; left:25%; --star-size:1.5px; --twinkle-delay:1.6s; --twinkle-duration:2.6s;"></span>
+        <span class="star" style="top:15%; left:50%; --star-size:2.2px; --twinkle-delay:0.2s; --twinkle-duration:3.5s;"></span>
+        <span class="star" style="top:32%; left:68%; --star-size:1.6px; --twinkle-delay:2.4s; --twinkle-duration:3.0s;"></span>
+        <span class="star" style="top:6%; left:90%; --star-size:1.8px; --twinkle-delay:1.3s; --twinkle-duration:2.9s;"></span>
+        <span class="star" style="top:38%; left:12%; --star-size:2px; --twinkle-delay:0.5s; --twinkle-duration:3.6s;"></span>
+        <span class="star" style="top:25%; left:42%; --star-size:1.4px; --twinkle-delay:1.8s; --twinkle-duration:2.7s;"></span>
+        <span class="star" style="top:10%; left:22%; --star-size:2.3px; --twinkle-delay:0.7s; --twinkle-duration:3.9s;"></span>
+        <span class="star" style="top:35%; left:85%; --star-size:1.7px; --twinkle-delay:2.2s; --twinkle-duration:3.2s;"></span>
+        <span class="star" style="top:20%; left:92%; --star-size:1.9px; --twinkle-delay:0.4s; --twinkle-duration:3.3s;"></span>
+        <span class="star" style="top:42%; left:30%; --star-size:1.5px; --twinkle-delay:1.5s; --twinkle-duration:2.5s;"></span>
+        <span class="star" style="top:16%; left:8%; --star-size:2.1px; --twinkle-delay:1.0s; --twinkle-duration:3.7s;"></span>
+        <span class="star" style="top:30%; left:55%; --star-size:1.6px; --twinkle-delay:2.6s; --twinkle-duration:3.0s;"></span>
+        <span class="star" style="top:4%; left:45%; --star-size:1.8px; --twinkle-delay:0.8s; --twinkle-duration:2.9s;"></span>
+        <span class="star" style="top:40%; left:65%; --star-size:1.4px; --twinkle-delay:1.9s; --twinkle-duration:3.4s;"></span>
+        <span class="star" style="top:24%; left:15%; --star-size:2px; --twinkle-delay:1.2s; --twinkle-duration:3.1s;"></span>
+      </div>
     </div>
 
+    <!-- ============================================= -->
+    <!-- GARDEN — 4 depth layers, RE-ZONED (Version 10)  -->
+    <!-- All 4 layers now share height:100% of .garden.   -->
+    <!-- Depth comes entirely from where each layer's ground -->
+    <!-- shape sits vertically (farther = higher, closer to  -->
+    <!-- the sky), not from different container heights —    -->
+    <!-- that's the actual fix for flowers being hidden.      -->
+    <!-- ============================================= -->
     <div class="garden" id="garden">
 
-      <!-- Layer 4: background vegetation, furthest, most blur -->
+      <!-- Layer 4: background vegetation, farthest — its terrain now
+           sits HIGH in the frame (near the sky), leaving everything
+           below it clear for the nearer layers to show through. -->
       <div class="garden-layer garden-layer--4">
         <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
           <defs>
@@ -291,19 +408,19 @@
             </linearGradient>
           </defs>
           <path
-            d="M -20,170 C 60,150 140,185 230,165 C 340,142 420,178 520,160 C 610,145 700,175 790,155 C 880,138 950,160 1020,150 L 1020,420 L -20,420 Z"
+            d="M -20,55 C 110,38 190,62 290,45 C 400,28 480,58 580,42 C 680,25 770,52 870,36 C 935,20 978,45 1020,32 L 1020,440 L -20,440 Z"
             fill="url(#gardenLayer4Gradient)"
             stroke="rgba(255,255,255,0.35)"
             stroke-width="4"
           />
         </svg>
         <div class="garden-layer__contents">
-          <!-- Version 9: ferns + bushes (generateProps), thin blurred
-               grass fringe (generateGrass) populate this layer -->
+          <!-- Ferns + bushes + a thin blurred grass fringe live here -->
         </div>
       </div>
 
-      <!-- Layer 3: smaller flowers (procedural), small bushes, tiny rocks -->
+      <!-- Layer 3: smaller flowers, bushes, tiny rocks — terrain sits
+           in the upper-middle band. -->
       <div class="garden-layer garden-layer--3">
         <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
           <defs>
@@ -313,21 +430,20 @@
             </linearGradient>
           </defs>
           <path
-            d="M -20,140 C 40,190 120,110 210,150 C 300,185 380,120 470,155 C 560,185 650,130 740,160 C 830,185 900,140 1020,165 L 1020,420 L -20,420 Z"
+            d="M -20,150 C 100,132 180,158 280,140 C 390,124 470,155 570,138 C 670,120 760,148 860,132 C 930,118 975,140 1020,130 L 1020,440 L -20,440 Z"
             fill="url(#gardenLayer3Gradient)"
             stroke="rgba(255,255,255,0.3)"
             stroke-width="3"
           />
         </svg>
         <div class="garden-layer__contents">
-          <!-- Version 9: bushes, stones, mushrooms (generateProps) +
-               grass fringe (generateGrass); flowers (generateFlowerField)
-               paint in front of both -->
+          <!-- Bushes, stones, mushrooms + grass; flowers paint in front -->
         </div>
       </div>
 
-      <!-- Layer 2: MAIN flower field — the bulk of the 70 procedural
-           flowers land here; creature-layer (unchanged) stays inside -->
+      <!-- Layer 2: MAIN flower field — terrain sits in the lower-middle
+           band, well below Layer 3's. Creature-layer (unchanged) stays
+           inside. -->
       <div class="garden-layer garden-layer--2">
         <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
           <defs>
@@ -338,7 +454,7 @@
             </linearGradient>
           </defs>
           <path
-            d="M -20,190 C 70,160 150,210 260,195 C 370,178 430,240 550,255 C 660,240 730,190 830,168 C 900,155 960,120 1020,145 L 1020,420 L -20,420 Z"
+            d="M -20,245 C 90,228 170,252 270,235 C 380,220 460,248 560,232 C 660,218 750,240 850,225 C 920,215 970,235 1020,228 L 1020,440 L -20,440 Z"
             fill="url(#gardenLayer2Gradient)"
             stroke="rgba(255,255,255,0.4)"
             stroke-width="4"
@@ -349,8 +465,10 @@
         </div>
       </div>
 
-      <!-- Layer 1: closest foreground — largest, few but big procedural
-           flowers, some intentionally cropped by the viewport edge -->
+      <!-- Layer 1: closest foreground — terrain now sits LOW, close to
+           the very bottom, so it can no longer swallow anything behind
+           it. Big flowers still read as dominant through scale, not
+           through how tall this layer's own ground shape is. -->
       <div class="garden-layer garden-layer--1">
         <svg class="garden-layer__terrain" viewBox="0 0 1000 400" preserveAspectRatio="none" focusable="false">
           <defs>
@@ -360,15 +478,14 @@
             </linearGradient>
           </defs>
           <path
-            d="M -20,230 C 60,270 140,210 240,250 C 330,285 410,225 520,260 C 620,290 700,235 800,255 C 890,270 950,225 1020,245 L 1020,440 L -20,440 Z"
+            d="M -20,335 C 80,320 160,342 260,328 C 360,315 440,338 540,325 C 640,312 730,332 830,320 C 900,312 960,330 1020,322 L 1020,440 L -20,440 Z"
             fill="url(#gardenLayer1Gradient)"
             stroke="rgba(255,255,255,0.3)"
             stroke-width="4"
           />
         </svg>
         <div class="garden-layer__contents">
-          <!-- Version 9: tall grass (generateGrass) + a few stones/log
-               (generateProps); flowers (generateFlowerField) paint in front -->
+          <!-- Tall grass + a few stones/log; flowers paint in front -->
         </div>
       </div>
 
