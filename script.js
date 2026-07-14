@@ -1,6 +1,7 @@
 /* =====================================================
    BIRTHDAY WEBSITE — MAIN SCRIPT
-   Version 13: Seamless single-field meadow (no depth layers)
+   Version 14: Neon-rendered flowers (all 11 species) +
+   flat-base/single-tip grass, individually instanced
 ===================================================== */
 
 'use strict';
@@ -68,7 +69,7 @@ const dom = {
   cakeStatusHint: document.getElementById('cakeStatusHint'),
 
   world: document.getElementById('world'),
-  meadowField: document.getElementById('meadowField'), // Version 13: replaces gardenStrip
+  meadowField: document.getElementById('meadowField'),
   creatureLayer: document.getElementById('creatureLayer'),
 
   celestialToggle: document.getElementById('celestialToggle'),
@@ -530,110 +531,106 @@ function initCelestialToggle() {
 }
 
 /* -----------------------------------------------------
-   12. PROCEDURAL FLOWER FIELD (Version 13: flat field)
-   -----------------------------------------------------
-   No more per-layer loop or zone table. One cluster pass,
-   one continuous bottom% range, with scale correlated
-   continuously to bottom% (lower + slightly bigger =
-   "nearer") rather than via discrete depth tiers.
+   12. PROCEDURAL FLOWER FIELD (Version 14: neon palettes,
+   independent sway phase, proximity grass overlap)
 ----------------------------------------------------- */
 
 const FLOWER_SPECIES = [
   {
     id: 'wildflower', symbol: 'flower-wildflower', baseScale: 1.0, baseSway: 0.7,
-    glowColor: '#ffb0d9',
+    glowColor: '#ff3fa0',
     palette: [
-      { petal: '#ff8fab', center: '#f5c66b' },
-      { petal: '#d9c9f5', center: '#fff8f2' },
-      { petal: '#f5c66b', center: '#ff8fab' },
+      { petal: '#ff3fa0', center: '#ffe14d' },
+      { petal: '#b24dff', center: '#fff8f2' },
+      { petal: '#ffcf1f', center: '#ff3fa0' },
     ],
   },
   {
     id: 'rose', symbol: 'flower-rose', baseScale: 1.05, baseSway: 0.45,
-    glowColor: '#ff4f8b',
+    glowColor: '#ff1f6d',
     palette: [
-      { petal: '#e0577a' },
-      { petal: '#ff8fab' },
-      { petal: '#c9436b' },
-      { petal: '#f5b8c8' },
+      { petal: '#ff1f6d' },
+      { petal: '#ff3d81' },
+      { petal: '#e0177a' },
+      { petal: '#ff5fa8' },
     ],
   },
   {
     id: 'tulip', symbol: 'flower-tulip', baseScale: 1.1, baseSway: 0.5,
-    glowColor: '#c68bff',
+    glowColor: '#c14dff',
     palette: [
-      { petal: '#ff8fab', center: '#c9436b' },
-      { petal: '#f5c66b', center: '#e0a53a' },
-      { petal: '#b98be0', center: '#8a5cc4' },
-      { petal: '#ff7a6f', center: '#c9483f' },
+      { petal: '#ff2e88', center: '#c9436b' },
+      { petal: '#ffb020', center: '#e0a53a' },
+      { petal: '#b24dff', center: '#8a5cc4' },
+      { petal: '#2ea6ff', center: '#1f7fc9' },
     ],
   },
   {
     id: 'daisy', symbol: 'flower-daisy', baseScale: 0.85, baseSway: 0.8,
-    glowColor: '#fff2b8',
+    glowColor: '#5ff2ff',
     palette: [
-      { petal: '#fffdf7', center: '#f5c66b' },
-      { petal: '#fdf0e6', center: '#f0a93a' },
+      { petal: '#ffffff', center: '#ffd400' },
+      { petal: '#eafcff', center: '#ffb020' },
     ],
   },
   {
     id: 'sunflower', symbol: 'flower-sunflower', baseScale: 1.4, baseSway: 0.35,
-    glowColor: '#ffcf5c',
+    glowColor: '#ffd400',
     palette: [
-      { petal: '#f5c66b', center: '#7a5230' },
-      { petal: '#f0b93a', center: '#6b431f' },
+      { petal: '#ffd400', center: '#7a5230' },
+      { petal: '#ffb020', center: '#6b431f' },
     ],
   },
   {
     id: 'bluebell', symbol: 'flower-bluebell', baseScale: 0.8, baseSway: 0.85,
-    glowColor: '#6fa8ff',
+    glowColor: '#2ea6ff',
     palette: [
-      { petal: '#7ea0e0' },
-      { petal: '#8f7fd6' },
-      { petal: '#6a8fd1' },
+      { petal: '#2ea6ff' },
+      { petal: '#7a5cff' },
+      { petal: '#4fc3ff' },
     ],
   },
   {
     id: 'poppy', symbol: 'flower-poppy', baseScale: 1.1, baseSway: 0.55,
-    glowColor: '#ff6b4a',
+    glowColor: '#ff5a1f',
     palette: [
-      { petal: '#e0473f', center: '#3a2a1e' },
-      { petal: '#ef7a3c', center: '#3a2a1e' },
+      { petal: '#ff3b1f', center: '#241238' },
+      { petal: '#ff6a00', center: '#241238' },
     ],
   },
   {
     id: 'lavender', symbol: 'flower-lavender', baseScale: 0.9, baseSway: 0.9,
-    glowColor: '#c9a3ff',
+    glowColor: '#b48aff',
     palette: [
-      { petal: '#9b87d1' },
-      { petal: '#b98be0' },
-      { petal: '#8069c2' },
+      { petal: '#b48aff' },
+      { petal: '#c9a3ff' },
+      { petal: '#9166e0' },
     ],
   },
   {
     id: 'babysBreath', symbol: 'flower-babys-breath', baseScale: 0.65, baseSway: 1.0,
-    glowColor: '#7ff0d4',
+    glowColor: '#7ff0e0',
     palette: [
       { petal: '#ffffff' },
-      { petal: '#fdf0f5' },
+      { petal: '#eafcff' },
     ],
   },
   {
     id: 'lily', symbol: 'flower-lily', baseScale: 1.15, baseSway: 0.5,
-    glowColor: '#ff8a6b',
+    glowColor: '#ff8a2e',
     palette: [
-      { petal: '#ff6b4a', center: '#f5c66b' },
-      { petal: '#ff9466', center: '#e0a53a' },
-      { petal: '#ffd166', center: '#c96b3f' },
+      { petal: '#ff6a1f', center: '#ffd400' },
+      { petal: '#ffb020', center: '#e0a53a' },
+      { petal: '#ff3fa0', center: '#ffd400' },
     ],
   },
   {
     id: 'hyacinth', symbol: 'flower-hyacinth', baseScale: 0.75, baseSway: 0.9,
-    glowColor: '#9b87ff',
+    glowColor: '#7a5cff',
     palette: [
-      { petal: '#8f7fd6' },
-      { petal: '#6a8fd1' },
-      { petal: '#b98be0' },
+      { petal: '#7a5cff' },
+      { petal: '#2ea6ff' },
+      { petal: '#b24dff' },
     ],
   },
 ];
@@ -684,8 +681,6 @@ function createFlowerInstance(clusterCenters) {
   const bottomPercent = FLOWER_FIELD_CONFIG.bottomMin +
     Math.random() * (FLOWER_FIELD_CONFIG.bottomMax - FLOWER_FIELD_CONFIG.bottomMin);
 
-  // One continuous "lower + a bit bigger = nearer" relationship — a single
-  // smooth formula, not discrete depth tiers.
   const depthFactor = 1 - (bottomPercent - FLOWER_FIELD_CONFIG.bottomMin) /
     (FLOWER_FIELD_CONFIG.bottomMax - FLOWER_FIELD_CONFIG.bottomMin);
   const scale = species.baseScale * (0.78 + depthFactor * 0.5) * (0.85 + Math.random() * 0.35);
@@ -696,10 +691,15 @@ function createFlowerInstance(clusterCenters) {
   const bloomRotation = (Math.random() * 34 - 17).toFixed(1);
   const stemLean = (Math.random() * 16 - 8).toFixed(1);
 
-  // Wider spread than before, so the field reads as less synchronized
-  // when a wind gust passes through.
   const transitionDelay = (Math.random() * 0.8).toFixed(2);
   const transitionDuration = (0.22 + Math.random() * 0.45).toFixed(2);
+
+  // Version 14 — independent sway PHASE: each flower's bloom nods on its
+  // own amplitude/duration/delay, layered on top of the shared wind
+  // engine (the engine itself is untouched — see bloomNod in style.css).
+  const nodAmplitude = (2 + Math.random() * 4).toFixed(1);
+  const nodDuration = (3 + Math.random() * 3).toFixed(2);
+  const nodDelay = (Math.random() * 4).toFixed(2);
 
   const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   el.setAttribute('viewBox', '0 0 40 100');
@@ -719,6 +719,9 @@ function createFlowerInstance(clusterCenters) {
   el.style.setProperty('--glow-color', species.glowColor);
   el.style.setProperty('--glow-pulse-duration', `${(2.4 + Math.random() * 2).toFixed(2)}s`);
   el.style.setProperty('--glow-pulse-delay', `${(Math.random() * 3).toFixed(2)}s`);
+  el.style.setProperty('--nod-amplitude', `${nodAmplitude}deg`);
+  el.style.setProperty('--nod-duration', `${nodDuration}s`);
+  el.style.setProperty('--nod-delay', `${nodDelay}s`);
   el.style.transitionDelay = `${transitionDelay}s`;
   el.style.transitionDuration = `${transitionDuration}s`;
 
@@ -728,7 +731,7 @@ function createFlowerInstance(clusterCenters) {
   use.setAttribute('height', '100');
   el.appendChild(use);
 
-  return el;
+  return { element: el, leftPercent };
 }
 
 function generateFlowerField() {
@@ -739,90 +742,108 @@ function generateFlowerField() {
   const count = Math.round(FLOWER_FIELD_CONFIG.totalCount * multiplier);
   const clusterCenters = buildClusterCenters(FLOWER_FIELD_CONFIG.clusterCount);
 
-  const fragment = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
-    fragment.appendChild(createFlowerInstance(clusterCenters));
+    const { element, leftPercent } = createFlowerInstance(clusterCenters);
+    dom.meadowField.appendChild(element);
+
+    // Version 14 — depth cue: ~35% of flowers get 1-2 grass blades
+    // placed immediately after them in the DOM, anchored to roughly the
+    // same horizontal position, so those specific blades paint IN FRONT
+    // of that specific flower's stem base. This is proximity-based, not
+    // a global shuffle — the rest of the field stays behind everything
+    // (see generateGrassField, which runs before this).
+    if (Math.random() < GRASS_FIELD_CONFIG.overlapChance) {
+      const overlapCount = Math.random() < 0.5 ? 1 : 2;
+      for (let o = 0; o < overlapCount; o++) {
+        dom.meadowField.appendChild(createGrassBladeInstance(leftPercent));
+      }
+    }
   }
-  dom.meadowField.appendChild(fragment);
 }
 
 /* -----------------------------------------------------
-   13. PROCEDURAL GRASS FIELD (Version 13: one flat strip)
+   13. PROCEDURAL GRASS FIELD (Version 14: real flat-base/
+   single-tip blades, individually instanced)
    -----------------------------------------------------
-   ONE svg, ONE shared bottom edge. Each band's height is
-   independently randomized (anchored to the same bottom),
-   which is what creates natural clumping — no separate
-   depth-tier strips anymore. Fill alternates between the
-   two pattern tiles so no single motif repeats
-   uninterrupted across the whole width.
+   Each blade is its own root <svg> (same architecture as
+   flowers/props) referencing one of 3 shared curve symbols
+   defined in index.html. Per-instance variety comes from
+   CSS transform (scaleX/scaleY/rotate/skew) + filter
+   (hue/brightness/saturate), not from unique path data —
+   this is what keeps ~300 blades affordable.
 ----------------------------------------------------- */
 
-const GRASS_CONFIG = {
-  bandCount: 32,
-  viewBoxWidth: 1000,
-  viewBoxHeight: 400,
-  minBandHeightFraction: 0.55,
-  maxStaggerSeconds: 0.9,
-  smallScreenBandMultiplier: 0.7,
+const GRASS_BLADE_SYMBOLS = ['grass-blade-a', 'grass-blade-b', 'grass-blade-c'];
+
+const GRASS_FIELD_CONFIG = {
+  baseCount: 260,
+  overlapChance: 0.35, // read by generateFlowerField() above
+  smallScreenMultiplier: 0.55,
 };
 
-function createGrassStrip(bandCount) {
-  const svgNS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(svgNS, 'svg');
-  svg.classList.add('grass-strip');
-  svg.setAttribute('viewBox', `0 0 ${GRASS_CONFIG.viewBoxWidth} ${GRASS_CONFIG.viewBoxHeight}`);
-  svg.setAttribute('preserveAspectRatio', 'none');
-  svg.setAttribute('focusable', 'false');
+function createGrassBladeInstance(anchorLeftPercent) {
+  const symbolId = GRASS_BLADE_SYMBOLS[Math.floor(Math.random() * GRASS_BLADE_SYMBOLS.length)];
 
-  const slotWidth = GRASS_CONFIG.viewBoxWidth / bandCount;
+  const leftPercent = anchorLeftPercent === undefined
+    ? Math.random() * 100
+    : Math.min(99, Math.max(1, anchorLeftPercent + (Math.random() * 3 - 1.5)));
 
-  for (let i = 0; i < bandCount; i++) {
-    const band = document.createElementNS(svgNS, 'rect');
+  const heightScale = 0.5 + Math.random() * 0.85;
+  const widthScale = 0.7 + Math.random() * 0.6;
+  const lean = (Math.random() * 12 - 6).toFixed(1);
+  const swayMult = (0.85 + Math.random() * 0.75).toFixed(2);
+  const opacity = (0.72 + Math.random() * 0.28).toFixed(2);
+  const hue = (Math.random() * 16 - 6).toFixed(1);
+  const brightness = (0.85 + Math.random() * 0.3).toFixed(2);
+  const saturate = (0.8 + Math.random() * 0.4).toFixed(2);
+  const delay = (Math.random() * 0.7).toFixed(2);
 
-    const widthJitter = 1 + (Math.random() * 0.3 - 0.15);
-    const width = slotWidth * widthJitter;
-    const x = i * slotWidth - (width - slotWidth) / 2;
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el.setAttribute('viewBox', '-3 0 16 100');
+  el.setAttribute('focusable', 'false');
+  el.classList.add('garden-grass-blade');
 
-    const heightFraction = GRASS_CONFIG.minBandHeightFraction +
-      Math.random() * (1 - GRASS_CONFIG.minBandHeightFraction);
-    const height = GRASS_CONFIG.viewBoxHeight * heightFraction;
-    const y = GRASS_CONFIG.viewBoxHeight - height;
+  el.style.left = `${leftPercent.toFixed(2)}%`;
+  el.style.bottom = `${(-1 + Math.random() * 2).toFixed(2)}%`;
+  el.style.setProperty('--blade-height-scale', heightScale.toFixed(2));
+  el.style.setProperty('--blade-width-scale', widthScale.toFixed(2));
+  el.style.setProperty('--blade-lean', `${lean}deg`);
+  el.style.setProperty('--blade-sway-mult', swayMult);
+  el.style.setProperty('--blade-opacity', opacity);
+  el.style.setProperty('--blade-hue', `${hue}deg`);
+  el.style.setProperty('--blade-brightness', brightness);
+  el.style.setProperty('--blade-saturate', saturate);
+  el.style.transitionDelay = `${delay}s`;
 
-    band.setAttribute('x', x.toFixed(2));
-    band.setAttribute('y', y.toFixed(2));
-    band.setAttribute('width', width.toFixed(2));
-    band.setAttribute('height', height.toFixed(2));
-    band.classList.add('grass-band');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', `#${symbolId}`);
+  use.setAttribute('width', '16');
+  use.setAttribute('height', '100');
+  el.appendChild(use);
 
-    const patternId = Math.random() < 0.5 ? 'grassBladePattern' : 'grassBladePattern2';
-    band.style.setProperty('--grass-fill', `url(#${patternId})`);
-
-    const delay = (i / bandCount) * GRASS_CONFIG.maxStaggerSeconds;
-    band.style.setProperty('--grass-band-delay', `${delay.toFixed(3)}s`);
-    band.style.setProperty('--grass-sway-mult', (0.9 + Math.random() * 0.7).toFixed(2));
-    band.style.setProperty('--grass-brightness-day', (0.85 + Math.random() * 0.35).toFixed(2));
-    band.style.setProperty('--grass-saturate-day', (0.8 + Math.random() * 0.35).toFixed(2));
-
-    svg.appendChild(band);
-  }
-
-  return svg;
+  return el;
 }
 
-function generateGrass() {
+function generateGrassField() {
   if (!dom.meadowField) return;
 
   const isSmallScreen = window.innerWidth < 480;
-  const bandCount = isSmallScreen
-    ? Math.max(10, Math.round(GRASS_CONFIG.bandCount * GRASS_CONFIG.smallScreenBandMultiplier))
-    : GRASS_CONFIG.bandCount;
+  const multiplier = isSmallScreen ? GRASS_FIELD_CONFIG.smallScreenMultiplier : 1;
+  const count = Math.round(GRASS_FIELD_CONFIG.baseCount * multiplier);
 
-  const strip = createGrassStrip(bandCount);
-  dom.meadowField.insertBefore(strip, dom.meadowField.firstChild);
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    fragment.appendChild(createGrassBladeInstance());
+  }
+  // This bulk pass is the base layer everything else sits on top of —
+  // inserted first so it paints behind props and flowers. The proximity
+  // "overlap" blades near ~35% of flowers are added later, individually,
+  // in generateFlowerField() above, so those specific ones paint in front.
+  dom.meadowField.insertBefore(fragment, dom.meadowField.firstChild);
 }
 
 /* -----------------------------------------------------
-   14. PROCEDURAL GARDEN PROPS (Version 13: flat field)
+   14. PROCEDURAL GARDEN PROPS (unchanged)
 ----------------------------------------------------- */
 
 function pick(arr) {
@@ -930,9 +951,7 @@ function generateProps() {
 
 /* -----------------------------------------------------
    15. ILLUSTRATED WORLD — Butterflies + Fireflies
-   -----------------------------------------------------
-   Entirely unchanged — bounds come from #creatureLayer's
-   own box, which never depended on the layer system.
+   (unchanged)
 ----------------------------------------------------- */
 
 function getCreatureLayerBounds() {
@@ -1126,6 +1145,10 @@ function bindEvents() {
 
 /* -----------------------------------------------------
    17. INIT — Runs once DOM is ready
+   -----------------------------------------------------
+   Order matters for paint stacking: grass base (behind) →
+   props (middle) → flowers, which ALSO seed proximity
+   grass overlaps as they go (in front, near ~35% of them).
 ----------------------------------------------------- */
 function init() {
   applyPersonalization();
@@ -1136,9 +1159,9 @@ function init() {
   initCake();
   initEnvironmentSystem();
   initCelestialToggle();
-  generateGrass();
+  generateGrassField(); // Version 14: replaces the old pattern-tile grass
   generateProps();
-  generateFlowerField();
+  generateFlowerField(); // seeds proximity grass overlaps as it runs
   initIllustratedWorld();
 }
 
