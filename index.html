@@ -21,14 +21,35 @@
     <defs>
 
       <filter id="softGlowBlur" x="-150%" y="-150%" width="400%" height="400%">
-        <feGaussianBlur stdDeviation="4.5" />
+        <feGaussianBlur stdDeviation="5.5" />
       </filter>
+
+      <!-- Shared glossy highlight — every petal gets this same fixed
+           white-to-transparent glaze layered on top. This is the
+           reliable, cross-browser stand-in for "gradients inside
+           petals" (see explanation above the code). -->
+      <radialGradient id="petalShineGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55" />
+        <stop offset="45%" stop-color="#ffffff" stop-opacity="0.16" />
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+      </radialGradient>
+
+      <!-- Shared grass shading — dark near the soil, lighter toward the
+           tip, like real grass catching light. Per-instance color
+           variety comes from a CSS filter on top of this fixed gradient
+           (see .garden-grass-blade), not from re-authoring the gradient. -->
+      <linearGradient id="grassBladeShadeGradient" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#3f7a30" />
+        <stop offset="55%" stop-color="#5a9c46" />
+        <stop offset="100%" stop-color="#82c862" />
+      </linearGradient>
 
       <symbol id="flower-wildflower" viewBox="0 0 40 100">
         <g class="garden-flower__stem-group">
           <path class="garden-flower__stem" d="M20,100 C20,74 20,52 20,34" />
           <path class="garden-flower__leaf" d="M20,78 C10,74 6,82 10,88 C15,90 20,86 20,78 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,26)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -41,6 +62,7 @@
             <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
             <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
             <circle class="garden-flower__center" cx="0" cy="0" r="5" />
+            <circle class="garden-flower__shine" cx="-2" cy="-3" r="7" />
           </g>
         </g>
       </symbol>
@@ -51,6 +73,7 @@
           <path class="garden-flower__leaf" d="M20,80 C11,77 8,84 11,90 C16,92 20,88 20,80 Z" />
           <path class="garden-flower__leaf" d="M20,70 C29,67 32,74 29,80 C24,82 20,78 20,70 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -83,6 +106,7 @@
               <path class="garden-flower__petal" d="M0,0 C-2.2,-3 -2.4,-6.5 0,-8.5 C2.4,-6.5 2.2,-3 0,0 Z" transform="rotate(288)" />
             </g>
             <circle class="garden-flower__center" cx="0" cy="0" r="2.6" />
+            <circle class="garden-flower__shine" cx="-2.5" cy="-4" r="9" />
           </g>
         </g>
       </symbol>
@@ -92,6 +116,7 @@
           <path class="garden-flower__stem" d="M20,100 C20,70 20,46 20,32" />
           <path class="garden-flower__leaf" d="M20,74 C9,72 5,80 9,88 C14,90 20,85 20,74 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,30)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -109,6 +134,7 @@
             </g>
             <path d="M0,-1 C-0.5,-5 -0.3,-9.5 0,-11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" />
             <path class="garden-flower__center" opacity="0.55" d="M-3,3 C-3,-2 -1,-6 0,-7 C1,-6 3,-2 3,3 Z" />
+            <ellipse class="garden-flower__shine" cx="-1.5" cy="-6" rx="4.5" ry="7" />
           </g>
         </g>
       </symbol>
@@ -118,6 +144,7 @@
           <path class="garden-flower__stem" d="M20,100 C20,75 20,52 20,36" />
           <path class="garden-flower__leaf" d="M20,72 C11,69 8,76 11,82 C16,84 20,80 20,72 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -148,6 +175,7 @@
               <circle cx="1.6" cy="2" r="0.45" /><circle cx="-1.6" cy="2" r="0.45" />
               <circle cx="-2.4" cy="-1" r="0.45" /><circle cx="0" cy="0.2" r="0.5" />
             </g>
+            <circle class="garden-flower__shine" cx="-2" cy="-3" r="6" />
           </g>
         </g>
       </symbol>
@@ -158,6 +186,7 @@
           <path class="garden-flower__leaf" d="M20,76 C7,73 3,82 8,90 C14,92 20,87 20,76 Z" />
           <path class="garden-flower__leaf" d="M20,64 C33,61 37,70 32,78 C26,80 20,75 20,64 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,22)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -205,6 +234,7 @@
               <circle cx="1.2" cy="1.8" r="0.5" /><circle cx="-1.5" cy="1.5" r="0.5" />
               <circle cx="-2" cy="-1" r="0.5" />
             </g>
+            <circle class="garden-flower__shine" cx="-3" cy="-5" r="9" />
           </g>
         </g>
       </symbol>
@@ -214,6 +244,7 @@
           <path class="garden-flower__stem" d="M20,100 C20,72 24,50 30,38" />
           <path class="garden-flower__leaf" d="M20,80 C11,78 8,85 12,90 C16,91 20,87 20,80 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(30,36)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -222,6 +253,7 @@
             </g>
             <path class="garden-flower__petal" d="M-5,-10 C-8,-4 -7,3 0,8 C7,3 8,-4 5,-10 C2,-6 -2,-6 -5,-10 Z" />
             <path class="garden-flower__petal" d="M-9,-2 C-11,4 -9,10 -3,14 C1,10 2,5 0,0 C-3,1 -7,0 -9,-2 Z" opacity="0.85" transform="translate(-4,5) scale(0.7)" />
+            <ellipse class="garden-flower__shine" cx="-4" cy="-3" rx="4" ry="5.5" />
           </g>
         </g>
       </symbol>
@@ -231,6 +263,7 @@
           <path class="garden-flower__stem" d="M20,100 C20,73 20,50 20,34" />
           <path class="garden-flower__leaf" d="M20,76 C10,73 6,81 10,88 C15,90 20,85 20,76 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -262,6 +295,7 @@
               <line x1="0" y1="0" x2="0" y2="-3.2" transform="rotate(270)" />
               <line x1="0" y1="0" x2="0" y2="-3.2" transform="rotate(315)" />
             </g>
+            <circle class="garden-flower__shine" cx="-2" cy="-2" r="6" />
           </g>
         </g>
       </symbol>
@@ -270,6 +304,7 @@
         <g class="garden-flower__stem-group">
           <path class="garden-flower__stem" d="M20,100 C20,70 20,44 20,20" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,15)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -283,6 +318,7 @@
             <circle class="garden-flower__petal" cx="-2.5" cy="1" r="3" />
             <circle class="garden-flower__petal" cx="2.5" cy="1" r="3" />
             <circle class="garden-flower__petal" cx="0" cy="6" r="3" />
+            <ellipse class="garden-flower__shine" cx="-1" cy="-6" rx="4" ry="10" />
           </g>
         </g>
       </symbol>
@@ -293,6 +329,7 @@
           <path class="garden-flower__stem" d="M20,60 C24,52 28,46 30,38" />
           <path class="garden-flower__stem" d="M20,54 C16,46 12,42 9,36" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,30)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -305,6 +342,7 @@
             <circle class="garden-flower__petal" cx="4" cy="2" r="1.8" />
             <circle class="garden-flower__petal" cx="-6" cy="4" r="1.8" />
             <circle class="garden-flower__petal" cx="0" cy="-12" r="1.6" />
+            <circle class="garden-flower__shine" cx="-1" cy="-4" r="7" />
           </g>
         </g>
       </symbol>
@@ -315,6 +353,7 @@
           <path class="garden-flower__leaf" d="M20,78 C10,75 6,83 10,89 C15,91 20,86 20,78 Z" />
           <path class="garden-flower__leaf" d="M20,66 C30,63 34,71 30,78 C25,80 20,75 20,66 Z" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,28)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -354,6 +393,7 @@
               <circle cx="0" cy="-7.5" r="0.9" transform="rotate(230)" />
               <circle cx="0" cy="-7.5" r="0.9" transform="rotate(300)" />
             </g>
+            <circle class="garden-flower__shine" cx="-2" cy="-3" r="6" />
           </g>
         </g>
       </symbol>
@@ -362,6 +402,7 @@
         <g class="garden-flower__stem-group">
           <path class="garden-flower__stem" d="M20,100 C20,72 20,48 20,26" />
         </g>
+        <circle class="garden-flower__ground-glow" cx="20" cy="97" r="9" />
         <g transform="translate(20,24)">
           <g class="garden-flower__bloom">
             <g class="garden-flower__glow-wrap">
@@ -400,27 +441,28 @@
             </g>
             <circle class="garden-flower__center" cx="0" cy="4" r="0.9" />
             <circle class="garden-flower__center" cx="0" cy="-2" r="0.75" />
+            <ellipse class="garden-flower__shine" cx="-1" cy="-6" rx="3.5" ry="11" />
           </g>
         </g>
       </symbol>
 
-      <!-- Two grass tiles that alternate band-by-band, so no single tile
-           repeats uninterrupted across the whole meadow width. -->
-      <pattern id="grassBladePattern" width="70" height="100" patternUnits="userSpaceOnUse">
-        <path class="grass-blade" d="M8,100 C5,70 5,35 8,5 C11,35 11,70 8,100 Z" fill="#5a9c46" />
-        <path class="grass-blade" d="M22,100 C19,75 20,45 24,20 C28,45 25,75 22,100 Z" fill="#4a8c3a" transform="rotate(-5 22 100)" />
-        <path class="grass-blade" d="M37,100 C35,85 36,65 39,45 C42,65 39,85 37,100 Z" fill="#6bab52" transform="rotate(4 37 100)" />
-        <path class="grass-blade" d="M51,100 C48,80 49,55 53,30 C56,55 54,80 51,100 Z" fill="#548f3e" transform="rotate(-4 51 100)" />
-        <path class="grass-blade" d="M64,100 C61,72 62,40 66,10 C69,40 67,72 64,100 Z" fill="#5a9c46" transform="rotate(5 64 100)" />
-      </pattern>
-
-      <pattern id="grassBladePattern2" width="64" height="100" patternUnits="userSpaceOnUse">
-        <path class="grass-blade" d="M6,100 C4,68 5,32 7,8 C10,32 9,68 6,100 Z" fill="#4f9440" transform="rotate(3 6 100)" />
-        <path class="grass-blade" d="M18,100 C16,72 18,38 22,14 C25,38 21,72 18,100 Z" fill="#63a84c" transform="rotate(-6 18 100)" />
-        <path class="grass-blade" d="M32,100 C30,80 31,58 35,36 C38,58 34,80 32,100 Z" fill="#4a8c3a" transform="rotate(6 32 100)" />
-        <path class="grass-blade" d="M46,100 C44,76 45,50 49,24 C52,50 48,76 46,100 Z" fill="#5a9c46" transform="rotate(-3 46 100)" />
-        <path class="grass-blade" d="M58,100 C56,85 57,66 60,48 C63,66 59,85 58,100 Z" fill="#548f3e" transform="rotate(4 58 100)" />
-      </pattern>
+      <!-- ============================================= -->
+      <!-- GRASS — Version 14: real flat-base, single-tip  -->
+      <!-- blade geometry (fixes the double-pointed shape   -->
+      <!-- from earlier versions). 3 curve variants, each    -->
+      <!-- defined ONCE; per-instance scale/lean/color come  -->
+      <!-- from CSS on the <use> wrapper, same pattern as     -->
+      <!-- flowers and props. -->
+      <!-- ============================================= -->
+      <symbol id="grass-blade-a" viewBox="-3 0 16 100">
+        <path class="grass-blade__shape" d="M2,100 C1.5,70 2,35 3,10 C3.5,5 4.2,1 5,0 C5.6,2 6.5,6 7,12 C7.8,40 8,72 8,100 Z" />
+      </symbol>
+      <symbol id="grass-blade-b" viewBox="-3 0 16 100">
+        <path class="grass-blade__shape" d="M2,100 C2.5,68 1,38 -1,14 C-1.8,8 -1.5,2 -1,0 C0.5,2 3,6 4.5,14 C6.5,42 7.5,72 8,100 Z" />
+      </symbol>
+      <symbol id="grass-blade-c" viewBox="-3 0 16 100">
+        <path class="grass-blade__shape" d="M2,100 C2.2,70 3.5,42 5.5,18 C6.5,10 8,4 9.5,0 C10,3 10.5,8 10,16 C9,44 8.5,72 8,100 Z" />
+      </symbol>
 
       <symbol id="prop-bush" viewBox="0 0 80 60">
         <ellipse class="prop-bush__shadow" cx="40" cy="58" rx="30" ry="4" />
@@ -565,7 +607,6 @@
         </g>
       </svg>
 
-      <!-- Version 13 — 2 more clouds for natural spacing/variety -->
       <svg class="sky__cloud sky__cloud--4" viewBox="0 0 200 90" focusable="false">
         <g fill="#ffffff" opacity="0.75">
           <ellipse cx="45" cy="50" rx="40" ry="22" />
@@ -606,14 +647,6 @@
       </div>
     </div>
 
-    <!-- ============================================= -->
-    <!-- MEADOW — Version 13: single flat field.        -->
-    <!-- No terrain shapes, no depth layers. The green    -->
-    <!-- comes purely from the .sky gradient behind this  -->
-    <!-- transparent box; grass/flowers/props/creatures    -->
-    <!-- all sit in ONE container, so nothing here can     -->
-    <!-- hide behind a "closer" layer — there isn't one.    -->
-    <!-- ============================================= -->
     <div class="meadow" id="meadow">
       <div class="meadow__field" id="meadowField">
         <div class="creature-layer" id="creatureLayer"></div>
