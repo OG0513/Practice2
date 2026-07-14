@@ -90,15 +90,8 @@ button {
 }
 
 /* =====================================================
-   3. ILLUSTRATED WORLD — Seamless Sky-to-Meadow (Version 13)
-   -----------------------------------------------------
-   One continuous vertical gradient does the entire "sky
-   fading into ground" job — no terrain shapes, no hard
-   horizon line, no depth layers. .meadow is a transparent
-   stage sitting in front of it; grass/flowers/props all
-   live in ONE flat container (.meadow__field), so nothing
-   can be hidden behind a "closer" layer, because there
-   isn't one anymore.
+   3. ILLUSTRATED WORLD — Seamless Meadow (Version 14:
+   neon flowers + individually-instanced grass blades)
 ===================================================== */
 .flower-sprite-defs {
   position: absolute;
@@ -119,9 +112,6 @@ button {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  /* Six stops = sky blue -> lighter horizon -> lush green, blended with
-     no visible seam. The "ground" color IS this gradient; nothing paints
-     over it anymore. */
   background: linear-gradient(
     180deg,
     #a8d8f0 0%,
@@ -271,7 +261,7 @@ body.is-night .sky__stars {
   50% { opacity: 1; }
 }
 
-/* --- Meadow: one flat field, no depth layers --- */
+/* --- Meadow: one flat field --- */
 .meadow {
   position: absolute;
   left: -6%;
@@ -286,43 +276,47 @@ body.is-night .sky__stars {
   inset: 0;
 }
 
-/* --- Grass: one flat strip, bands of varied height sharing one bottom
-   edge, alternating between the two pattern tiles above --- */
-.grass-strip {
+/* --- Grass (Version 14): individually-instanced blades ---
+   Real flat-base/single-tip geometry (see the 3 symbols in
+   index.html). Each blade is its own root <svg>, positioned/
+   scaled/tinted independently — same pattern as flowers and
+   props, not a tiled pattern anymore. */
+.garden-grass-blade {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 82%;
-  overflow: hidden;
+  bottom: -1%;
+  width: clamp(5px, 1vw, 12px);
+  height: auto;
+  transform-origin: bottom center;
+  transform:
+    skewX(calc(var(--wind-angle) * var(--blade-sway-mult, 1.1)))
+    rotate(var(--blade-lean, 0deg))
+    scaleX(var(--blade-width-scale, 1))
+    scaleY(var(--blade-height-scale, 1));
+  transition-property: transform, filter;
+  transition-timing-function: ease-out;
+  transition-duration: 0.3s, 1.8s;
+  transition-delay: var(--blade-delay, 0s), 0s;
+  opacity: var(--blade-opacity, 1);
+  filter:
+    hue-rotate(var(--blade-hue, 0deg))
+    brightness(var(--blade-brightness, 1))
+    saturate(var(--blade-saturate, 1));
   pointer-events: none;
 }
 
-.grass-band {
-  fill: var(--grass-fill, url(#grassBladePattern));
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  transform: skewX(calc(var(--wind-angle) * var(--grass-sway-mult, 1.2)));
-  transition-property: transform, filter;
-  transition-timing-function: ease-out;
-  transition-duration: 0.35s, 1.8s;
-  transition-delay: var(--grass-band-delay, 0s), 0s;
+body.is-night .garden-grass-blade {
   filter:
-    brightness(var(--grass-brightness-day, 1))
-    saturate(var(--grass-saturate-day, 1))
-    hue-rotate(0deg);
+    hue-rotate(calc(var(--blade-hue, 0deg) + 112deg))
+    brightness(calc(var(--blade-brightness, 1) * 0.32))
+    saturate(calc(var(--blade-saturate, 1) * 0.6));
 }
 
-body.is-night .grass-band {
-  filter:
-    brightness(calc(var(--grass-brightness-day, 1) * 0.34))
-    saturate(calc(var(--grass-saturate-day, 1) * 0.65))
-    hue-rotate(116deg);
+.grass-blade__shape {
+  fill: url(#grassBladeShadeGradient);
 }
 
-/* --- Procedural flowers (species geometry unchanged since Version 12 —
-   none of this ever depended on layers) --- */
+/* --- Procedural flowers (Version 14: neon palettes + real
+   independent sway phase via bloomNod + shine glaze) --- */
 .garden-flower {
   position: absolute;
   bottom: 4%;
@@ -340,9 +334,19 @@ body.is-night .grass-band {
   transform-origin: 20px 100px;
 }
 
+/* The bloom now animates independently ON TOP of the wind-driven parent
+   transform above — each flower gets its own amplitude/duration/delay
+   (--nod-*), so the field never sways in lockstep even though every
+   flower shares the same underlying wind engine. */
 .garden-flower__bloom {
-  transform: rotate(var(--bloom-rotation, 0deg));
   transform-origin: 0 0;
+  animation: bloomNod var(--nod-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--nod-delay, 0s);
+}
+
+@keyframes bloomNod {
+  0%, 100% { transform: rotate(calc(var(--bloom-rotation, 0deg) - var(--nod-amplitude, 3deg))); }
+  50% { transform: rotate(calc(var(--bloom-rotation, 0deg) + var(--nod-amplitude, 3deg))); }
 }
 
 .garden-flower__stem {
@@ -364,11 +368,25 @@ body.is-night .grass-band {
 }
 
 body.is-night .garden-flower__petal {
-  filter: drop-shadow(0 0 7px var(--glow-color, transparent)) brightness(1.25);
+  filter: drop-shadow(0 0 8px var(--glow-color, transparent)) brightness(1.3);
 }
 
 .garden-flower__center {
   fill: var(--center-color, #f5c66b);
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+  transition: filter 1.6s ease;
+}
+
+body.is-night .garden-flower__center {
+  filter: drop-shadow(0 0 5px var(--glow-color, rgba(255, 255, 255, 0.6)));
+}
+
+/* Shared glossy glaze — see #petalShineGradient in index.html. Same
+   fixed white gradient on every flower; only the solid color underneath
+   (--petal-color) varies per instance. */
+.garden-flower__shine {
+  fill: url(#petalShineGradient);
+  pointer-events: none;
 }
 
 .garden-flower__glow-wrap {
@@ -388,13 +406,13 @@ body.is-night .garden-flower__glow-wrap {
 }
 
 .garden-flower__glow--outer {
-  --glow-pulse-min: 0.18;
-  --glow-pulse-max: 0.5;
+  --glow-pulse-min: 0.22;
+  --glow-pulse-max: 0.55;
 }
 
 .garden-flower__glow--inner {
-  --glow-pulse-min: 0.45;
-  --glow-pulse-max: 0.9;
+  --glow-pulse-min: 0.5;
+  --glow-pulse-max: 0.95;
 }
 
 @keyframes flowerGlowPulse {
@@ -402,7 +420,21 @@ body.is-night .garden-flower__glow-wrap {
   50% { opacity: var(--glow-pulse-max, 0.75); }
 }
 
-/* --- Garden props: unchanged, never depended on layers --- */
+/* Ground glow pool — "flowers softly illuminate nearby grass," done as
+   a soft light pool at each flower's base. Invisible by day, fades in
+   at night alongside the bloom's own glow. */
+.garden-flower__ground-glow {
+  fill: var(--glow-color, transparent);
+  filter: url(#softGlowBlur);
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+body.is-night .garden-flower__ground-glow {
+  opacity: 0.55;
+}
+
+/* --- Garden props: unchanged --- */
 .garden-prop {
   position: absolute;
   bottom: 2%;
@@ -611,9 +643,9 @@ body.is-night .garden-prop {
 .hero {
   position: relative;
   z-index: 1;
-  width: min(100%, 520px); /* Version 13: further reduced (was 580px in V11) */
+  width: min(100%, 520px);
   text-align: center;
-  padding: var(--space-sm) var(--space-md); /* Version 13: vertical padding trimmed further */
+  padding: var(--space-sm) var(--space-md);
   border-radius: clamp(24px, 4vw, 40px);
   margin-bottom: clamp(100px, 18vh, 220px);
 
