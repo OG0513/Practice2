@@ -3,9 +3,7 @@
    Version 14: Neon-rendered flowers (all 11 species) +
    flat-base/single-tip grass, individually instanced
 ===================================================== */
-
 'use strict';
-
 /* -----------------------------------------------------
    1. CONFIG — Personalize the celebration here
 ----------------------------------------------------- */
@@ -736,6 +734,7 @@ function createFlowerInstance(clusterCenters) {
   el.style.setProperty('--bloom-rotation', `${bloomRotation}deg`);
   el.style.setProperty('--stem-lean', `${stemLean}deg`);
   el.style.setProperty('--petal-color', colorway.petal);
+  el.style.setProperty('--petal-color-night', colorway.petalNight || colorway.petal);
   if (colorway.center) {
     el.style.setProperty('--center-color', colorway.center);
   }
