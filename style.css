@@ -31,8 +31,6 @@
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --wind-angle: -6deg;
-  --wind-strength: 0.4;
   --light-progress: 0;
   --sun-color: #fff1d0;
   --ambient-color: rgba(255, 233, 184, 0.35);
@@ -90,16 +88,8 @@ button {
 }
 
 /* =====================================================
-   3. ILLUSTRATED WORLD — Seamless Meadow (Version 14:
-   neon flowers + individually-instanced grass blades)
+   3. ILLUSTRATED WORLD — Sky Only
 ===================================================== */
-.flower-sprite-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-
 .world {
   position: fixed;
   inset: 0;
@@ -261,7 +251,7 @@ body.is-night .sky__stars {
   50% { opacity: 1; }
 }
 
-/* --- Meadow: one flat field --- */
+/* --- Meadow: empty placeholder --- */
 .meadow {
   position: absolute;
   left: -6%;
@@ -276,303 +266,11 @@ body.is-night .sky__stars {
   inset: 0;
 }
 
-/* --- Grass (Version 14): individually-instanced blades ---
-   Real flat-base/single-tip geometry (see the 3 symbols in
-   index.html). Each blade is its own root <svg>, positioned/
-   scaled/tinted independently — same pattern as flowers and
-   props, not a tiled pattern anymore. */
-.garden-grass-blade {
-  position: absolute;
-  bottom: -1%;
-  width: clamp(5px, 1vw, 12px);
-  height: auto;
-  transform-origin: bottom center;
-  transform:
-    skewX(calc(var(--wind-angle) * var(--blade-sway-mult, 1.1)))
-    rotate(var(--blade-lean, 0deg))
-    scaleX(var(--blade-width-scale, 1))
-    scaleY(var(--blade-height-scale, 1));
-  transition-property: transform, filter;
-  transition-timing-function: ease-out;
-  transition-duration: 0.3s, 1.8s;
-  transition-delay: var(--blade-delay, 0s), 0s;
-  opacity: var(--blade-opacity, 1);
-  filter:
-    hue-rotate(var(--blade-hue, 0deg))
-    brightness(var(--blade-brightness, 1))
-    saturate(var(--blade-saturate, 1));
-  pointer-events: none;
-}
-
-body.is-night .garden-grass-blade {
-  filter:
-    hue-rotate(calc(var(--blade-hue, 0deg) + 112deg))
-    brightness(calc(var(--blade-brightness, 1) * 0.32))
-    saturate(calc(var(--blade-saturate, 1) * 0.6));
-}
-
-.grass-blade__shape {
-  fill: url(#grassBladeShadeGradient);
-}
-
-/* --- Procedural flowers (Version 14: neon palettes + real
-   independent sway phase via bloomNod + shine glaze) --- */
-.garden-flower {
-  position: absolute;
-  bottom: 4%;
-  width: clamp(22px, 5.5vw, 42px);
-  height: auto;
-  transform-origin: bottom center;
-  transform: rotate(calc(var(--wind-angle) * var(--sway-mult, 0.6))) scale(var(--flower-scale, 1));
-  transition-property: transform;
-  transition-timing-function: ease-out;
-  filter: drop-shadow(0 4px 6px rgba(80, 60, 40, 0.12));
-}
-
-.garden-flower__stem-group {
-  transform: rotate(var(--stem-lean, 0deg));
-  transform-origin: 20px 100px;
-}
-
-/* The bloom now animates independently ON TOP of the wind-driven parent
-   transform above — each flower gets its own amplitude/duration/delay
-   (--nod-*), so the field never sways in lockstep even though every
-   flower shares the same underlying wind engine. */
-.garden-flower__bloom {
-  transform-origin: 0 0;
-  animation: bloomNod var(--nod-duration, 4s) ease-in-out infinite;
-  animation-delay: var(--nod-delay, 0s);
-}
-
-@keyframes bloomNod {
-  0%, 100% { transform: rotate(calc(var(--bloom-rotation, 0deg) - var(--nod-amplitude, 3deg))); }
-  50% { transform: rotate(calc(var(--bloom-rotation, 0deg) + var(--nod-amplitude, 3deg))); }
-}
-
-.garden-flower__stem {
-  fill: none;
-  stroke: #6b8f5a;
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.garden-flower__leaf {
-  fill: #7ea968;
-}
-
-.garden-flower__petal {
-  /* Version 15: fill now transitions too — day color is the soft, pastel
-     --petal-color; night crossfades to the vivid --petal-color-night.
-     "fill" is a genuinely animatable CSS color property, so this fades
-     smoothly over the same 1.6s window as everything else at night. */
-  fill: var(--petal-color, #ff8fab);
-  opacity: 0.95;
-  transition: fill 1.6s ease, filter 1.6s ease;
-  filter: drop-shadow(0 0 0px transparent) brightness(1);
-}
-
-body.is-night .garden-flower__petal {
-  fill: var(--petal-color-night, var(--petal-color, #ff8fab));
-  filter: drop-shadow(0 0 8px var(--glow-color, transparent)) brightness(1.3);
-}
-
-.garden-flower__center {
-  fill: var(--center-color, #f5c66b);
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
-  transition: filter 1.6s ease;
-}
-
-body.is-night .garden-flower__center {
-  filter: drop-shadow(0 0 5px var(--glow-color, rgba(255, 255, 255, 0.6)));
-}
-
-/* Shared glossy glaze — see #petalShineGradient in index.html. Same
-   fixed white gradient on every flower; only the solid color underneath
-   (--petal-color) varies per instance. */
-/* Version 16: dark rim-shade — sits BELOW the shine, ABOVE the flat
-   petal color, giving every bloom a genuine light-center/darker-rim
-   read. Colorless (uses the shared #petalRimShadeGradient), so it
-   needs no per-instance variation and script.js is untouched. */
-.garden-flower__rimshade {
-  fill: url(#petalRimShadeGradient);
-  pointer-events: none;
-}
-
-.garden-flower__shine {
-  fill: url(#petalShineGradient);
-  pointer-events: none;
-}
-
-/* Version 16: small bright dot suggesting light catching each flower's
-   centre — applied only where a species has a clear single focal
-   centre (wildflower, rose, daisy, sunflower, poppy). */
-.garden-flower__center-highlight {
-  fill: rgba(255, 255, 255, 0.65);
-  pointer-events: none;
-}
-
-.garden-flower__glow-wrap {
-  opacity: 0;
-  transition: opacity 1.6s ease;
-}
-
-body.is-night .garden-flower__glow-wrap {
-  opacity: 1;
-}
-
-.garden-flower__glow {
-  fill: var(--glow-color, transparent);
-  filter: url(#softGlowBlur);
-  animation: flowerGlowPulse var(--glow-pulse-duration, 3s) ease-in-out infinite;
-  animation-delay: var(--glow-pulse-delay, 0s);
-}
-
-.garden-flower__glow--outer {
-  --glow-pulse-min: 0.22;
-  --glow-pulse-max: 0.55;
-}
-
-.garden-flower__glow--inner {
-  --glow-pulse-min: 0.5;
-  --glow-pulse-max: 0.95;
-}
-
-@keyframes flowerGlowPulse {
-  0%, 100% { opacity: var(--glow-pulse-min, 0.3); }
-  50% { opacity: var(--glow-pulse-max, 0.75); }
-}
-
-/* Ground glow pool — "flowers softly illuminate nearby grass," done as
-   a soft light pool at each flower's base. Invisible by day, fades in
-   at night alongside the bloom's own glow. */
-.garden-flower__ground-glow {
-  fill: var(--glow-color, transparent);
-  filter: url(#softGlowBlur);
-  opacity: 0;
-  transition: opacity 1.6s ease;
-}
-
-body.is-night .garden-flower__ground-glow {
-  opacity: 0.55;
-}
-
-/* --- Garden props: unchanged --- */
-.garden-prop {
-  position: absolute;
-  bottom: 2%;
-  height: auto;
-  transform-origin: bottom center;
-  transform: scale(var(--prop-scale, 1)) rotate(var(--prop-rotation, 0deg));
-  filter: drop-shadow(0 3px 5px rgba(60, 45, 30, 0.15)) brightness(1) saturate(1) hue-rotate(0deg);
-  transition: filter 1.8s ease;
-  pointer-events: none;
-}
-
-body.is-night .garden-prop {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 15, 0.4)) brightness(0.3) saturate(0.55) hue-rotate(112deg);
-}
-
-.garden-prop--sways {
-  transform: scale(var(--prop-scale, 1)) rotate(calc(var(--wind-angle) * var(--prop-sway-mult, 0.6)));
-  transition: transform 0.4s ease-out;
-}
-
-.garden-prop--bush { width: clamp(34px, 7vw, 64px); }
-.garden-prop--fern { width: clamp(20px, 4.5vw, 42px); }
-.garden-prop--mushroom { width: clamp(14px, 3vw, 24px); }
-.garden-prop--stone { width: clamp(18px, 4vw, 34px); }
-.garden-prop--log { width: clamp(28px, 6vw, 58px); }
-
-.prop-bush__foliage { fill: var(--bush-color, #5a9c46); }
-.prop-bush__accent { fill: var(--bush-accent, #7ec95e); opacity: 0.7; }
-.prop-bush__shadow { fill: rgba(60, 45, 30, 0.15); }
-
-.prop-fern__fronds {
-  stroke: var(--fern-color, #3f7a35);
-  stroke-width: 2.5;
-  stroke-dasharray: 1.5 2.5;
-}
-
-.prop-mushroom__cap { fill: var(--mushroom-cap, #d1524a); }
-.prop-mushroom__stem { fill: #f3e6d8; }
-.prop-mushroom__spot { fill: #fff8ee; opacity: 0.9; }
-.prop-mushroom__shadow { fill: rgba(60, 45, 30, 0.18); }
-
-.prop-stone__body { fill: var(--stone-color, #9a9086); }
-.prop-stone__highlight { stroke: rgba(255, 255, 255, 0.4); stroke-width: 2; fill: none; stroke-linecap: round; }
-.prop-stone__shadow { fill: rgba(60, 45, 30, 0.18); }
-
-.prop-log__body { fill: var(--log-color, #8a6141); }
-.prop-log__end { fill: var(--log-end-color, #a9825c); }
-.prop-log__ring { fill: none; stroke: rgba(90, 60, 30, 0.35); stroke-width: 1.3; }
-.prop-log__shadow { fill: rgba(60, 45, 30, 0.18); }
-
-/* --- Creature layer: butterflies + fireflies (unchanged) --- */
 .creature-layer {
   position: absolute;
   inset: 0 0 20% 0;
   pointer-events: none;
   z-index: 2;
-}
-
-.butterfly {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: clamp(26px, 5vw, 40px);
-  height: auto;
-  will-change: transform;
-}
-
-.butterfly svg {
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.butterfly__wing {
-  fill: var(--wing-color, #ff8fab);
-  opacity: 0.92;
-  transform-box: fill-box;
-  animation: wingFlap 0.42s ease-in-out infinite;
-}
-
-.butterfly__wing--left { transform-origin: 100% 50%; }
-.butterfly__wing--right { transform-origin: 0% 50%; animation-duration: 0.4s; }
-
-@keyframes wingFlap {
-  0%, 100% { transform: scaleX(1); }
-  50% { transform: scaleX(0.3); }
-}
-
-.butterfly.is-resting .butterfly__wing {
-  animation-duration: 1.6s;
-}
-
-.butterfly__body {
-  fill: #4a3b52;
-}
-
-.firefly {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--firefly-size, 6px);
-  height: var(--firefly-size, 6px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff6c8, #f5c66b 60%, transparent 100%);
-  box-shadow: 0 0 6px 2px rgba(245, 198, 107, 0.6);
-  transform: translate(0, 0);
-  opacity: 0;
-  transition: transform var(--move-duration, 4s) ease-in-out, opacity 0.4s ease;
-  animation: fireflyBlink var(--blink-duration, 2.4s) ease-in-out infinite;
-  animation-delay: var(--blink-delay, 0s);
-  will-change: transform, opacity;
-}
-
-@keyframes fireflyBlink {
-  0%, 100% { opacity: var(--blink-min, 0.25); }
-  50% { opacity: var(--blink-max, 0.95); }
 }
 
 /* =====================================================
@@ -650,12 +348,10 @@ body.is-night .garden-prop {
 
 @keyframes floatDrift {
   0%, 100% {
-    transform: translateY(0) rotate(calc(var(--wind-angle) * 0.4));
+    transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform:
-      translateY(calc(-14px - (var(--wind-strength) * 10px)))
-      rotate(calc(var(--wind-angle) * 0.4 + 6deg));
+    transform: translateY(-14px) rotate(6deg);
   }
 }
 
@@ -936,24 +632,6 @@ body.is-night .garden-prop {
   min-height: 1.4em;
 }
 
-.scene__header {
-  text-align: center;
-  margin-bottom: var(--space-md);
-}
-
-.scene__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.4rem, 4.5vw, 2.1rem);
-  color: var(--color-text-dark);
-  margin-bottom: var(--space-xs);
-}
-
-.scene__lead {
-  font-size: clamp(0.85rem, 2vw, 1rem);
-  color: var(--color-text-soft);
-}
-
 /* =====================================================
    9. BIRTHDAY CARD (Interactive Object)
 ===================================================== */
@@ -1000,676 +678,191 @@ body.is-night .garden-prop {
 .greeting-card__message {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
-}
-
-.greeting-card.is-open .greeting-card__message {
-  opacity: 1;
-  transform: translateY(0);
+  gap: var(--space-md);
 }
 
 .greeting-card__greeting {
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
-  font-weight: 600;
-  color: var(--color-rose);
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-weight: 500;
+  color: var(--color-text-dark);
 }
 
 .greeting-card__body {
-  font-size: clamp(0.9rem, 2.2vw, 1.05rem);
-  color: var(--color-text-dark);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: var(--color-text-soft);
   line-height: 1.8;
 }
 
 .greeting-card__signature {
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(1rem, 2.6vw, 1.2rem);
-  color: var(--color-purple-light);
-  margin-top: var(--space-xs);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: var(--color-rose);
+  font-weight: 500;
+  margin-top: var(--space-md);
 }
 
 .greeting-card__close {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 44px;
-  height: 44px;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 1rem;
-  color: var(--color-text-soft);
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease 0.3s, background 0.25s ease, color 0.25s ease;
-}
-
-.greeting-card.is-open .greeting-card__close {
-  opacity: 1;
-  pointer-events: auto;
+  background: rgba(245, 198, 107, 0.15);
+  color: var(--color-text-dark);
+  font-size: 1.2rem;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .greeting-card__close:hover,
 .greeting-card__close:focus-visible {
-  background: var(--color-rose);
-  color: var(--color-white);
+  background: rgba(245, 198, 107, 0.3);
+  transform: scale(1.1);
+}
+
+.greeting-card__close:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
 }
 
 .greeting-card__cover {
   position: absolute;
   inset: 0;
-  z-index: 2;
-  border-radius: clamp(16px, 3vw, 24px);
-  transform-origin: left center;
-  backface-visibility: hidden;
-  background: linear-gradient(160deg, var(--color-pink), var(--color-rose) 60%, var(--color-purple-light));
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 20px 50px rgba(180, 140, 180, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  transition: transform 1.1s var(--ease-smooth);
+  gap: var(--space-md);
+  border-radius: clamp(16px, 3vw, 24px);
+  background: linear-gradient(135deg, var(--color-lavender), var(--color-sky));
+  border: 1px solid rgba(245, 198, 107, 0.4);
+  backdrop-filter: blur(8px);
+  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.8s ease;
+  transform-style: preserve-3d;
 }
 
-.greeting-card__cover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(90deg, transparent 46%, rgba(255, 255, 255, 0.5) 50%, transparent 54%);
-  opacity: 0.6;
+.greeting-card.is-open .greeting-card__cover {
+  transform: rotateY(180deg);
+  opacity: 0;
   pointer-events: none;
 }
 
 .greeting-card__seal {
-  font-size: clamp(2.2rem, 8vw, 3.2rem);
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.15));
-  animation: sealBob 3.5s ease-in-out infinite;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  animation: sealBounce 2s ease-in-out infinite;
 }
 
-@keyframes sealBob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(-4deg); }
+@keyframes sealBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 .greeting-card__cover-title {
   font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
   font-weight: 700;
-  font-size: clamp(1.3rem, 4.5vw, 1.9rem);
-  color: var(--color-white);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.greeting-card__cover-hint {
-  font-size: clamp(0.75rem, 2vw, 0.85rem);
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.05em;
-  animation: hintPulse 2.2s ease-in-out infinite;
-}
-
-@keyframes hintPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.greeting-card:not(.is-open):hover .greeting-card__cover,
-.greeting-card:not(.is-open):focus-visible .greeting-card__cover {
-  transform: rotateY(-8deg) scale(1.02);
-}
-
-.greeting-card.is-open .greeting-card__cover {
-  transform: rotateY(-150deg);
-  box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* =====================================================
-   10. GIFT BOXES (Interactive Object)
-===================================================== */
-.scene--gifts {
-  gap: var(--space-md);
-}
-
-.gift-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-  gap: var(--space-md);
-  justify-items: center;
-}
-
-.gift {
-  position: relative;
-  width: 100%;
-  max-width: 260px;
-  aspect-ratio: 1 / 1;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  border-radius: clamp(16px, 3vw, 22px);
-}
-
-.gift.is-open {
-  cursor: default;
-}
-
-.gift:focus-visible {
-  outline: 3px solid var(--color-gold);
-  outline-offset: 6px;
-  border-radius: clamp(16px, 3vw, 22px);
-}
-
-.gift__reveal {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: clamp(16px, 3vw, 22px);
-  background: linear-gradient(160deg, #fffdf9, var(--color-cream));
-  border: 1px solid rgba(245, 198, 107, 0.35);
-  box-shadow: 0 16px 40px var(--glass-shadow);
-  padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
+  color: var(--color-text-dark);
   text-align: center;
 }
 
-.gift__reveal-emoji {
-  font-size: clamp(2rem, 8vw, 2.6rem);
-  opacity: 0;
-  transform: scale(0.6) translateY(8px);
-  transition: opacity 0.6s var(--ease-bounce) 0.55s, transform 0.6s var(--ease-bounce) 0.55s;
+.greeting-card__cover-hint {
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  color: var(--color-text-soft);
+  text-align: center;
+  animation: hintBlink 2s ease-in-out infinite;
 }
 
-.gift.is-open .gift__reveal-emoji {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  animation: giftEmojiPop 2.6s ease-in-out infinite 1.2s;
-}
-
-@keyframes giftEmojiPop {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.06); }
-}
-
-.gift__reveal-text {
-  font-size: clamp(0.82rem, 2.1vw, 0.95rem);
-  color: var(--color-text-dark);
-  line-height: 1.6;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.6s ease 0.7s, transform 0.6s ease 0.7s;
-}
-
-.gift.is-open .gift__reveal-text {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.gift__box {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: clamp(16px, 3vw, 22px);
-  background: var(--gift-box, var(--color-rose));
-  box-shadow: 0 16px 40px rgba(180, 140, 180, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  transition: transform 0.7s var(--ease-smooth) 0.1s, opacity 0.5s ease 0.1s;
-  transform-origin: center bottom;
-}
-
-.gift__lid {
-  position: absolute;
-  inset: 0 0 55% 0;
-  background: var(--gift-lid, var(--color-pink));
-  border-radius: clamp(16px, 3vw, 22px) clamp(16px, 3vw, 22px) 8px 8px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: var(--space-xs);
-  transform-origin: top center;
-  transition: transform 0.8s var(--ease-bounce) 0.15s, opacity 0.5s ease 0.4s;
-}
-
-.gift__bow {
-  font-size: clamp(1.6rem, 6vw, 2.1rem);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-  animation: bowSway 3.2s ease-in-out infinite;
-}
-
-@keyframes bowSway {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-8deg); }
-}
-
-.gift__ribbon {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.55);
-  z-index: 1;
-}
-
-.gift__ribbon--v {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 14%;
-  transform: translateX(-50%);
-}
-
-.gift__ribbon--h {
-  left: 0;
-  right: 0;
-  top: 38%;
-  height: 12%;
-}
-
-.gift:not(.is-open):hover .gift__box,
-.gift:not(.is-open):focus-visible .gift__box {
-  animation: giftJiggle 0.5s ease-in-out;
-}
-
-@keyframes giftJiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-2deg); }
-  75% { transform: rotate(2deg); }
-}
-
-.gift.is-open .gift__lid {
-  transform: rotateX(-115deg) translateY(-6px);
-  opacity: 0;
-}
-
-.gift.is-open .gift__box {
-  transform: scale(1.06);
-  opacity: 0;
-  pointer-events: none;
+@keyframes hintBlink {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 /* =====================================================
-   11. CONFETTI BURST (Reusable Celebration Effect)
+   10. CONFETTI
 ===================================================== */
 .confetti-layer {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 10;
   pointer-events: none;
   overflow: hidden;
 }
 
 .confetti-piece {
   position: absolute;
-  top: -5%;
-  width: 8px;
-  height: 14px;
-  opacity: 0.95;
-  animation: confettiFall linear forwards;
+  bottom: 0;
+  animation: confettiFall var(--confetti-duration, 3s) ease-out forwards;
 }
 
 @keyframes confettiFall {
   0% {
-    transform: translate(0, 0) rotate(0deg);
     opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg);
   }
   100% {
-    transform: translate(var(--confetti-drift, 0px), 110vh) rotate(var(--confetti-spin, 360deg));
-    opacity: 0.3;
+    opacity: 0;
+    transform: translateY(-100vh) translateX(var(--confetti-drift, 0px)) rotate(var(--confetti-spin, 0deg));
   }
 }
 
 /* =====================================================
-   12. CAKE & CANDLES (Interactive Object)
-===================================================== */
-.scene--cake {
-  gap: var(--space-md);
-}
-
-.cake-wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.cake {
-  position: relative;
-  width: min(100%, 280px);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  border-radius: clamp(16px, 3vw, 22px);
-  padding: var(--space-xs);
-}
-
-.cake.is-lit {
-  cursor: default;
-}
-
-.cake:focus-visible {
-  outline: 3px solid var(--color-gold);
-  outline-offset: 6px;
-  border-radius: clamp(16px, 3vw, 22px);
-}
-
-.cake__body {
-  position: relative;
-  transition: transform 0.4s var(--ease-smooth);
-}
-
-.cake:not(.is-lit):hover .cake__body,
-.cake:not(.is-lit):focus-visible .cake__body {
-  transform: translateY(-4px);
-}
-
-.cake__candles {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: clamp(6px, 2vw, 14px);
-  margin-bottom: clamp(-6px, -1vw, -2px);
-  position: relative;
-  z-index: 1;
-}
-
-.candle {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  width: clamp(6px, 1.6vw, 10px);
-}
-
-.candle__stick {
-  width: 100%;
-  height: calc(clamp(20px, 6vw, 34px) * var(--candle-scale, 1));
-  background: linear-gradient(180deg, var(--candle-color, var(--color-gold)), var(--color-white));
-  border-radius: 3px;
-  box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.12);
-}
-
-.candle__wick {
-  width: 2px;
-  height: 6px;
-  background: #5a4632;
-  border-radius: 1px;
-}
-
-.candle__flame {
-  position: relative;
-  width: clamp(8px, 2.2vw, 12px);
-  height: clamp(12px, 3.2vw, 18px);
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: radial-gradient(circle at 50% 70%, #fff6d6, var(--color-gold) 55%, #ff9248 90%);
-  opacity: 0;
-  transform: scaleY(0.3);
-  transform-origin: bottom center;
-  transition: opacity 0.5s ease;
-}
-
-.candle__flame::before {
-  content: '';
-  position: absolute;
-  inset: -70%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 198, 107, 0.55), transparent 70%);
-  filter: blur(4px);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.candle__flame::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(140, 140, 150, 0.5), transparent 70%);
-  border-radius: 50%;
-  filter: blur(2px);
-  opacity: 0;
-  transform: translate(-50%, 0) scale(0.4);
-}
-
-.cake.is-lit .candle__flame {
-  opacity: 1;
-  animation: flameFlicker 0.7s ease-in-out infinite;
-}
-
-.cake.is-lit .candle__flame::before {
-  opacity: 1;
-}
-
-@keyframes flameFlicker {
-  0%, 100% { transform: scaleY(1) scaleX(1) rotate(0deg); }
-  25% { transform: scaleY(1.08) scaleX(0.94) rotate(-2deg); }
-  50% { transform: scaleY(0.93) scaleX(1.05) rotate(2deg); }
-  75% { transform: scaleY(1.05) scaleX(0.96) rotate(-1deg); }
-}
-
-.cake.is-puffing .candle__flame {
-  animation: flamePuff 0.5s ease-out forwards;
-}
-
-.cake.is-puffing .candle__flame::after {
-  animation: smokeWisp 0.6s ease-out forwards;
-}
-
-@keyframes flamePuff {
-  0% { transform: scaleY(1) scaleX(1); opacity: 1; }
-  40% { transform: scaleY(1.6) scaleX(0.6) translateY(-6px); opacity: 0.6; }
-  100% { transform: scaleY(0.2) scaleX(0.4) translateY(-14px); opacity: 0; }
-}
-
-@keyframes smokeWisp {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(0.4); }
-  30% { opacity: 0.6; }
-  100% { opacity: 0; transform: translate(-50%, -18px) scale(1.3); }
-}
-
-.cake__tier {
-  position: relative;
-  margin-inline: auto;
-  border-radius: 16px 16px 8px 8px;
-}
-
-.cake__tier--top {
-  width: 62%;
-  height: clamp(52px, 15vw, 74px);
-  background: linear-gradient(180deg, var(--color-lavender), var(--color-purple-light));
-  z-index: 1;
-}
-
-.cake__tier--bottom {
-  width: 100%;
-  height: clamp(68px, 19vw, 96px);
-  background: linear-gradient(180deg, var(--color-pink), var(--color-rose));
-}
-
-.cake__drip {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -7px;
-  height: 14px;
-  background-image: radial-gradient(circle at 10px 0, var(--drip-color, var(--color-gold)) 7px, transparent 8px);
-  background-size: 20px 14px;
-  background-repeat: repeat-x;
-}
-
-.cake__tier--top .cake__drip {
-  --drip-color: var(--color-cream);
-}
-
-.cake__tier--bottom .cake__drip {
-  --drip-color: var(--color-gold);
-}
-
-.cake__sprinkle {
-  position: absolute;
-  top: 32%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.cake__sprinkle.s1 { left: 18%; background: var(--color-gold); }
-.cake__sprinkle.s2 { left: 40%; top: 55%; background: var(--color-white); }
-.cake__sprinkle.s3 { left: 62%; background: var(--color-rose); }
-.cake__sprinkle.s4 { left: 80%; top: 48%; background: var(--color-gold); }
-
-.cake__plate {
-  width: 112%;
-  margin-inline: auto;
-  height: clamp(12px, 3.5vw, 18px);
-  border-radius: 50%;
-  background: linear-gradient(180deg, var(--color-white), #f2e9f7);
-  box-shadow: 0 12px 28px var(--glass-shadow), inset 0 2px 3px rgba(255, 255, 255, 0.8);
-}
-
-.cake__message {
-  min-height: 2.6em;
-  max-width: 42ch;
-  text-align: center;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
-  color: var(--color-rose);
-}
-
-/* =====================================================
-   13. CELESTIAL TOGGLE
+   11. CELESTIAL TOGGLE
 ===================================================== */
 .celestial-toggle {
   position: fixed;
-  top: clamp(12px, 3vw, 20px);
-  right: clamp(12px, 3vw, 20px);
-  z-index: 15;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 100;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   color: var(--color-text-dark);
-  opacity: 0.5;
-  box-shadow: 0 4px 14px rgba(120, 90, 90, 0.18);
-  transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
 .celestial-toggle:hover,
 .celestial-toggle:focus-visible {
-  opacity: 1;
-  transform: scale(1.07);
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
 }
 
 .celestial-toggle:focus-visible {
-  outline: 3px solid var(--color-gold);
-  outline-offset: 3px;
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
 }
 
-.celestial-toggle__sun,
-.celestial-toggle__moon {
+.celestial-toggle svg {
+  width: 24px;
+  height: 24px;
   position: absolute;
-  width: 22px;
-  height: 22px;
-  transition: opacity 1.6s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.celestial-toggle__sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
 
 .celestial-toggle__moon {
   opacity: 0;
+  transform: scale(0.8) rotate(-180deg);
 }
 
 body.is-night .celestial-toggle__sun {
   opacity: 0;
+  transform: scale(0.8) rotate(180deg);
 }
 
 body.is-night .celestial-toggle__moon {
   opacity: 1;
-}
-
-body.is-night .celestial-toggle {
-  background: rgba(30, 30, 60, 0.55);
-  color: #f4f2ec;
-}
-
-/* =====================================================
-   14. RESPONSIVE BREAKPOINTS
-===================================================== */
-
-@media (max-width: 359px) {
-  .hero {
-    padding: var(--space-sm) var(--space-sm);
-    border-radius: 20px;
-  }
-
-  .greeting-card__inside {
-    padding: var(--space-md) var(--space-sm) var(--space-sm);
-  }
-
-  .gift-row {
-    grid-template-columns: 1fr;
-    max-width: 260px;
-    margin-inline: auto;
-  }
-
-  .meadow {
-    height: clamp(200px, 34vh, 340px);
-  }
-}
-
-@media (min-width: 768px) {
-  .hero {
-    padding: var(--space-sm) var(--space-lg);
-  }
-}
-
-@media (min-width: 1200px) {
-  .hero {
-    width: min(100%, 600px);
-  }
-}
-
-@media (min-width: 1920px) {
-  .landing {
-    max-width: 1920px;
-    margin-inline: auto;
-  }
-}
-
-@media (max-height: 500px) and (orientation: landscape) {
-  .hero {
-    padding: var(--space-sm) var(--space-md);
-    margin-bottom: clamp(40px, 12vh, 100px);
-  }
-  .hero__subtitle {
-    margin-bottom: var(--space-md);
-  }
-  .greeting-card {
-    width: min(60%, 280px);
-  }
-  .gift-row {
-    grid-template-columns: repeat(3, minmax(140px, 1fr));
-  }
-  .cake {
-    width: min(55%, 220px);
-  }
-  .meadow {
-    height: clamp(140px, 28vh, 220px);
-  }
-  .sky__sun,
-  .sky__cloud,
-  .sky__moon {
-    transform: scale(0.8);
-  }
+  transform: scale(1) rotate(0deg);
 }
