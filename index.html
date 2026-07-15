@@ -24,26 +24,37 @@
         <feGaussianBlur stdDeviation="5.5" />
       </filter>
 
-      <!-- Shared glossy highlight — every petal gets this same fixed
-           white-to-transparent glaze layered on top. This is the
-           reliable, cross-browser stand-in for "gradients inside
-           petals" (see explanation above the code). -->
       <radialGradient id="petalShineGradient" cx="35%" cy="30%" r="65%">
         <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55" />
         <stop offset="45%" stop-color="#ffffff" stop-opacity="0.16" />
         <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
       </radialGradient>
 
-      <!-- Shared grass shading — dark near the soil, lighter toward the
-           tip, like real grass catching light. Per-instance color
-           variety comes from a CSS filter on top of this fixed gradient
-           (see .garden-grass-blade), not from re-authoring the gradient. -->
+      <!-- Version 16: shared dark rim-shade — same "colorless overlay"
+           technique as the shine above, just darkening instead of
+           lightening. Layered on TOP of the flat petal color but BELOW
+           the shine, this is what gives every flower genuine "light
+           center, richer rim" depth without needing per-instance
+           gradient color variation. -->
+      <radialGradient id="petalRimShadeGradient" cx="42%" cy="38%" r="72%">
+        <stop offset="0%" stop-color="#1a0f22" stop-opacity="0" />
+        <stop offset="55%" stop-color="#1a0f22" stop-opacity="0" />
+        <stop offset="100%" stop-color="#1a0f22" stop-opacity="0.38" />
+      </radialGradient>
+
       <linearGradient id="grassBladeShadeGradient" x1="0" y1="1" x2="0" y2="0">
         <stop offset="0%" stop-color="#3f7a30" />
         <stop offset="55%" stop-color="#5a9c46" />
         <stop offset="100%" stop-color="#82c862" />
       </linearGradient>
 
+      <!-- ============================================= -->
+      <!-- WILDFLOWER — Version 16: petals reshaped from   -->
+      <!-- overlapping circles into rotated ellipses         -->
+      <!-- radiating from center (reads as actual petals      -->
+      <!-- rather than polka dots) + rim-shade + centre       -->
+      <!-- highlight. -->
+      <!-- ============================================= -->
       <symbol id="flower-wildflower" viewBox="0 0 40 100">
         <g class="garden-flower__stem-group">
           <path class="garden-flower__stem" d="M20,100 C20,74 20,52 20,34" />
@@ -56,12 +67,14 @@
               <circle class="garden-flower__glow garden-flower__glow--outer" cx="0" cy="0" r="18" />
               <circle class="garden-flower__glow garden-flower__glow--inner" cx="0" cy="0" r="9" />
             </g>
-            <circle class="garden-flower__petal" cx="0" cy="-9" r="7" />
-            <circle class="garden-flower__petal" cx="8" cy="-3" r="7" />
-            <circle class="garden-flower__petal" cx="5" cy="7" r="7" />
-            <circle class="garden-flower__petal" cx="-5" cy="7" r="7" />
-            <circle class="garden-flower__petal" cx="-8" cy="-3" r="7" />
+            <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="5.5" ry="7.5" transform="rotate(0 0 -9)" />
+            <ellipse class="garden-flower__petal" cx="8" cy="-3" rx="5.5" ry="7.5" transform="rotate(72 8 -3)" />
+            <ellipse class="garden-flower__petal" cx="5" cy="7" rx="5.5" ry="7.5" transform="rotate(144 5 7)" />
+            <ellipse class="garden-flower__petal" cx="-5" cy="7" rx="5.5" ry="7.5" transform="rotate(216 -5 7)" />
+            <ellipse class="garden-flower__petal" cx="-8" cy="-3" rx="5.5" ry="7.5" transform="rotate(288 -8 -3)" />
+            <ellipse class="garden-flower__rimshade" cx="0" cy="0" rx="9" ry="9" />
             <circle class="garden-flower__center" cx="0" cy="0" r="5" />
+            <circle class="garden-flower__center-highlight" cx="-1.6" cy="-1.8" r="1.6" />
             <circle class="garden-flower__shine" cx="-2" cy="-3" r="7" />
           </g>
         </g>
@@ -105,7 +118,9 @@
               <path class="garden-flower__petal" d="M0,0 C-2.2,-3 -2.4,-6.5 0,-8.5 C2.4,-6.5 2.2,-3 0,0 Z" transform="rotate(216)" />
               <path class="garden-flower__petal" d="M0,0 C-2.2,-3 -2.4,-6.5 0,-8.5 C2.4,-6.5 2.2,-3 0,0 Z" transform="rotate(288)" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-4" rx="13" ry="15" />
             <circle class="garden-flower__center" cx="0" cy="0" r="2.6" />
+            <circle class="garden-flower__center-highlight" cx="-0.9" cy="-1" r="0.9" />
             <circle class="garden-flower__shine" cx="-2.5" cy="-4" r="9" />
           </g>
         </g>
@@ -133,6 +148,7 @@
               <path class="garden-flower__petal" d="M-6,3 C-6.8,-4.5 -3.8,-10.5 0,-12 C3.8,-10.5 6.8,-4.5 6,3 C6,6 3,7.5 0,7.5 C-3,7.5 -6,6 -6,3 Z" transform="rotate(9)" />
             </g>
             <path d="M0,-1 C-0.5,-5 -0.3,-9.5 0,-11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.1" stroke-linecap="round" />
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-4" rx="9" ry="13" />
             <path class="garden-flower__center" opacity="0.55" d="M-3,3 C-3,-2 -1,-6 0,-7 C1,-6 3,-2 3,3 Z" />
             <ellipse class="garden-flower__shine" cx="-1.5" cy="-6" rx="4.5" ry="7" />
           </g>
@@ -169,12 +185,14 @@
               <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="1.8" ry="7" transform="rotate(315)" />
               <ellipse class="garden-flower__petal" cx="0" cy="-9" rx="1.8" ry="7" transform="rotate(337.5)" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="0" rx="9" ry="9" />
             <circle class="garden-flower__center" cx="0" cy="0" r="4.6" />
             <g fill="rgba(0,0,0,0.15)">
               <circle cx="0" cy="-2.8" r="0.45" /><circle cx="2.4" cy="-1" r="0.45" />
               <circle cx="1.6" cy="2" r="0.45" /><circle cx="-1.6" cy="2" r="0.45" />
               <circle cx="-2.4" cy="-1" r="0.45" /><circle cx="0" cy="0.2" r="0.5" />
             </g>
+            <circle class="garden-flower__center-highlight" cx="-1.5" cy="-1.6" r="1.4" />
             <circle class="garden-flower__shine" cx="-2" cy="-3" r="6" />
           </g>
         </g>
@@ -223,6 +241,7 @@
               <ellipse class="garden-flower__petal" cx="0" cy="-10" rx="2" ry="6.5" transform="rotate(306)" />
               <ellipse class="garden-flower__petal" cx="0" cy="-10" rx="2" ry="6.5" transform="rotate(342)" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="0" rx="11" ry="11" />
             <circle class="garden-flower__center" cx="0" cy="0" r="7.5" />
             <circle cx="0" cy="0" r="7.5" fill="rgba(0,0,0,0.18)" />
             <g fill="rgba(0,0,0,0.28)">
@@ -234,6 +253,7 @@
               <circle cx="1.2" cy="1.8" r="0.5" /><circle cx="-1.5" cy="1.5" r="0.5" />
               <circle cx="-2" cy="-1" r="0.5" />
             </g>
+            <circle class="garden-flower__center-highlight" cx="-2.4" cy="-2.6" r="2.2" />
             <circle class="garden-flower__shine" cx="-3" cy="-5" r="9" />
           </g>
         </g>
@@ -253,6 +273,7 @@
             </g>
             <path class="garden-flower__petal" d="M-5,-10 C-8,-4 -7,3 0,8 C7,3 8,-4 5,-10 C2,-6 -2,-6 -5,-10 Z" />
             <path class="garden-flower__petal" d="M-9,-2 C-11,4 -9,10 -3,14 C1,10 2,5 0,0 C-3,1 -7,0 -9,-2 Z" opacity="0.85" transform="translate(-4,5) scale(0.7)" />
+            <ellipse class="garden-flower__rimshade" cx="-3" cy="-2" rx="7" ry="9" />
             <ellipse class="garden-flower__shine" cx="-4" cy="-3" rx="4" ry="5.5" />
           </g>
         </g>
@@ -284,7 +305,9 @@
               <path d="M0,-1 C-1,-4 -1,-6.5 0,-8.5" transform="rotate(216)" />
               <path d="M0,-1 C-1,-4 -1,-6.5 0,-8.5" transform="rotate(288)" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-1" rx="9" ry="9" />
             <circle fill="#241238" cx="0" cy="0" r="3.4" />
+            <circle class="garden-flower__center-highlight" cx="-1" cy="-1.1" r="0.9" />
             <g stroke="rgba(255,255,255,0.4)" stroke-width="0.4">
               <line x1="0" y1="0" x2="0" y2="-3.2" transform="rotate(0)" />
               <line x1="0" y1="0" x2="0" y2="-3.2" transform="rotate(45)" />
@@ -318,6 +341,7 @@
             <circle class="garden-flower__petal" cx="-2.5" cy="1" r="3" />
             <circle class="garden-flower__petal" cx="2.5" cy="1" r="3" />
             <circle class="garden-flower__petal" cx="0" cy="6" r="3" />
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-4" rx="5" ry="12" />
             <ellipse class="garden-flower__shine" cx="-1" cy="-6" rx="4" ry="10" />
           </g>
         </g>
@@ -342,6 +366,7 @@
             <circle class="garden-flower__petal" cx="4" cy="2" r="1.8" />
             <circle class="garden-flower__petal" cx="-6" cy="4" r="1.8" />
             <circle class="garden-flower__petal" cx="0" cy="-12" r="1.6" />
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-4" rx="9" ry="10" />
             <circle class="garden-flower__shine" cx="-1" cy="-4" r="7" />
           </g>
         </g>
@@ -379,6 +404,7 @@
               <circle cx="0" cy="-4" r="0.5" transform="rotate(240)" />
               <circle cx="0" cy="-4" r="0.5" transform="rotate(300)" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-2" rx="11" ry="11" />
             <g stroke="var(--center-color, #f5c66b)" stroke-width="0.6">
               <line x1="0" y1="0" x2="0" y2="-7.5" transform="rotate(20)" />
               <line x1="0" y1="0" x2="0" y2="-7.5" transform="rotate(90)" />
@@ -439,6 +465,7 @@
               <circle class="garden-flower__petal" cx="0" cy="-0.9" r="0.75" />
               <circle class="garden-flower__petal" cx="0" cy="0.8" r="0.75" />
             </g>
+            <ellipse class="garden-flower__rimshade" cx="0" cy="-6" rx="5" ry="12" />
             <circle class="garden-flower__center" cx="0" cy="4" r="0.9" />
             <circle class="garden-flower__center" cx="0" cy="-2" r="0.75" />
             <ellipse class="garden-flower__shine" cx="-1" cy="-6" rx="3.5" ry="11" />
@@ -446,14 +473,6 @@
         </g>
       </symbol>
 
-      <!-- ============================================= -->
-      <!-- GRASS — Version 14: real flat-base, single-tip  -->
-      <!-- blade geometry (fixes the double-pointed shape   -->
-      <!-- from earlier versions). 3 curve variants, each    -->
-      <!-- defined ONCE; per-instance scale/lean/color come  -->
-      <!-- from CSS on the <use> wrapper, same pattern as     -->
-      <!-- flowers and props. -->
-      <!-- ============================================= -->
       <symbol id="grass-blade-a" viewBox="-3 0 16 100">
         <path class="grass-blade__shape" d="M2,100 C1.5,70 2,35 3,10 C3.5,5 4.2,1 5,0 C5.6,2 6.5,6 7,12 C7.8,40 8,72 8,100 Z" />
       </symbol>
@@ -756,10 +775,9 @@
         <p class="scene__hint" id="cardStatusHint" aria-live="polite">tap the card to open it</p>
       </div>
 
-      <!-- Version 15: gift boxes + cake temporarily removed from the page.
-           Nothing was deleted from style.css or script.js — initGiftBoxes()
-           and initCake() already no-op safely when their elements don't
-           exist. Paste this exact block back to restore both instantly. -->
+      <!-- Gift Boxes and Cake & Candles scenes remain removed per your
+           earlier request — see script.js for the intact, restorable
+           initGiftBoxes()/initCake() functions and CSS. -->
 
     </div>
   </section>
