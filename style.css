@@ -389,8 +389,25 @@ body.is-night .garden-flower__center {
 /* Shared glossy glaze — see #petalShineGradient in index.html. Same
    fixed white gradient on every flower; only the solid color underneath
    (--petal-color) varies per instance. */
+/* Version 16: dark rim-shade — sits BELOW the shine, ABOVE the flat
+   petal color, giving every bloom a genuine light-center/darker-rim
+   read. Colorless (uses the shared #petalRimShadeGradient), so it
+   needs no per-instance variation and script.js is untouched. */
+.garden-flower__rimshade {
+  fill: url(#petalRimShadeGradient);
+  pointer-events: none;
+}
+
 .garden-flower__shine {
   fill: url(#petalShineGradient);
+  pointer-events: none;
+}
+
+/* Version 16: small bright dot suggesting light catching each flower's
+   centre — applied only where a species has a clear single focal
+   centre (wildflower, rose, daisy, sunflower, poppy). */
+.garden-flower__center-highlight {
+  fill: rgba(255, 255, 255, 0.65);
   pointer-events: none;
 }
 
