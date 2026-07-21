@@ -166,7 +166,7 @@ body {
 }
 
 /* ==========================================================================
-   5. ENVIRONMENT & ATMOSPHERIC CANVAS (Preserved & Enhanced)
+   5. ENVIRONMENT, STARS & MOON CANVASES (Version 2.3 Stacking)
    ========================================================================== */
 .layer-world {
   z-index: var(--z-world);
@@ -186,7 +186,18 @@ body {
   z-index: 1;
 }
 
-/* Moon Canvas (Version 2.2 Added: High-Resolution Layer) */
+/* Stars Canvas (Version 2.3 Added: Crisp High-DPI Starfield Layer) */
+.stars-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 2; /* Sits between atmospheric background and moon elements */
+}
+
 .moon-canvas {
   position: absolute;
   top: 0;
@@ -195,7 +206,7 @@ body {
   height: 100%;
   display: block;
   pointer-events: none;
-  z-index: 2; /* Sits cleanly on top of low-res environment canvas */
+  z-index: 3; /* Top-most environment canvas, projecting ambient light filters */
 }
 
 .sub-layer {
