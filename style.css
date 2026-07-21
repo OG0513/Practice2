@@ -166,7 +166,7 @@ body {
 }
 
 /* ==========================================================================
-   5. ENVIRONMENT & ATMOSPHERIC CANVAS (Version 1.3 Added)
+   5. ENVIRONMENT & ATMOSPHERIC CANVAS (Preserved & Enhanced)
    ========================================================================== */
 .layer-world {
   z-index: var(--z-world);
@@ -181,9 +181,21 @@ body {
   width: 100%;
   height: 100%;
   display: block;
-  /* Smooth scale rendering to automatically blend and blur lower-resolution canvas buffers */
   image-rendering: auto;
   pointer-events: none;
+  z-index: 1;
+}
+
+/* Moon Canvas (Version 2.2 Added: High-Resolution Layer) */
+.moon-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 2; /* Sits cleanly on top of low-res environment canvas */
 }
 
 .sub-layer {
@@ -202,7 +214,6 @@ body {
 
 .layer-overlay {
   z-index: var(--z-overlay);
-  /* Gentle global atmospheric overlay vignette */
   background: radial-gradient(
     circle,
     transparent 30%,
