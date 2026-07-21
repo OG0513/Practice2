@@ -1,5 +1,5 @@
 /**
- * Cinematic Environment Engine (Version 1.2 Immersive Entry)
+ * Cinematic Environment Engine (Version 1.3 Atmospheric Sky)
  * Namespace structure to manage lifecycle, states, and render threads.
  */
 
@@ -99,7 +99,102 @@ const GardenEngine = (() => {
   };
 
   /**
-   * Loading Screen System (Version 1.2 Sub-System)
+   * Environment System (Version 1.3 Sub-System)
+   * Renders a highly performance-optimized, slowly breathing atmospheric evening sky
+   * using offscreen bilinear scaling calculations to avoid color banding.
+   */
+  const EnvironmentSystem = {
+    name: 'EnvironmentSystem',
+    canvas: null,
+    ctx: null,
+    
+    // Low-resolution rendering grid to achieve smooth gradient integration & avoid pixel painting overhead
+    bufferWidth: 512,
+    bufferHeight: 512,
+
+    // Time phase variables to cycle atmospheric drift
+    ambientTime: 0,
+    ambientSpeed: 0.04, // Extremely slow speed (approx. 2.5 min cycles)
+
+    init(width, height, dpr) {
+      this.canvas = document.getElementById('environment-canvas');
+      if (!this.canvas) return;
+
+      this.ctx = this.canvas.getContext('2d', { alpha: false });
+      this.onResize(width, height, dpr);
+    },
+
+    onResize(width, height, dpr) {
+      if (!this.canvas) return;
+      
+      // Preserve canvas back-buffer resolution at fixed performance constraints
+      // This allows hardware scales on the GPU while maintaining fluid 60fps
+      this.canvas.width = this.bufferWidth;
+      this.canvas.height = this.bufferHeight;
+    },
+
+    update(dt) {
+      // Accumulate slow-time cycles for continuous movement
+      this.ambientTime += this.ambientSpeed * dt;
+    },
+
+    render() {
+      if (!this.ctx) return;
+
+      const ctx = this.ctx;
+      const w = this.bufferWidth;
+      const h = this.bufferHeight;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Base: Midnight Blue to Lavender-Purple twilight base gradient
+      const baseGradient = ctx.createLinearGradient(0, 0, 0, h);
+      baseGradient.addColorStop(0, 'hsla(230, 25%, 12%, 1)'); // Deep Midnight Blue
+      baseGradient.addColorStop(0.5, 'hsla(260, 20%, 18%, 1)'); // Soft Lavender Shadow
+      baseGradient.addColorStop(1, 'hsla(265, 30%, 25%, 1)'); // Warm Lavender Haze
+      ctx.fillStyle = baseGradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Calculate smooth oscillating vectors using trigonometric curves
+      const driftX = Math.sin(this.ambientTime) * (w * 0.15);
+      const driftY = Math.cos(this.ambientTime * 0.8) * (h * 0.08);
+
+      // Gradient 2: Glowing Soft Golden twilight center representing the warm horizon
+      const horizonGlow = ctx.createRadialGradient(
+        w * 0.5 + driftX,      // Slow x-drift
+        h * 0.85 + driftY,     // Slow y-drift
+        0, 
+        w * 0.5 + driftX, 
+        h * 0.85 + driftY, 
+        w * 0.6
+      );
+      horizonGlow.addColorStop(0, 'hsla(43, 40%, 75%, 0.15)'); // Soft Gold
+      horizonGlow.addColorStop(0.5, 'hsla(350, 40%, 88%, 0.08)'); // Blush Pink
+      horizonGlow.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Fades out completely
+      
+      ctx.fillStyle = horizonGlow;
+      ctx.fillRect(0, 0, w, h);
+
+      // Gradient 3: Cool, ambient atmospheric light casting down from upper elements
+      const upperAtmosphereGlow = ctx.createRadialGradient(
+        w * 0.35 - driftX * 0.5, 
+        h * 0.2 + driftY * 0.5, 
+        w * 0.1, 
+        w * 0.35 - driftX * 0.5, 
+        h * 0.2 + driftY * 0.5, 
+        w * 0.8
+      );
+      upperAtmosphereGlow.addColorStop(0, 'hsla(205, 35%, 84%, 0.12)'); // Soft Baby Blue
+      upperAtmosphereGlow.addColorStop(0.6, 'hsla(265, 30%, 82%, 0.04)'); // Soft Lavender Haze
+      upperAtmosphereGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = upperAtmosphereGlow;
+      ctx.fillRect(0, 0, w, h);
+    }
+  };
+
+  /**
+   * Loading Screen System (Version 1.2 Sub-System - Preserved)
    * Manages SVG Calligraphy strokes, magical dust canvas updates, and transitions.
    */
   const LoadingSystem = {
@@ -117,8 +212,6 @@ const GardenEngine = (() => {
       this.ctx = this.canvas.getContext('2d', { alpha: true });
       this.onResize(width, height, dpr);
       this.generateParticles();
-
-      // Trigger the calligraphy and UI progression timeline
       this.triggerMonogramTimeline();
     },
 
@@ -140,8 +233,8 @@ const GardenEngine = (() => {
           radius: utils.randomRange(1, 2.8),
           opacity: utils.randomRange(0.1, 0.6),
           baseOpacity: utils.randomRange(0.1, 0.5),
-          vx: utils.randomRange(-8, 8), // Gentle drifting velocities
-          vy: utils.randomRange(-15, -5), // Drifts predominantly upward
+          vx: utils.randomRange(-8, 8),
+          vy: utils.randomRange(-15, -5),
           pulseSpeed: utils.randomRange(1, 3),
           pulsePhase: utils.randomRange(0, Math.PI * 2)
         });
@@ -155,17 +248,13 @@ const GardenEngine = (() => {
 
       for (let i = 0; i < this.particles.length; i++) {
         const p = this.particles[i];
-
-        // Frame-rate independent coordinate progression
         p.x += (p.vx * dt);
         p.y += (p.vy * dt);
 
-        // Sinusoidal opacity pulsing to simulate glistening light
         p.pulsePhase += p.pulseSpeed * dt;
         p.opacity = p.baseOpacity + Math.sin(p.pulsePhase) * 0.15;
         p.opacity = utils.clamp(p.opacity, 0.05, 0.85);
 
-        // Re-wrap particles that float off the viewport boundaries
         if (p.y < -10) {
           p.y = State.height + 10;
           p.x = utils.randomRange(0, State.width);
@@ -182,17 +271,16 @@ const GardenEngine = (() => {
       const ctx = this.ctx;
       ctx.clearRect(0, 0, State.width, State.height);
 
-      // Render magical dust coordinates
       for (let i = 0; i < this.particles.length; i++) {
         const p = this.particles[i];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(43, 60%, 75%, ${p.opacity})`; // Soft Gold particles
+        ctx.fillStyle = `hsla(43, 60%, 75%, ${p.opacity})`;
         ctx.shadowColor = 'hsla(43, 60%, 75%, 0.4)';
         ctx.shadowBlur = 4;
         ctx.fill();
       }
-      ctx.shadowBlur = 0; // Reset canvas shadow context
+      ctx.shadowBlur = 0;
     },
 
     triggerMonogramTimeline() {
@@ -200,31 +288,26 @@ const GardenEngine = (() => {
       const monogramSvg = document.querySelector('.monogram-svg');
       const message = document.querySelector('.loading-message');
 
-      // 1. Prepare SVG handwriting stroke lengths dynamically
       paths.forEach(path => {
         const length = path.getTotalLength();
         path.style.strokeDasharray = length;
         path.style.strokeDashoffset = length;
       });
 
-      // 2. Trigger Handwriting strokes (0.4s initial delay)
       setTimeout(() => {
         paths.forEach(path => {
           path.style.strokeDashoffset = '0';
         });
       }, 400);
 
-      // 3. Trigger Glowing aura of completed calligraphy monogram
       setTimeout(() => {
         if (monogramSvg) monogramSvg.classList.add('glowing');
       }, 2100);
 
-      // 4. Reveal subtext message
       setTimeout(() => {
         if (message) message.classList.add('visible');
       }, 3000);
 
-      // 5. Unveil the world (Fade loading layer completely)
       setTimeout(() => {
         SceneManager.revealWorld();
       }, 4500);
@@ -241,7 +324,7 @@ const GardenEngine = (() => {
 
   /**
    * Scene Manager to handle initialization lifecycle steps,
-   * mount scene layers, and control transition states. (Enhanced)
+   * mount scene layers, and control transition states. (Preserved)
    */
   const SceneManager = {
     dom: {},
@@ -258,12 +341,11 @@ const GardenEngine = (() => {
         this.dom.loading.style.opacity = '0';
         this.dom.loading.style.pointerEvents = 'none';
 
-        // Unmount loading sub-system after transition closes to conserve CPU/GPU
         setTimeout(() => {
           this.dom.loading.style.display = 'none';
           LoadingSystem.destroy();
           GardenEngine.unregisterSystem(LoadingSystem);
-        }, 1200); // Syncs with CSS '--transition-duration-slow'
+        }, 1200);
       }
     }
   };
@@ -286,14 +368,13 @@ const GardenEngine = (() => {
     init() {
       if (State.isInitialized) return;
 
-      // Bind global event managers
       ResizeManager.init();
       SceneManager.init();
       
-      // Register loading experience system
+      // Register global systems
       this.registerSystem(LoadingSystem);
+      this.registerSystem(EnvironmentSystem); // Version 1.3 Active
       
-      // Start processing general frame calculations
       AnimationManager.start();
 
       State.isInitialized = true;
