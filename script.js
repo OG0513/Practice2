@@ -175,7 +175,7 @@
     }
   };
 
-  // Canvas Garden Ambient Effects Controller (Stars, Petals, Fireflies)
+  // Canvas Garden Ambient Effects Controller (Organically Clustered Twinkling Stars, Petals, Fireflies)
   const GardenEffects = {
     canvas: null,
     ctx: null,
@@ -195,7 +195,10 @@
       this.setupFXLayers();
       this.loop();
 
-      DOM.on(window, 'resize', () => this.resizeCanvas());
+      DOM.on(window, 'resize', () => {
+        this.resizeCanvas();
+        this.setupFXLayers(); // Dynamic density re-calculation on screen scaling
+      });
     },
 
     resizeCanvas: function() {
@@ -208,17 +211,94 @@
       const w = this.canvas.width;
       const h = this.canvas.height;
 
-      // 1. Twinkling Night Stars Layer
+      // Estimate the exact absolute pixel center of the upper-right centerpiece Moon
+      const moonSize = Math.max(260, Math.min(w * 0.24, 420));
+      const moonRadius = moonSize / 2;
+      const moonX = w - (w * 0.08) - moonRadius;
+      const moonY = (h * 0.06) + moonRadius;
+
+      // 1. Organic Countryside Star Field Layer
       this.stars = [];
-      const starCount = Math.floor((w * h) / 11000); // Responsive density distribution
+      
+      // Seed positions to form realistic galaxy/dust-cloud clustering
+      const clusterSeeds = [
+        { x: w * 0.15, y: h * 0.25 },
+        { x: w * 0.35, y: h * 0.15 },
+        { x: w * 0.50, y: h * 0.45 },
+        { x: w * 0.70, y: h * 0.20 }
+      ];
+
+      // Responsive quantity distribution (e.g. ~240 stars on desktop viewports)
+      const starDensityFactor = Math.floor((w * h) / 5500);
+      const starCount = Math.max(120, Math.min(starDensityFactor, 320));
+
       for (let i = 0; i < starCount; i++) {
+        let x, y;
+
+        // 60% of stars cluster around seeds (Milky Way simulation); 40% are scattered randomly
+        if (Math.random() < 0.60) {
+          const seed = clusterSeeds[Math.floor(Math.random() * clusterSeeds.length)];
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.pow(Math.random(), 2.5) * 320; // Concentrated center density distribution
+          x = seed.x + Math.cos(angle) * distance;
+          y = seed.y + Math.sin(angle) * distance;
+        } else {
+          x = Math.random() * w;
+          y = Math.random() * h;
+        }
+
+        // Keep bounds aligned
+        if (x < 0) x = w + (x % w);
+        if (x > w) x = x % w;
+        if (y < 0) y = h + (y % h);
+        if (y > h) y = y % h;
+
+        // Calculate distance relative to center of moon body
+        const dx = x - moonX;
+        const dy = y - moonY;
+        const distToMoon = Math.sqrt(dx * dx + dy * dy);
+
+        // Cull stars placed directly over the solid physical sphere of the moon
+        if (distToMoon < moonRadius) continue;
+
+        // Faint ambient light washout factor (moonlit atmospheric fade out)
+        let lunarWashout = 1.0;
+        const washoutStartRadius = moonRadius + 20;
+        const washoutEndRadius = moonRadius + 280;
+
+        if (distToMoon < washoutEndRadius) {
+          lunarWashout = (distToMoon - washoutStartRadius) / (washoutEndRadius - washoutStartRadius);
+          if (lunarWashout < 0) lunarWashout = 0; // Completely blank directly beside lunar rim
+        }
+
+        // Color profiles (90% soft warm off-white, 5% cool ice-blue, 5% warm yellow/amber)
+        let rgbString = '254, 253, 246'; // Soft Country White
+        const randColor = Math.random();
+        if (randColor < 0.05) {
+          rgbString = '147, 197, 253'; // Ice Blue Tint
+        } else if (randColor < 0.10) {
+          rgbString = '251, 191, 36'; // Golden Amber Tint
+        }
+
+        // Layering depth properties (Distant faint stars vs foreground bright stars)
+        const isDistantBg = Math.random() < 0.45;
+        const size = isDistantBg 
+          ? (Math.random() * 0.35 + 0.15) // Deep distant particles
+          : (Math.random() * 1.0 + 0.4);   // Closer prominent stars
+
+        const maxAlpha = (isDistantBg 
+          ? (Math.random() * 0.18 + 0.05) 
+          : (Math.random() * 0.65 + 0.25)) * lunarWashout;
+
         this.stars.push({
-          x: Math.random() * w,
-          y: Math.random() * (h * 0.75), // Limit stars to higher sky regions
-          size: Math.random() * 1.5 + 0.3,
-          maxAlpha: Math.random() * 0.6 + 0.2,
-          alpha: Math.random(),
-          speed: Math.random() * 0.02 + 0.005
+          x: x,
+          y: y,
+          size: size,
+          maxAlpha: maxAlpha,
+          rgb: rgbString,
+          // Independent astronomical twinkling speeds & starting oscillation phases
+          twinkleSpeed: Math.random() * 0.012 + 0.003,
+          twinklePhase: Math.random() * Math.PI * 2
         });
       }
 
@@ -262,14 +342,18 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      // Render Layer 1: Twinkling Stars
+      // Render Layer 1: Independently Twinkling Countryside Stars
       for (let i = 0; i < this.stars.length; i++) {
         const s = this.stars[i];
-        s.alpha += s.speed;
-        if (s.alpha > s.maxAlpha || s.alpha < 0.1) {
-          s.speed = -s.speed; // Invert bounce
-        }
-        ctx.fillStyle = `rgba(254, 253, 246, ${Math.max(0.1, Math.min(s.maxAlpha, s.alpha))})`;
+        
+        // Cycle twinkle phase smoothly over time
+        s.twinklePhase += s.twinkleSpeed;
+        
+        // Soft atmospheric shimmer (oscillates between 30% and 100% of maximum alpha)
+        const twinkleScale = 0.35 + 0.65 * (Math.sin(s.twinklePhase) * 0.5 + 0.5);
+        const currentAlpha = s.maxAlpha * twinkleScale;
+
+        ctx.fillStyle = `rgba(${s.rgb}, ${Math.max(0.01, Math.min(s.maxAlpha, currentAlpha))})`;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
