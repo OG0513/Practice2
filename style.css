@@ -1,955 +1,135 @@
 /* ==========================================================================
-   1. CSS CUSTOM PROPERTIES & DESIGN TOKENS
+   1. DESIGN SYSTEM & CUSTOM PROPERTIES
    ========================================================================== */
 :root {
-  /* Magical Palette Integration */
-  --clr-cream: #fefdf6;
-  --clr-blush: #fae1e6;
-  --clr-lavender: #e0d7f5;
-  --clr-baby-blue: #d2e4f9;
-  --clr-warm-beige: #ebdcb9;
-  --clr-sage: #9cb8a5;
-  --clr-gold: #f3d27a;
-  
-  /* Core Base Adaptations */
-  --clr-primary: #8b5cf6; /* Lavender accent primary */
-  --clr-primary-hover: #7c3aed;
-  --clr-secondary: #4b5563;
-  --clr-secondary-hover: #374151;
-  --clr-bg-page: #0a0a16; /* Seamless integrated dark sky base */
-  --clr-bg-card: rgba(15, 23, 42, 0.45); /* High-end glass overlay */
-  --clr-text-main: #f4f4f5;
-  --clr-text-muted: #cbd5e1;
-  --clr-border: rgba(255, 255, 255, 0.12);
-  --clr-accent: #34d399;
+  /* Soft Cinematic Palette (Desaturated Pastel Variables) */
+  --color-sky-top: hsla(230, 25%, 12%, 1);       /* Muted Midnight Blue */
+  --color-sky-bottom: hsla(260, 20%, 18%, 1);    /* Soft Lavender Shadow */
+  --color-cream: hsla(38, 40%, 94%, 1);          /* Soft Off-White */
+  --color-blush-pink: hsla(350, 45%, 88%, 1);    /* Desaturated Pink */
+  --color-lavender: hsla(265, 30%, 82%, 1);      /* Light Pastel Purple */
+  --color-baby-blue: hsla(205, 35%, 84%, 1);     /* Desaturated Sky Blue */
+  --color-warm-beige: hsla(33, 25%, 85%, 1);     /* Neutral Warm Tint */
+  --color-sage-green: hsla(110, 15%, 45%, 1);    /* Desaturated Earth Green */
+  --color-soft-gold: hsla(43, 60%, 75%, 1);      /* Low-Saturation Gold */
 
-  /* Cinematic Loading Screen Tokens */
-  --clr-loader-bg: #09090b;
-  --clr-loader-text: #f4f4f5;
-  --clr-loader-accent: #fbbf24;
+  /* Layer Hierarchy (Strict Stacking Order) */
+  --z-world: 10;
+  --z-env: 11;
+  --z-foreground: 12;
+  --z-effects: 13;
+  --z-ui: 14;
+  --z-loading: 20;
+  --z-overlay: 30;
 
-  /* Typography Scale */
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-handwritten: "Alex Brush", cursive, sans-serif;
-
-  --fs-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.8rem);
-  --fs-sm: clamp(0.875rem, 0.8rem + 0.3vw, 0.95rem);
-  --fs-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  --fs-md: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
-  --fs-lg: clamp(1.5rem, 1.35rem + 0.75vw, 2rem);
-  --fs-xl: clamp(2rem, 1.75rem + 1.25vw, 2.75rem);
-
-  /* Layout Boundaries */
-  --max-width: 1200px;
-  --header-height: 70px;
-  --spacing-unit: 1rem;
-
-  /* Elevation (Shadows) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-
-  /* Borders & Radii */
-  --border-radius: 12px;
-  --border-radius-lg: 20px;
-
-  /* Transition Constants */
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-cinematic: 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  /* Global Animations & Transitions */
+  --transition-ease-slow: cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-duration-slow: 1.2s;
+  --transition-duration-normal: 0.4s;
 }
 
 /* ==========================================================================
-   2. CSS RESET & GLOBAL BASICS
+   2. HARDWARE-ACCELERATED RESET
    ========================================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-sky-top);
+  /* Prevent scroll bouncing, touch selection, and zooming on mobile */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Ensure typography and scale adapt nicely */
 body {
-  font-family: var(--font-family);
-  background-color: var(--clr-bg-page);
-  color: var(--clr-text-main);
-  line-height: 1.6;
-  font-size: var(--fs-base);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Base magical overrides for integrated dashboard structure */
-body.magical-night {
-  overflow-x: hidden;
-  background-attachment: fixed;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-img, svg {
-  max-width: 100%;
-  display: block;
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Skip link logic for accessibility focus */
-.skip-link {
-  position: absolute;
-  top: -100px;
-  left: 1rem;
-  background: var(--clr-primary);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  z-index: 1000;
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  transition: top var(--transition-fast);
-}
-
-.skip-link:focus {
-  top: 0;
-  outline: 2px solid var(--clr-primary-hover);
 }
 
 /* ==========================================================================
-   3. PREMIUM LOADING SCREEN SYSTEM
+   3. STRUCTURE & VIEWPORT MANAGEMENT
    ========================================================================== */
-.loader-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: var(--clr-loader-bg);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: opacity var(--transition-cinematic), visibility var(--transition-cinematic);
-  will-change: opacity, visibility;
-}
-
-/* Overlay Fade Out Class */
-.loader-overlay.loader-fade-out {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* Particle Canvas Backdrop */
-.loader-particles-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-/* Centralized Loader Alignment */
-.loader-content {
+.app-root {
   position: relative;
-  z-index: 2;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  gap: 1.5rem;
-}
-
-/* Handwritten initials elements */
-.initials-container {
-  width: 200px;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.3));
-}
-
-.handwritten-svg {
-  width: 100%;
-  height: auto;
-}
-
-/* Handwriting drawing animations */
-.draw-path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawStroke 3.2s cubic-bezier(0.45, 0, 0.55, 1) forwards;
-}
-
-.path-1 { animation-delay: 0.2s; }
-.path-2 { animation-delay: 0.9s; }
-.path-3 {
-  stroke-width: 1.5;
-  opacity: 0.85;
-  animation: drawStroke 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: 1.8s;
-}
-
-@keyframes drawStroke {
-  to { stroke-dashoffset: 0; }
-}
-
-/* Narrative dynamic loader text styles */
-.loader-text {
-  font-family: var(--font-handwritten);
-  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
-  color: var(--clr-loader-text);
-  opacity: 0;
-  transform: translateY(10px);
-  animation: textReveal 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  animation-delay: 1.2s;
-  text-shadow: 0 0 10px rgba(244, 244, 245, 0.2), 0 0 20px rgba(251, 191, 36, 0.1);
-  letter-spacing: 0.02em;
-}
-
-@keyframes textReveal {
-  to {
-    opacity: 0.9;
-    transform: translateY(0);
-  }
-}
-
-/* ==========================================================================
-   4. IMMERSIVE CELESTIAL & BOTANICAL GARDEN SCENE
-   ========================================================================== */
-.garden-scene-container {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1; /* Placed completely behind dynamic dashboard application */
+  width: 100vw;
+  height: 100vh;
+  /* Support modern viewport sizes including notch/home indicator areas */
+  height: 100dvh;
   overflow: hidden;
-  pointer-events: none;
-}
-
-/* Multilayer Sky Gradient - Off-Center radial gradient centered on the Moon */
-.sky-background-gradient {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 82% 16%, #28244a 0%, #13122e 45%, #050412 100%);
-  z-index: 1;
-}
-
-/* Giant Highly Detailed Celestial Moon */
-.giant-moon {
-  position: absolute;
-  top: 6%;
-  right: 8%; /* Upper-right quadrant centerpiece placement */
-  width: clamp(260px, 24vw, 420px);
-  height: clamp(260px, 24vw, 420px);
-  border-radius: 50%;
-  z-index: 2;
-  /* Soft breathing atmospheric glow scaling outwards, preventing harsh circular halos */
-  box-shadow: 
-    0 0 45px rgba(254, 243, 199, 0.35),
-    0 0 95px rgba(253, 230, 138, 0.22),
-    0 0 180px rgba(224, 215, 245, 0.12),
-    0 0 300px rgba(210, 228, 249, 0.08);
-  animation: atmosphericBreathing 12s infinite alternate ease-in-out;
-  will-change: transform, box-shadow;
-}
-
-.moon-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 10px rgba(254, 243, 199, 0.15));
-}
-
-@keyframes atmosphericBreathing {
-  0% {
-    transform: scale(0.98);
-    box-shadow: 
-      0 0 40px rgba(254, 243, 199, 0.3),
-      0 0 85px rgba(253, 230, 138, 0.16),
-      0 0 160px rgba(224, 215, 245, 0.09),
-      0 0 260px rgba(210, 228, 249, 0.06);
-  }
-  100% {
-    transform: scale(1.02);
-    box-shadow: 
-      0 0 55px rgba(254, 243, 199, 0.44),
-      0 0 115px rgba(253, 230, 138, 0.26),
-      0 0 210px rgba(224, 215, 245, 0.15),
-      0 0 340px rgba(210, 228, 249, 0.11);
-  }
-}
-
-/* Drifting clouds styling */
-.clouds-container {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-.drifting-cloud {
-  position: absolute;
-  /* Silver golden light borders representing moonlight illumination */
-  filter: blur(25px) drop-shadow(0 4px 20px rgba(254, 243, 199, 0.08));
-  background: radial-gradient(circle at 75% 30%, rgba(255, 253, 245, 0.15) 0%, rgba(224, 215, 245, 0.04) 60%, transparent 100%);
-  border-radius: 50%;
-  will-change: transform;
-}
-
-.cloud-foreground-1 {
-  width: 500px;
-  height: 180px;
-  top: 30%;
-  left: -20%;
-  animation: driftRight 65s infinite linear;
-}
-
-.cloud-foreground-2 {
-  width: 400px;
-  height: 140px;
-  top: 45%;
-  right: -15%;
-  animation: driftLeft 55s infinite linear;
-}
-
-.cloud-background-1 {
-  width: 650px;
-  height: 220px;
-  top: 15%;
-  left: 20%;
-  background: radial-gradient(circle at 50% 50%, rgba(210, 228, 249, 0.08) 0%, transparent 70%);
-  animation: driftRight 110s infinite linear;
-}
-
-@keyframes driftRight {
-  0% { transform: translateX(-100px); }
-  100% { transform: translateX(calc(100vw + 200px)); }
-}
-
-@keyframes driftLeft {
-  0% { transform: translateX(100px); }
-  100% { transform: translateX(calc(-100vw - 200px)); }
-}
-
-/* Garden FX Layer (Stars, Petals, Fireflies Canvas) */
-.garden-fx-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  /* Hardware acceleration parameters */
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-/* Swaying Flowers and Botanical Elements */
-.botanical-bottom-layer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 280px;
-  z-index: 5;
-}
-
-/* Blend bottom border line to dark space and project ambient gold moonlight glow descending from upper right */
-.garden-ground-blend {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 140px;
-  background: linear-gradient(to top, #060512 0%, rgba(13, 12, 34, 0.8) 35%, rgba(251, 191, 36, 0.03) 75%, transparent 100%);
-  z-index: 10;
-}
-
-.botanical-stem {
-  position: absolute;
-  bottom: 0;
-  transform-origin: bottom center;
-}
-
-/* Wind sway keyframe triggers */
-.sway-slow {
-  animation: swayBreezeSlow 6s ease-in-out infinite alternate;
-}
-
-.sway-fast {
-  animation: swayBreezeFast 4.5s ease-in-out infinite alternate;
-}
-
-@keyframes swayBreezeSlow {
-  0% { transform: rotate(-1.5deg) skewX(-1deg); }
-  100% { transform: rotate(2.5deg) skewX(2deg); }
-}
-
-@keyframes swayBreezeFast {
-  0% { transform: rotate(-3deg) skewX(-2deg); }
-  100% { transform: rotate(3.5deg) skewX(3deg); }
-}
-
-/* Stylized realistic grass blades */
-.stylized-grass-canopy {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  z-index: 12;
-  pointer-events: none;
-}
-
-.grass-blade {
-  position: absolute;
-  bottom: 0;
-  width: 6px;
-  height: clamp(45px, 6vh, 85px);
-  background: linear-gradient(to top, #608068 0%, var(--clr-sage) 100%);
-  border-radius: 80% 0 0 0;
-  transform-origin: bottom center;
-  opacity: 0.85;
-}
-
-.grass-blade.style-1 {
-  height: 70px;
-  animation: swayBreezeSlow 3s infinite alternate ease-in-out;
-}
-
-.grass-blade.style-2 {
-  height: 50px;
-  transform: scaleX(-1);
-  background: linear-gradient(to top, #415c48 0%, #829a87 100%);
-  animation: swayBreezeFast 2.5s infinite alternate ease-in-out;
-}
-
-.grass-blade.style-3 {
-  height: 90px;
-  animation: swayBreezeSlow 4s infinite alternate ease-in-out;
-  opacity: 0.7;
-}
-
-/* ==========================================================================
-   5. GLASSMORPHISM LAYOUTS & INTERFACE OVERLAYS
-   ========================================================================== */
-.glass-element {
-  background: var(--clr-bg-card);
-  backdrop-filter: blur(12px) saturate(120%);
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
-  border: 1px solid var(--clr-border);
-  box-shadow: 
-    0 10px 30px -10px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: var(--clr-text-main);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.glass-element:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 15px 35px -5px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Glass Buttons */
-.btn-glass {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--clr-text-main);
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background var(--transition-fast), border var(--transition-fast), transform var(--transition-fast);
-}
-
-.btn-glass:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Specific Focus View Toggle */
-.scene-focus-toggle {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 1000;
-  box-shadow: var(--shadow-lg);
-}
-
-/* Interactive slide state classes */
-.site-header, .site-main, .site-footer {
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity;
-}
-
-body.dashboard-hidden .site-header {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-body.dashboard-hidden .site-main {
-  transform: translateY(40px);
-  opacity: 0;
-  pointer-events: none;
-}
-
-body.dashboard-hidden .site-footer {
-  transform: translateY(100%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Specific theme adjustment overrides for dark celestial context */
-.section-heading-dark {
-  color: var(--clr-cream);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.section-subtitle-dark {
-  color: var(--clr-text-muted);
-  font-size: var(--fs-sm);
-}
-
-/* ==========================================================================
-   6. LAYOUT UTILITIES
-   ========================================================================== */
-.container {
-  width: 100%;
-  max-width: var(--max-width);
-  margin-inline: auto;
-  padding-inline: calc(var(--spacing-unit) * 1.5);
-}
-
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: calc(var(--spacing-unit) * 2);
-  padding-block: calc(var(--spacing-unit) * 2);
-}
-
-@media (min-width: 1024px) {
-  .main-grid {
-    grid-template-columns: 3fr 1fr;
-    align-items: start;
-  }
-}
-
-/* ==========================================================================
-   7. NAVIGATION & HEADER
-   ========================================================================== */
-.site-header {
-  height: var(--header-height);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-}
-
-.header-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%;
-}
-
-.logo-text {
-  font-size: var(--fs-md);
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: var(--clr-text-main);
-}
-
-.logo-text span {
-  color: var(--clr-gold);
-}
-
-.primary-navigation {
-  display: none; /* Mobile hidden by default */
-}
-
-.primary-navigation.open {
-  display: block;
-  position: absolute;
-  top: var(--header-height);
-  left: 0;
-  right: 0;
-  background-color: rgba(15, 23, 42, 0.95);
-  border-bottom: 1px solid var(--clr-border);
-  padding: var(--spacing-unit);
-  box-shadow: var(--shadow-lg);
-  animation: fadeIn var(--transition-fast) forwards;
-}
-
-.nav-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.nav-link {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--clr-text-muted);
-  transition: color var(--transition-fast);
-  display: block;
-}
-
-.nav-link:hover, .nav-link.active {
-  color: var(--clr-gold);
-}
-
-/* Hamburger Menu Button */
-.mobile-nav-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 101;
+  align-items: center;
 }
 
-.hamburger {
-  position: relative;
-  width: 24px;
-  height: 2px;
-  background-color: var(--clr-text-main);
-  transition: background-color var(--transition-fast);
-}
-
-.hamburger::before, .hamburger::after {
-  content: '';
+/* Base Layer Definition */
+.layer {
   position: absolute;
-  width: 24px;
-  height: 2px;
-  background-color: var(--clr-text-main);
-  left: 0;
-  transition: transform var(--transition-fast);
-}
-
-.hamburger::before { top: -6px; }
-.hamburger::after { bottom: -6px; }
-
-/* Hamburger Open States */
-.mobile-nav-toggle[aria-expanded="true"] .hamburger {
-  background-color: transparent;
-}
-
-.mobile-nav-toggle[aria-expanded="true"] .hamburger::before {
-  transform: rotate(45deg);
   top: 0;
-}
-
-.mobile-nav-toggle[aria-expanded="true"] .hamburger::after {
-  transform: rotate(-45deg);
-  bottom: 0;
-}
-
-@media (min-width: 768px) {
-  .mobile-nav-toggle {
-    display: none;
-  }
-  
-  .primary-navigation {
-    display: block;
-    position: static;
-    background-color: transparent;
-    border-bottom: none;
-    padding: 0;
-    box-shadow: none;
-  }
-  
-  .nav-list {
-    flex-direction: row;
-    gap: 1.5rem;
-  }
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let pointer events fall through to interactive sub-layers */
 }
 
 /* ==========================================================================
-   8. INTERFACE COMPONENTS
+   4. LAYER-SPECIFIC RULES
    ========================================================================== */
-.section {
-  margin-bottom: calc(var(--spacing-unit) * 2.5);
+
+/* World Layer - Backing for the entire experience */
+.layer-world {
+  z-index: var(--z-world);
+  /* Cinematic twilight gradient acting as a placeholder */
+  background: radial-gradient(
+    circle at 50% 60%,
+    var(--color-sky-bottom) 0%,
+    var(--color-sky-top) 100%
+  );
+  transition: opacity var(--transition-duration-slow) var(--transition-ease-slow);
 }
 
-.section-header {
-  margin-bottom: calc(var(--spacing-unit) * 1.5);
+.sub-layer {
+  width: 100%;
+  height: 100%;
 }
 
-/* Hero Banner Card */
-.hero-card {
-  border-radius: var(--border-radius-lg);
-  padding: calc(var(--spacing-unit) * 2.5);
+#layer-environment { z-index: var(--z-env); }
+#layer-foreground { z-index: var(--z-foreground); }
+#layer-effects { z-index: var(--z-effects); }
+
+/* UI Layer - Active UI container, pointer events enabled selectively */
+#layer-ui {
+  z-index: var(--z-ui);
+  pointer-events: auto;
 }
 
-.hero-card h1 {
-  font-family: var(--font-serif);
-  font-size: var(--fs-xl);
-  font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 1rem;
-  letter-spacing: -0.015em;
-  color: var(--clr-cream);
+/* Loading Layer - Initially visible overlay */
+.layer-loading {
+  z-index: var(--z-loading);
+  background-color: var(--color-sky-top);
+  transition: opacity var(--transition-duration-slow) var(--transition-ease-slow);
 }
 
-.subtitle {
-  color: var(--clr-text-muted);
-  font-size: var(--fs-md);
-  margin-bottom: 1.5rem;
-  max-width: 60ch;
-}
-
-/* Button UI Components */
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background-color: var(--clr-primary);
-  color: #ffffff;
-}
-
-.btn-primary:hover {
-  background-color: var(--clr-primary-hover);
-}
-
-.btn-secondary {
-  background-color: #ffffff;
-  color: var(--clr-text-main);
-  border: 1px solid var(--clr-border);
-}
-
-.btn-secondary.glass-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: var(--clr-text-main);
-}
-
-.btn-secondary.glass-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-/* Card Auto Grid System */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.card {
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.card-icon {
-  font-size: var(--fs-lg);
-  margin-bottom: 1rem;
-}
-
-.card h3 {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--clr-cream);
-}
-
-.card p {
-  color: var(--clr-text-muted);
-  font-size: var(--fs-sm);
-}
-
-/* ==========================================================================
-   9. SIDEBAR
-   ========================================================================== */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.sidebar-card {
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.sidebar-heading {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--clr-cream);
-}
-
-.sidebar-text {
-  color: var(--clr-text-muted);
-  font-size: var(--fs-sm);
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  margin-bottom: 1rem;
-}
-
-.indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--clr-secondary);
-}
-
-.indicator-dot.active {
-  background-color: var(--clr-accent);
-}
-
-/* ==========================================================================
-   10. ANIMATIONS & MOTION SENSITIVITY
-   ========================================================================== */
-.animate-fade-in {
-  opacity: 0;
-  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-up {
-  opacity: 0;
-  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Respect motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  
-  .draw-path {
-    stroke-dashoffset: 0 !important;
-    animation: none !important;
-  }
-  
-  .loader-text {
-    opacity: 0.95 !important;
-    transform: none !important;
-    animation: none !important;
-  }
-
-  .moon-glow-layer-1, .moon-glow-layer-2, .drifting-cloud, .botanical-stem, .grass-blade, .giant-moon {
-    animation: none !important;
-    transform: none !important;
-  }
-}
-
-/* ==========================================================================
-   11. FOOTER
-   ========================================================================== */
-.site-footer {
-  border-bottom: none;
-  border-left: none;
-  border-right: none;
-  padding-block: 1.5rem;
-  margin-top: auto;
-}
-
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-  font-size: var(--fs-sm);
-  color: var(--clr-text-muted);
-}
-
-.footer-links {
-  list-style: none;
-  display: flex;
-  gap: 1.5rem;
-}
-
-.footer-links a:hover {
-  color: var(--clr-gold);
-}
-
-@media (min-width: 768px) {
-  .footer-container {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+/* Global Overlay Layer - Vignette effect to draw focus to center screen */
+.layer-overlay {
+  z-index: var(--z-overlay);
+  background: radial-gradient(
+    circle,
+    transparent 40%,
+    rgba(10, 11, 18, 0.4) 100%
+  );
 }
