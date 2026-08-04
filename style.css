@@ -1,529 +1,276 @@
-/**
- * ============================================================================
- * A LITTLE WORLD MADE JUST FOR HER — VERSION 1.1 ARCHITECTURE ENGINE
- * ============================================================================
- * Single responsibility modules:
- * 1. Config — Master configuration settings & constants
- * 2. ViewportManager — DPI scaling, dynamic VH handling, resize listener
- * 3. ParticleSystem — High-performance 60 FPS floating canvas particles
- * 4. HandwrittenInitials — Calligraphic SVG stroke calculation & pen tip tracking
- * 5. TimelineSequence — State machine driving animation sequence
- * 6. AccessibilityManager — Reduced motion detector & overrides
- * 7. SceneManager — Modular foundation for Version 1.2+ scene mounting
- * 8. App — Lifecycle manager and public window interface
- * ============================================================================
- */
+/* ==================================================
+   DESIGN SYSTEM & COLOR VARIABLES
+   Style: Flat Design 2.0 with soft pastel depth
+   ================================================== */
 
-(function () {
-  'use strict';
+:root {
+  /* Primary Soft Pastel Palette */
+  --color-cream: #fcf8f2;
+  --color-warm-beige: #f3e8d7;
+  --color-blush-pink: #f7d6d0;
+  --color-lavender: #e2d8ee;
+  --color-baby-blue: #c8ddf2;
+  --color-sage-green: #d1e0d3;
+  --color-soft-gold: #e6ca85;
+  --color-warm-yellow: #fce89e;
 
-  /* ==========================================================================
-     1. MASTER CONFIGURATION
-     ========================================================================== */
-  const Config = {
-    particles: {
-      count: 50, // 40-60 optimal range
-      minRadius: 1.0,
-      maxRadius: 3.2,
-      baseSpeedX: 0.08,
-      baseSpeedY: 0.22,
-      colors: [
-        'rgba(250, 246, 238, ',  // Cream
-        'rgba(229, 195, 120, ',  // Soft Gold
-        'rgba(248, 200, 220, ',  // Blush Pink
-        'rgba(185, 221, 241, '   // Baby Blue
-      ]
-    },
-    handwriting: {
-      totalDurationSeconds: 3.8, // Duration of visible writing animation
-      initialDelayMs: 600,       // Pause before pen starts writing
-      glowDelayMs: 300,          // Delay after writing before warm glow appears
-      subtitleDelayMs: 600       // Delay before subtitle fades in
-    },
-    timeline: {
-      readPauseMs: 3500,         // Pause after subtitle visible before screen fades
-      screenFadeMs: 2500         // Transition fade out duration
-    }
-  };
+  /* Loading Background (Midnight Indigo Gradient) */
+  --bg-midnight-deep: #070a1a;
+  --bg-midnight-mid: #0d122b;
+  --bg-midnight-light: #141a3d;
 
-  /* ==========================================================================
-     2. ACCESSIBILITY MANAGER
-     ========================================================================== */
-  class AccessibilityManager {
-    constructor() {
-      this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      this.isReducedMotion = this.reducedMotionQuery.matches;
-      
-      this.reducedMotionQuery.addEventListener('change', (e) => {
-        this.isReducedMotion = e.matches;
-      });
-    }
+  /* Particle Palette */
+  --particle-gold: rgba(230, 202, 133, 0.85);
+  --particle-cream: rgba(252, 248, 242, 0.75);
+  --particle-pink: rgba(247, 214, 208, 0.65);
+  --particle-blue: rgba(200, 221, 242, 0.65);
+
+  /* Typography System */
+  --font-serif: 'Cormorant Garamond', 'Georgia', 'Playfair Display', serif;
+
+  /* Easing Curves */
+  --ease-cinematic: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-handwriting: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================================================
+   RESET & FULLSCREEN VIEWPORT LOCK
+   ================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-midnight-deep);
+  color: var(--color-cream);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Pure Fullscreen Viewport Layer */
+.app-viewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, var(--bg-midnight-light) 0%, var(--bg-midnight-mid) 55%, var(--bg-midnight-deep) 100%);
+}
+
+/* Floating Particle Canvas Overlay */
+.particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Scene Container Foundation */
+.scene-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* ==================================================
+   LOADING EXPERIENCE SCENE
+   ================================================== */
+
+.loading-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 1;
+  transition: opacity 2.2s var(--ease-cinematic);
+  will-change: opacity;
+}
+
+.loading-scene.dissolving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  max-width: 90vw;
+  text-align: center;
+}
+
+/* Initials SVG Wrapper */
+.initials-wrapper {
+  position: relative;
+  width: min(85vw, 540px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.initials-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px rgba(230, 202, 133, 0.2));
+  transition: filter 1.8s var(--ease-cinematic);
+}
+
+/* Warm Glow Effect Applied After Handwriting Completes */
+.initials-svg.has-soft-glow {
+  filter: drop-shadow(0 0 12px rgba(230, 202, 133, 0.75))
+          drop-shadow(0 0 28px rgba(247, 214, 208, 0.45))
+          drop-shadow(0 0 50px rgba(230, 202, 133, 0.25));
+  animation: gentle-glow-pulse 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes gentle-glow-pulse {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(230, 202, 133, 0.65))
+            drop-shadow(0 0 22px rgba(247, 214, 208, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 16px rgba(230, 202, 133, 0.85))
+            drop-shadow(0 0 34px rgba(247, 214, 208, 0.55))
+            drop-shadow(0 0 60px rgba(230, 202, 133, 0.3));
+  }
+}
+
+.handwritten-path {
+  will-change: stroke-dashoffset;
+}
+
+.pen-tip {
+  transition: opacity 0.4s var(--ease-cinematic);
+  will-change: cx, cy, opacity;
+}
+
+/* ==================================================
+   SUBTITLE TYPOGRAPHY
+   ================================================== */
+
+.subtitle-container {
+  margin-top: 3.5rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1.8s var(--ease-cinematic), transform 1.8s var(--ease-cinematic);
+}
+
+.subtitle-container.visible {
+  opacity: 0.92;
+  transform: translateY(0);
+}
+
+.subtitle-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.16em;
+  color: var(--color-warm-beige);
+  text-shadow: 0 0 12px rgba(230, 202, 133, 0.25);
+  line-height: 1.6;
+}
+
+/* ==================================================
+   PREPARED CANVAS SCENE (FOUNDATION FOR FUTURE VERSIONS)
+   ================================================== */
+
+.prepared-canvas-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s var(--ease-cinematic);
+}
+
+.prepared-canvas-scene.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.prepared-status-container {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.replay-btn {
+  background: rgba(252, 248, 242, 0.05);
+  border: 1px solid rgba(230, 202, 133, 0.25);
+  color: var(--color-warm-beige);
+  padding: 0.65rem 1.4rem;
+  border-radius: 30px;
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.4s var(--ease-cinematic);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.replay-btn:hover {
+  background: rgba(252, 248, 242, 0.12);
+  border-color: rgba(230, 202, 133, 0.5);
+  color: var(--color-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 202, 133, 0.15);
+}
+
+.replay-icon {
+  font-size: 0.75rem;
+  color: var(--color-soft-gold);
+}
+
+/* ==================================================
+   ACCESSIBILITY & REDUCED MOTION PREFERENCES
+   ================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-scene,
+  .subtitle-container,
+  .initials-svg,
+  .replay-btn {
+    transition: none !important;
+    animation: none !important;
   }
 
-  /* ==========================================================================
-     3. VIEWPORT MANAGER
-     ========================================================================== */
-  class ViewportManager {
-    constructor() {
-      this.width = window.innerWidth;
-      this.height = window.innerHeight;
-      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-      this.resizeCallbacks = [];
-
-      this.init();
-    }
-
-    init() {
-      this.updateVh();
-      window.addEventListener('resize', this.debounce(() => this.handleResize(), 150));
-      window.addEventListener('orientationchange', () => this.handleResize());
-    }
-
-    updateVh() {
-      // Fix for mobile browser address bars changing viewport height
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-
-    handleResize() {
-      this.width = window.innerWidth;
-      this.height = window.innerHeight;
-      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-      this.updateVh();
-
-      this.resizeCallbacks.forEach(cb => cb(this.width, this.height, this.dpr));
-    }
-
-    onResize(callback) {
-      if (typeof callback === 'function') {
-        this.resizeCallbacks.push(callback);
-      }
-    }
-
-    debounce(fn, delay) {
-      let timer = null;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn.apply(this, args), delay);
-      };
-    }
+  .subtitle-container {
+    opacity: 1;
+    transform: none;
   }
-
-  /* ==========================================================================
-     4. PARTICLE SYSTEM (60 FPS CANVAS DRIFT)
-     ========================================================================== */
-  class ParticleSystem {
-    constructor(canvas, viewportManager, accessibilityManager) {
-      this.canvas = canvas;
-      this.ctx = canvas.getContext('2d', { alpha: true });
-      this.viewport = viewportManager;
-      this.a11y = accessibilityManager;
-      
-      this.particles = [];
-      this.animationFrameId = null;
-      this.isRunning = false;
-      this.time = 0;
-
-      this.init();
-    }
-
-    init() {
-      this.resizeCanvas();
-      this.createParticles();
-      
-      this.viewport.onResize(() => {
-        this.resizeCanvas();
-      });
-    }
-
-    resizeCanvas() {
-      const w = this.viewport.width;
-      const h = this.viewport.height;
-      const dpr = this.viewport.dpr;
-
-      this.canvas.width = w * dpr;
-      this.canvas.height = h * dpr;
-      this.canvas.style.width = `${w}px`;
-      this.canvas.style.height = `${h}px`;
-
-      this.ctx.scale(dpr, dpr);
-    }
-
-    createParticles() {
-      this.particles = [];
-      const count = Config.particles.count;
-
-      for (let i = 0; i < count; i++) {
-        const colorPrefix = Config.particles.colors[Math.floor(Math.random() * Config.particles.colors.length)];
-        const baseOpacity = 0.2 + Math.random() * 0.65;
-
-        this.particles.push({
-          x: Math.random() * this.viewport.width,
-          y: Math.random() * this.viewport.height,
-          radius: Config.particles.minRadius + Math.random() * (Config.particles.maxRadius - Config.particles.minRadius),
-          vx: (Math.random() - 0.5) * Config.particles.baseSpeedX,
-          vy: -(0.08 + Math.random() * Config.particles.baseSpeedY),
-          baseOpacity: baseOpacity,
-          currentOpacity: baseOpacity,
-          pulsePhase: Math.random() * Math.PI * 2,
-          pulseSpeed: 0.01 + Math.random() * 0.02,
-          colorPrefix: colorPrefix,
-          driftOffset: Math.random() * 100
-        });
-      }
-    }
-
-    start() {
-      if (this.isRunning) return;
-      this.isRunning = true;
-      this.loop();
-    }
-
-    stop() {
-      this.isRunning = false;
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
-    }
-
-    loop() {
-      if (!this.isRunning) return;
-
-      this.update();
-      this.render();
-
-      this.animationFrameId = requestAnimationFrame(() => this.loop());
-    }
-
-    update() {
-      this.time += 0.016;
-      const w = this.viewport.width;
-      const h = this.viewport.height;
-
-      const isReduced = this.a11y.isReducedMotion;
-
-      this.particles.forEach(p => {
-        if (!isReduced) {
-          // Slow organic wave drifting
-          p.x += p.vx + Math.sin(this.time + p.driftOffset) * 0.12;
-          p.y += p.vy;
-
-          // Pulse opacity gently
-          p.pulsePhase += p.pulseSpeed;
-          p.currentOpacity = p.baseOpacity + Math.sin(p.pulsePhase) * 0.15;
-
-          // Wrap edges smoothly
-          if (p.y < -10) {
-            p.y = h + 10;
-            p.x = Math.random() * w;
-          }
-          if (p.x < -10) p.x = w + 10;
-          if (p.x > w + 10) p.x = -10;
-        }
-      });
-    }
-
-    render() {
-      this.ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
-
-      this.particles.forEach(p => {
-        const alpha = Math.max(0, Math.min(1, p.currentOpacity));
-        
-        // Soft outer glowing halo
-        this.ctx.beginPath();
-        const glowGrad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
-        glowGrad.addColorStop(0, `${p.colorPrefix}${alpha})`);
-        glowGrad.addColorStop(0.4, `${p.colorPrefix}${alpha * 0.4})`);
-        glowGrad.addColorStop(1, `${p.colorPrefix}0)`);
-
-        this.ctx.fillStyle = glowGrad;
-        this.ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        // Bright particle core
-        this.ctx.beginPath();
-        this.ctx.fillStyle = `${p.colorPrefix}${Math.min(1, alpha + 0.2)})`;
-        this.ctx.arc(p.x, p.y, p.radius * 0.8, 0, Math.PI * 2);
-        this.ctx.fill();
-      });
-    }
-  }
-
-  /* ==========================================================================
-     5. HANDWRITTEN INITIALS SYSTEM
-     ========================================================================== */
-  class HandwrittenInitials {
-    constructor(svgElement, wrapperElement, accessibilityManager) {
-      this.svg = svgElement;
-      this.wrapper = wrapperElement;
-      this.a11y = accessibilityManager;
-      
-      this.strokes = Array.from(this.svg.querySelectorAll('.handwritten-stroke'));
-      this.penTip = this.svg.querySelector('#pen-tip-spark');
-      
-      this.strokeData = [];
-      this.totalLength = 0;
-      this.isComplete = false;
-
-      this.init();
-    }
-
-    init() {
-      // Calculate length for every stroke
-      this.totalLength = 0;
-      this.strokeData = this.strokes.map(path => {
-        const length = path.getTotalLength();
-        this.totalLength += length;
-        
-        // Set initial SVG stroke dash properties
-        path.style.strokeDasharray = `${length} ${length}`;
-        path.style.strokeDashoffset = `${length}`;
-        
-        return { path, length };
-      });
-    }
-
-    animateWriting(onComplete) {
-      if (this.a11y.isReducedMotion) {
-        // Complete immediately for reduced motion preference
-        this.strokeData.forEach(item => {
-          item.path.style.strokeDashoffset = '0';
-        });
-        this.penTip.style.opacity = '0';
-        if (typeof onComplete === 'function') onComplete();
-        return;
-      }
-
-      const totalDuration = Config.handwriting.totalDurationSeconds * 1000;
-      let startTime = null;
-
-      // Make pen tip visible
-      this.penTip.style.opacity = '1';
-
-      const step = (timestamp) => {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const globalProgress = Math.min(1, elapsed / totalDuration);
-
-        // Map global distance along strokes
-        const targetDistance = globalProgress * this.totalLength;
-        let accumulatedDistance = 0;
-        let currentTipPoint = null;
-
-        for (let i = 0; i < this.strokeData.length; i++) {
-          const { path, length } = this.strokeData[i];
-          
-          if (targetDistance <= accumulatedDistance) {
-            // Stroke has not started writing yet
-            path.style.strokeDashoffset = `${length}`;
-          } else if (targetDistance >= accumulatedDistance + length) {
-            // Stroke is completely written
-            path.style.strokeDashoffset = '0';
-          } else {
-            // Stroke is currently being written
-            const strokeProgress = targetDistance - accumulatedDistance;
-            path.style.strokeDashoffset = `${length - strokeProgress}`;
-            currentTipPoint = path.getPointAtLength(strokeProgress);
-          }
-
-          accumulatedDistance += length;
-        }
-
-        // Position pen tip ember spark
-        if (currentTipPoint) {
-          this.penTip.setAttribute('cx', currentTipPoint.x);
-          this.penTip.setAttribute('cy', currentTipPoint.y);
-        }
-
-        if (globalProgress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          // Writing complete — smoothly fade out pen spark
-          this.penTip.style.transition = 'opacity 0.4s ease';
-          this.penTip.style.opacity = '0';
-          this.isComplete = true;
-
-          if (typeof onComplete === 'function') {
-            setTimeout(onComplete, Config.handwriting.glowDelayMs);
-          }
-        }
-      };
-
-      requestAnimationFrame(step);
-    }
-
-    applyWarmGlow() {
-      this.wrapper.classList.add('glowing');
-    }
-  }
-
-  /* ==========================================================================
-     6. TIMELINE SEQUENCE ENGINE (STATE MACHINE)
-     ========================================================================== */
-  class TimelineSequence {
-    constructor(elements, components) {
-      this.loadingScreen = elements.loadingScreen;
-      this.subtitle = elements.subtitle;
-      this.worldContainer = elements.worldContainer;
-      
-      this.particleSystem = components.particleSystem;
-      this.initials = components.initials;
-      
-      this.currentState = 'IDLE';
-      this.listeners = new Map();
-    }
-
-    on(event, callback) {
-      if (!this.listeners.has(event)) {
-        this.listeners.set(event, []);
-      }
-      this.listeners.get(event).push(callback);
-    }
-
-    emit(event, data) {
-      if (this.listeners.has(event)) {
-        this.listeners.get(event).forEach(cb => cb(data));
-      }
-    }
-
-    start() {
-      this.transitionTo('LOADING');
-
-      // Step 1: Particles start moving immediately
-      this.particleSystem.start();
-
-      // Step 2: Pause briefly then begin handwriting
-      setTimeout(() => {
-        this.transitionTo('WRITING');
-        
-        this.initials.animateWriting(() => {
-          // Step 3: Writing finished -> Apply warm glow
-          this.transitionTo('GLOWING');
-          this.initials.applyWarmGlow();
-
-          // Step 4: Fade in subtitle
-          setTimeout(() => {
-            this.transitionTo('SUBTITLE');
-            this.subtitle.classList.add('visible');
-
-            // Step 5: Brief pause for reflection
-            setTimeout(() => {
-              this.transitionTo('FADING_OUT');
-              this.loadingScreen.classList.add('fade-out');
-
-              // Step 6: Complete sequence -> reveal empty dark scene V1.2 container
-              setTimeout(() => {
-                this.transitionTo('READY_V1_2');
-                this.worldContainer.setAttribute('aria-hidden', 'false');
-                this.emit('sequenceComplete');
-              }, Config.timeline.screenFadeMs);
-
-            }, Config.timeline.readPauseMs);
-
-          }, Config.handwriting.subtitleDelayMs);
-        });
-
-      }, Config.handwriting.initialDelayMs);
-    }
-
-    transitionTo(newState) {
-      this.currentState = newState;
-      this.emit('stateChange', newState);
-    }
-  }
-
-  /* ==========================================================================
-     7. SCENE MANAGEMENT FOUNDATION (VERSION 1.2 EXTENSION POINT)
-     ========================================================================== */
-  class SceneManager {
-    constructor(containerElement) {
-      this.container = containerElement;
-      this.activeScene = null;
-      this.registeredScenes = new Map();
-    }
-
-    registerScene(sceneId, sceneInstance) {
-      this.registeredScenes.set(sceneId, sceneInstance);
-    }
-
-    // Foundation method for V1.2 scene transitions
-    loadScene(sceneId) {
-      if (this.registeredScenes.has(sceneId)) {
-        const scene = this.registeredScenes.get(sceneId);
-        if (this.activeScene && typeof this.activeScene.destroy === 'function') {
-          this.activeScene.destroy();
-        }
-        this.activeScene = scene;
-        if (typeof scene.init === 'function') {
-          scene.init(this.container);
-        }
-      }
-    }
-  }
-
-  /* ==========================================================================
-     8. APP INITIALIZATION & PUBLIC API
-     ========================================================================== */
-  class App {
-    constructor() {
-      this.elements = {};
-      this.components = {};
-      this.init();
-    }
-
-    init() {
-      document.addEventListener('DOMContentLoaded', () => {
-        // Cache DOM elements
-        this.elements = {
-          app: document.getElementById('app'),
-          particleCanvas: document.getElementById('particle-canvas'),
-          loadingScreen: document.getElementById('loading-screen'),
-          initialsSvg: document.getElementById('initials-svg'),
-          initialsWrapper: document.getElementById('initials-wrapper'),
-          subtitle: document.getElementById('loading-subtitle'),
-          worldContainer: document.getElementById('world-container')
-        };
-
-        // Initialize Core Systems
-        this.components.a11y = new AccessibilityManager();
-        this.components.viewport = new ViewportManager();
-        
-        this.components.particleSystem = new ParticleSystem(
-          this.elements.particleCanvas,
-          this.components.viewport,
-          this.components.a11y
-        );
-
-        this.components.initials = new HandwrittenInitials(
-          this.elements.initialsSvg,
-          this.elements.initialsWrapper,
-          this.components.a11y
-        );
-
-        this.components.sceneManager = new SceneManager(
-          this.elements.worldContainer
-        );
-
-        this.components.timeline = new TimelineSequence(
-          this.elements,
-          this.components
-        );
-
-        // Global Public Interface for future versions & testing
-        window.LittleWorld = {
-          version: '1.1',
-          getTimelineState: () => this.components.timeline.currentState,
-          sceneManager: this.components.sceneManager,
-          replay: () => location.reload()
-        };
-
-        // Start Cinematic Sequence
-        this.components.timeline.start();
-      });
-    }
-  }
-
-  // Instantiate Application Engine
-  new App();
-
-})();
+}
