@@ -1,250 +1,529 @@
-/* ==========================================================================
-   A LITTLE WORLD MADE JUST FOR HER — VERSION 1.1 FOUNDATION STYLES
-   ========================================================================== */
+/**
+ * ============================================================================
+ * A LITTLE WORLD MADE JUST FOR HER — VERSION 1.1 ARCHITECTURE ENGINE
+ * ============================================================================
+ * Single responsibility modules:
+ * 1. Config — Master configuration settings & constants
+ * 2. ViewportManager — DPI scaling, dynamic VH handling, resize listener
+ * 3. ParticleSystem — High-performance 60 FPS floating canvas particles
+ * 4. HandwrittenInitials — Calligraphic SVG stroke calculation & pen tip tracking
+ * 5. TimelineSequence — State machine driving animation sequence
+ * 6. AccessibilityManager — Reduced motion detector & overrides
+ * 7. SceneManager — Modular foundation for Version 1.2+ scene mounting
+ * 8. App — Lifecycle manager and public window interface
+ * ============================================================================
+ */
 
-/* --------------------------------------------------------------------------
-   1. COLOR SYSTEM & CSS VARIABLES
-   -------------------------------------------------------------------------- */
-:root {
-  /* Primary Soft Palette */
-  --color-cream: #FAF6EE;
-  --color-warm-beige: #EADBC8;
-  --color-blush-pink: #F8C8DC;
-  --color-lavender: #E6E6FA;
-  --color-baby-blue: #B9DDF1;
-  --color-sage-green: #B2AC88;
-  --color-soft-gold: #E5C378;
-  --color-warm-moon-yellow: #FFF2B2;
+(function () {
+  'use strict';
 
-  /* Atmospheric Background Gradients (Deep Indigo / Midnight) */
-  --color-bg-deep: #050710;
-  --color-bg-midnight: #0A0D1D;
-  --color-bg-indigo: #101632;
-  --color-bg-glow: #182246;
+  /* ==========================================================================
+     1. MASTER CONFIGURATION
+     ========================================================================== */
+  const Config = {
+    particles: {
+      count: 50, // 40-60 optimal range
+      minRadius: 1.0,
+      maxRadius: 3.2,
+      baseSpeedX: 0.08,
+      baseSpeedY: 0.22,
+      colors: [
+        'rgba(250, 246, 238, ',  // Cream
+        'rgba(229, 195, 120, ',  // Soft Gold
+        'rgba(248, 200, 220, ',  // Blush Pink
+        'rgba(185, 221, 241, '   // Baby Blue
+      ]
+    },
+    handwriting: {
+      totalDurationSeconds: 3.8, // Duration of visible writing animation
+      initialDelayMs: 600,       // Pause before pen starts writing
+      glowDelayMs: 300,          // Delay after writing before warm glow appears
+      subtitleDelayMs: 600       // Delay before subtitle fades in
+    },
+    timeline: {
+      readPauseMs: 3500,         // Pause after subtitle visible before screen fades
+      screenFadeMs: 2500         // Transition fade out duration
+    }
+  };
 
-  /* Glow Shadows & Effects */
-  --glow-warm: rgba(229, 195, 120, 0.45);
-  --glow-pink: rgba(248, 200, 220, 0.35);
-
-  /* Typography */
-  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
-  --font-sans: 'Montserrat', -apple-system, sans-serif;
-
-  /* Timing & Transitions */
-  --ease-cinematic: cubic-bezier(0.25, 1, 0.35, 1);
-  --ease-soft-fade: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* --------------------------------------------------------------------------
-   2. VIEWPORT & RESET (STRICT NO-SCROLL CINEMATIC STYLING)
-   -------------------------------------------------------------------------- */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden !important;
-  background-color: var(--color-bg-deep);
-  color: var(--color-cream);
-  font-family: var(--font-serif);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Base App Viewport */
-.app-viewport {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 50% 50%, var(--color-bg-indigo) 0%, var(--color-bg-midnight) 65%, var(--color-bg-deep) 100%);
-}
-
-/* --------------------------------------------------------------------------
-   3. BACKGROUND CANVAS (FLOATING PARTICLES)
-   -------------------------------------------------------------------------- */
-.particle-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* --------------------------------------------------------------------------
-   4. LOADING SCREEN OVERLAY
-   -------------------------------------------------------------------------- */
-.loading-screen {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-  background: radial-gradient(ellipse at 50% 45%, #121938 0%, #0A0D1D 70%, #050710 100%);
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 2.5s var(--ease-soft-fade), visibility 2.5s var(--ease-soft-fade);
-  will-change: opacity, visibility;
-}
-
-/* Loading Screen Fade-Out Modifier */
-.loading-screen.fade-out {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* Container Content Sizing */
-.loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem;
-  max-width: 90vw;
-  z-index: 2;
-}
-
-/* --------------------------------------------------------------------------
-   5. HANDWRITTEN INITIALS SVG & GLOW EFFECTS
-   -------------------------------------------------------------------------- */
-.initials-wrapper {
-  position: relative;
-  width: min(82vw, 540px);
-  height: auto;
-  aspect-ratio: 650 / 320;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 0 2px rgba(229, 195, 120, 0.2));
-  transition: filter 1.8s ease-in-out;
-}
-
-/* Soft Glow State Applied after Writing completes */
-.initials-wrapper.glowing {
-  filter: drop-shadow(0 0 10px rgba(229, 195, 120, 0.55)) 
-          drop-shadow(0 0 24px rgba(248, 200, 220, 0.35));
-  animation: pulse-soft-glow 5s ease-in-out infinite alternate;
-}
-
-.initials-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* Individual Strokes styling */
-.handwritten-stroke {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  opacity: 0.95;
-  will-change: stroke-dashoffset;
-}
-
-/* Pen-Tip Ember Spark */
-.pen-tip-spark {
-  pointer-events: none;
-  transform-origin: center;
-  will-change: transform, opacity;
-  filter: drop-shadow(0 0 6px #FFE082) drop-shadow(0 0 12px #FF80AB);
-}
-
-/* Soft breathing animation for finished glowing initials */
-@keyframes pulse-soft-glow {
-  0% {
-    filter: drop-shadow(0 0 8px rgba(229, 195, 120, 0.45)) 
-            drop-shadow(0 0 18px rgba(248, 200, 220, 0.25));
-  }
-  100% {
-    filter: drop-shadow(0 0 14px rgba(229, 195, 120, 0.70)) 
-            drop-shadow(0 0 32px rgba(248, 200, 220, 0.45));
-  }
-}
-
-/* --------------------------------------------------------------------------
-   6. SUBTITLE TYPOGRAPHY
-   -------------------------------------------------------------------------- */
-.loading-subtitle {
-  margin-top: clamp(1.8rem, 4.5vh, 3.2rem);
-  font-family: var(--font-serif);
-  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
-  font-weight: 300;
-  font-style: italic;
-  letter-spacing: 0.16em;
-  color: var(--color-warm-beige);
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 1.8s var(--ease-cinematic), transform 1.8s var(--ease-cinematic);
-  text-shadow: 0 0 12px rgba(234, 219, 200, 0.3);
-  will-change: opacity, transform;
-}
-
-/* Subtitle Fade In Modifier */
-.loading-subtitle.visible {
-  opacity: 0.92;
-  transform: translateY(0);
-}
-
-/* --------------------------------------------------------------------------
-   7. EMPTY SCENE CONTAINER FOR VERSION 1.2
-   -------------------------------------------------------------------------- */
-.world-container {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 5;
-  background: transparent;
-  pointer-events: none;
-}
-
-/* --------------------------------------------------------------------------
-   8. RESPONSIVE BREAKPOINTS & ACCESSIBILITY
-   -------------------------------------------------------------------------- */
-@media (max-width: 480px) {
-  .loading-content {
-    padding: 1rem;
-  }
-  
-  .initials-wrapper {
-    width: min(90vw, 360px);
+  /* ==========================================================================
+     2. ACCESSIBILITY MANAGER
+     ========================================================================== */
+  class AccessibilityManager {
+    constructor() {
+      this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      this.isReducedMotion = this.reducedMotionQuery.matches;
+      
+      this.reducedMotionQuery.addEventListener('change', (e) => {
+        this.isReducedMotion = e.matches;
+      });
+    }
   }
 
-  .loading-subtitle {
-    letter-spacing: 0.12em;
-  }
-}
+  /* ==========================================================================
+     3. VIEWPORT MANAGER
+     ========================================================================== */
+  class ViewportManager {
+    constructor() {
+      this.width = window.innerWidth;
+      this.height = window.innerHeight;
+      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.resizeCallbacks = [];
 
-/* Respect Prefers Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .handwritten-stroke {
-    transition: none !important;
+      this.init();
+    }
+
+    init() {
+      this.updateVh();
+      window.addEventListener('resize', this.debounce(() => this.handleResize(), 150));
+      window.addEventListener('orientationchange', () => this.handleResize());
+    }
+
+    updateVh() {
+      // Fix for mobile browser address bars changing viewport height
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    handleResize() {
+      this.width = window.innerWidth;
+      this.height = window.innerHeight;
+      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      this.updateVh();
+
+      this.resizeCallbacks.forEach(cb => cb(this.width, this.height, this.dpr));
+    }
+
+    onResize(callback) {
+      if (typeof callback === 'function') {
+        this.resizeCallbacks.push(callback);
+      }
+    }
+
+    debounce(fn, delay) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
   }
 
-  .loading-screen {
-    transition: opacity 0.8s linear, visibility 0.8s linear;
+  /* ==========================================================================
+     4. PARTICLE SYSTEM (60 FPS CANVAS DRIFT)
+     ========================================================================== */
+  class ParticleSystem {
+    constructor(canvas, viewportManager, accessibilityManager) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext('2d', { alpha: true });
+      this.viewport = viewportManager;
+      this.a11y = accessibilityManager;
+      
+      this.particles = [];
+      this.animationFrameId = null;
+      this.isRunning = false;
+      this.time = 0;
+
+      this.init();
+    }
+
+    init() {
+      this.resizeCanvas();
+      this.createParticles();
+      
+      this.viewport.onResize(() => {
+        this.resizeCanvas();
+      });
+    }
+
+    resizeCanvas() {
+      const w = this.viewport.width;
+      const h = this.viewport.height;
+      const dpr = this.viewport.dpr;
+
+      this.canvas.width = w * dpr;
+      this.canvas.height = h * dpr;
+      this.canvas.style.width = `${w}px`;
+      this.canvas.style.height = `${h}px`;
+
+      this.ctx.scale(dpr, dpr);
+    }
+
+    createParticles() {
+      this.particles = [];
+      const count = Config.particles.count;
+
+      for (let i = 0; i < count; i++) {
+        const colorPrefix = Config.particles.colors[Math.floor(Math.random() * Config.particles.colors.length)];
+        const baseOpacity = 0.2 + Math.random() * 0.65;
+
+        this.particles.push({
+          x: Math.random() * this.viewport.width,
+          y: Math.random() * this.viewport.height,
+          radius: Config.particles.minRadius + Math.random() * (Config.particles.maxRadius - Config.particles.minRadius),
+          vx: (Math.random() - 0.5) * Config.particles.baseSpeedX,
+          vy: -(0.08 + Math.random() * Config.particles.baseSpeedY),
+          baseOpacity: baseOpacity,
+          currentOpacity: baseOpacity,
+          pulsePhase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.01 + Math.random() * 0.02,
+          colorPrefix: colorPrefix,
+          driftOffset: Math.random() * 100
+        });
+      }
+    }
+
+    start() {
+      if (this.isRunning) return;
+      this.isRunning = true;
+      this.loop();
+    }
+
+    stop() {
+      this.isRunning = false;
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+      }
+    }
+
+    loop() {
+      if (!this.isRunning) return;
+
+      this.update();
+      this.render();
+
+      this.animationFrameId = requestAnimationFrame(() => this.loop());
+    }
+
+    update() {
+      this.time += 0.016;
+      const w = this.viewport.width;
+      const h = this.viewport.height;
+
+      const isReduced = this.a11y.isReducedMotion;
+
+      this.particles.forEach(p => {
+        if (!isReduced) {
+          // Slow organic wave drifting
+          p.x += p.vx + Math.sin(this.time + p.driftOffset) * 0.12;
+          p.y += p.vy;
+
+          // Pulse opacity gently
+          p.pulsePhase += p.pulseSpeed;
+          p.currentOpacity = p.baseOpacity + Math.sin(p.pulsePhase) * 0.15;
+
+          // Wrap edges smoothly
+          if (p.y < -10) {
+            p.y = h + 10;
+            p.x = Math.random() * w;
+          }
+          if (p.x < -10) p.x = w + 10;
+          if (p.x > w + 10) p.x = -10;
+        }
+      });
+    }
+
+    render() {
+      this.ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
+
+      this.particles.forEach(p => {
+        const alpha = Math.max(0, Math.min(1, p.currentOpacity));
+        
+        // Soft outer glowing halo
+        this.ctx.beginPath();
+        const glowGrad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
+        glowGrad.addColorStop(0, `${p.colorPrefix}${alpha})`);
+        glowGrad.addColorStop(0.4, `${p.colorPrefix}${alpha * 0.4})`);
+        glowGrad.addColorStop(1, `${p.colorPrefix}0)`);
+
+        this.ctx.fillStyle = glowGrad;
+        this.ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Bright particle core
+        this.ctx.beginPath();
+        this.ctx.fillStyle = `${p.colorPrefix}${Math.min(1, alpha + 0.2)})`;
+        this.ctx.arc(p.x, p.y, p.radius * 0.8, 0, Math.PI * 2);
+        this.ctx.fill();
+      });
+    }
   }
 
-  .loading-subtitle {
-    transition: opacity 0.8s ease;
+  /* ==========================================================================
+     5. HANDWRITTEN INITIALS SYSTEM
+     ========================================================================== */
+  class HandwrittenInitials {
+    constructor(svgElement, wrapperElement, accessibilityManager) {
+      this.svg = svgElement;
+      this.wrapper = wrapperElement;
+      this.a11y = accessibilityManager;
+      
+      this.strokes = Array.from(this.svg.querySelectorAll('.handwritten-stroke'));
+      this.penTip = this.svg.querySelector('#pen-tip-spark');
+      
+      this.strokeData = [];
+      this.totalLength = 0;
+      this.isComplete = false;
+
+      this.init();
+    }
+
+    init() {
+      // Calculate length for every stroke
+      this.totalLength = 0;
+      this.strokeData = this.strokes.map(path => {
+        const length = path.getTotalLength();
+        this.totalLength += length;
+        
+        // Set initial SVG stroke dash properties
+        path.style.strokeDasharray = `${length} ${length}`;
+        path.style.strokeDashoffset = `${length}`;
+        
+        return { path, length };
+      });
+    }
+
+    animateWriting(onComplete) {
+      if (this.a11y.isReducedMotion) {
+        // Complete immediately for reduced motion preference
+        this.strokeData.forEach(item => {
+          item.path.style.strokeDashoffset = '0';
+        });
+        this.penTip.style.opacity = '0';
+        if (typeof onComplete === 'function') onComplete();
+        return;
+      }
+
+      const totalDuration = Config.handwriting.totalDurationSeconds * 1000;
+      let startTime = null;
+
+      // Make pen tip visible
+      this.penTip.style.opacity = '1';
+
+      const step = (timestamp) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const globalProgress = Math.min(1, elapsed / totalDuration);
+
+        // Map global distance along strokes
+        const targetDistance = globalProgress * this.totalLength;
+        let accumulatedDistance = 0;
+        let currentTipPoint = null;
+
+        for (let i = 0; i < this.strokeData.length; i++) {
+          const { path, length } = this.strokeData[i];
+          
+          if (targetDistance <= accumulatedDistance) {
+            // Stroke has not started writing yet
+            path.style.strokeDashoffset = `${length}`;
+          } else if (targetDistance >= accumulatedDistance + length) {
+            // Stroke is completely written
+            path.style.strokeDashoffset = '0';
+          } else {
+            // Stroke is currently being written
+            const strokeProgress = targetDistance - accumulatedDistance;
+            path.style.strokeDashoffset = `${length - strokeProgress}`;
+            currentTipPoint = path.getPointAtLength(strokeProgress);
+          }
+
+          accumulatedDistance += length;
+        }
+
+        // Position pen tip ember spark
+        if (currentTipPoint) {
+          this.penTip.setAttribute('cx', currentTipPoint.x);
+          this.penTip.setAttribute('cy', currentTipPoint.y);
+        }
+
+        if (globalProgress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          // Writing complete — smoothly fade out pen spark
+          this.penTip.style.transition = 'opacity 0.4s ease';
+          this.penTip.style.opacity = '0';
+          this.isComplete = true;
+
+          if (typeof onComplete === 'function') {
+            setTimeout(onComplete, Config.handwriting.glowDelayMs);
+          }
+        }
+      };
+
+      requestAnimationFrame(step);
+    }
+
+    applyWarmGlow() {
+      this.wrapper.classList.add('glowing');
+    }
   }
 
-  .initials-wrapper {
-    animation: none !important;
+  /* ==========================================================================
+     6. TIMELINE SEQUENCE ENGINE (STATE MACHINE)
+     ========================================================================== */
+  class TimelineSequence {
+    constructor(elements, components) {
+      this.loadingScreen = elements.loadingScreen;
+      this.subtitle = elements.subtitle;
+      this.worldContainer = elements.worldContainer;
+      
+      this.particleSystem = components.particleSystem;
+      this.initials = components.initials;
+      
+      this.currentState = 'IDLE';
+      this.listeners = new Map();
+    }
+
+    on(event, callback) {
+      if (!this.listeners.has(event)) {
+        this.listeners.set(event, []);
+      }
+      this.listeners.get(event).push(callback);
+    }
+
+    emit(event, data) {
+      if (this.listeners.has(event)) {
+        this.listeners.get(event).forEach(cb => cb(data));
+      }
+    }
+
+    start() {
+      this.transitionTo('LOADING');
+
+      // Step 1: Particles start moving immediately
+      this.particleSystem.start();
+
+      // Step 2: Pause briefly then begin handwriting
+      setTimeout(() => {
+        this.transitionTo('WRITING');
+        
+        this.initials.animateWriting(() => {
+          // Step 3: Writing finished -> Apply warm glow
+          this.transitionTo('GLOWING');
+          this.initials.applyWarmGlow();
+
+          // Step 4: Fade in subtitle
+          setTimeout(() => {
+            this.transitionTo('SUBTITLE');
+            this.subtitle.classList.add('visible');
+
+            // Step 5: Brief pause for reflection
+            setTimeout(() => {
+              this.transitionTo('FADING_OUT');
+              this.loadingScreen.classList.add('fade-out');
+
+              // Step 6: Complete sequence -> reveal empty dark scene V1.2 container
+              setTimeout(() => {
+                this.transitionTo('READY_V1_2');
+                this.worldContainer.setAttribute('aria-hidden', 'false');
+                this.emit('sequenceComplete');
+              }, Config.timeline.screenFadeMs);
+
+            }, Config.timeline.readPauseMs);
+
+          }, Config.handwriting.subtitleDelayMs);
+        });
+
+      }, Config.handwriting.initialDelayMs);
+    }
+
+    transitionTo(newState) {
+      this.currentState = newState;
+      this.emit('stateChange', newState);
+    }
   }
-}
+
+  /* ==========================================================================
+     7. SCENE MANAGEMENT FOUNDATION (VERSION 1.2 EXTENSION POINT)
+     ========================================================================== */
+  class SceneManager {
+    constructor(containerElement) {
+      this.container = containerElement;
+      this.activeScene = null;
+      this.registeredScenes = new Map();
+    }
+
+    registerScene(sceneId, sceneInstance) {
+      this.registeredScenes.set(sceneId, sceneInstance);
+    }
+
+    // Foundation method for V1.2 scene transitions
+    loadScene(sceneId) {
+      if (this.registeredScenes.has(sceneId)) {
+        const scene = this.registeredScenes.get(sceneId);
+        if (this.activeScene && typeof this.activeScene.destroy === 'function') {
+          this.activeScene.destroy();
+        }
+        this.activeScene = scene;
+        if (typeof scene.init === 'function') {
+          scene.init(this.container);
+        }
+      }
+    }
+  }
+
+  /* ==========================================================================
+     8. APP INITIALIZATION & PUBLIC API
+     ========================================================================== */
+  class App {
+    constructor() {
+      this.elements = {};
+      this.components = {};
+      this.init();
+    }
+
+    init() {
+      document.addEventListener('DOMContentLoaded', () => {
+        // Cache DOM elements
+        this.elements = {
+          app: document.getElementById('app'),
+          particleCanvas: document.getElementById('particle-canvas'),
+          loadingScreen: document.getElementById('loading-screen'),
+          initialsSvg: document.getElementById('initials-svg'),
+          initialsWrapper: document.getElementById('initials-wrapper'),
+          subtitle: document.getElementById('loading-subtitle'),
+          worldContainer: document.getElementById('world-container')
+        };
+
+        // Initialize Core Systems
+        this.components.a11y = new AccessibilityManager();
+        this.components.viewport = new ViewportManager();
+        
+        this.components.particleSystem = new ParticleSystem(
+          this.elements.particleCanvas,
+          this.components.viewport,
+          this.components.a11y
+        );
+
+        this.components.initials = new HandwrittenInitials(
+          this.elements.initialsSvg,
+          this.elements.initialsWrapper,
+          this.components.a11y
+        );
+
+        this.components.sceneManager = new SceneManager(
+          this.elements.worldContainer
+        );
+
+        this.components.timeline = new TimelineSequence(
+          this.elements,
+          this.components
+        );
+
+        // Global Public Interface for future versions & testing
+        window.LittleWorld = {
+          version: '1.1',
+          getTimelineState: () => this.components.timeline.currentState,
+          sceneManager: this.components.sceneManager,
+          replay: () => location.reload()
+        };
+
+        // Start Cinematic Sequence
+        this.components.timeline.start();
+      });
+    }
+  }
+
+  // Instantiate Application Engine
+  new App();
+
+})();
