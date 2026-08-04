@@ -2,92 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="A peaceful magical world created especially for one person.">
-  <meta name="theme-color" content="#080B1A">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>A Little World Made Just for Her</title>
-  
-  <!-- Premium Google Fonts for cinematic typography -->
+
+  <!-- Typography Preconnect & Standard Storybook Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- Root Cinematic Viewport -->
+  <!-- Cinematic Fullscreen Viewport -->
   <div id="app" class="app-viewport">
     
-    <!-- Background Floating Particle Canvas -->
-    <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"></canvas>
+    <!-- Floating Ambient Particle Canvas -->
+    <canvas id="particle-canvas" class="particle-canvas"></canvas>
 
-    <!-- Loading Experience Overlay -->
-    <section id="loading-screen" class="loading-screen" role="region" aria-label="Welcome Loading Experience">
-      <div class="loading-content">
+    <!-- Foundation Scene Container -->
+    <main id="scene-container" class="scene-container">
+
+      <!-- Loading Scene (Version 1.0 Primary Screen) -->
+      <section id="loading-scene" class="loading-scene" aria-label="Introductory Experience">
         
-        <!-- Center Handwritten Monogram Vector -->
-        <div class="initials-wrapper" id="initials-wrapper">
-          <svg id="initials-svg" class="initials-svg" viewBox="0 0 650 320" aria-label="Handwritten Monogram Initials" role="img">
-            <defs>
-              <!-- Metallic Warm Gold & Blush Gradient Stroke -->
-              <linearGradient id="stroke-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FAF6EE" />
-                <stop offset="30%" stop-color="#FFF2B2" />
-                <stop offset="65%" stop-color="#E5C378" />
-                <stop offset="100%" stop-color="#F8C8DC" />
-              </linearGradient>
+        <div class="loading-content">
+          <!-- Monogram SVG Container -->
+          <div class="initials-wrapper" id="initials-wrapper">
+            <svg id="initials-svg" class="initials-svg" viewBox="0 0 600 240" aria-label="Handwritten Monogram Initials A and M">
+              <defs>
+                <!-- Soft Glow Filter for Initials -->
+                <filter id="path-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="blur1" />
+                  <feGaussianBlur stdDeviation="8" result="blur2" />
+                  <feMerge>
+                    <feMergeNode in="blur2" />
+                    <feMergeNode in="blur1" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
 
-              <!-- Radial Pen-Tip Ember Spark Glow -->
-              <radialGradient id="spark-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
-                <stop offset="30%" stop-color="#FFF2B2" stop-opacity="0.9" />
-                <stop offset="70%" stop-color="#E5C378" stop-opacity="0.4" />
-                <stop offset="100%" stop-color="#E5C378" stop-opacity="0" />
-              </radialGradient>
+                <!-- Pen Tip Radial Sparkle Glow -->
+                <filter id="tip-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-              <!-- Subtle Ambient Glow Filter for Completed Stroke -->
-              <filter id="soft-ambient-glow" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="3" result="blur1" />
-                <feGaussianBlur stdDeviation="8" result="blur2" />
-                <feMerge>
-                  <feMergeNode in="blur2" />
-                  <feMergeNode in="blur1" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
+              <!-- Dynamic Handwriting Path Group -->
+              <g id="stroke-group" class="stroke-group"></g>
 
-            <!-- Sequential Calligraphic SVG Strokes (Representing Monogram "A & E" with Swash) -->
-            <g id="stroke-group" stroke="url(#stroke-gradient)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Initial 'A' Main Stem & Loop -->
-              <path class="handwritten-stroke" id="stroke-1" d="M 130,210 C 135,160 170,75 195,55 C 210,45 220,60 210,90 C 190,150 160,220 150,240 C 145,250 155,250 170,235 C 200,205 240,160 270,160" />
-              <!-- Initial 'A' Crossbar Flourish -->
-              <path class="handwritten-stroke" id="stroke-2" d="M 170,165 C 200,165 230,150 250,130" />
-              <!-- Connecting Ampersand Heart Flourish -->
-              <path class="handwritten-stroke" id="stroke-3" d="M 270,190 C 280,165 300,145 315,150 C 330,155 315,185 290,205 C 275,217 280,235 300,235 C 320,235 340,210 350,180 C 360,150 345,130 325,145 C 310,156 305,180 320,185 C 335,190 360,175 375,160" />
-              <!-- Initial 'E' Main Cursive Swirl -->
-              <path class="handwritten-stroke" id="stroke-4" d="M 440,135 C 415,135 395,150 395,170 C 395,190 425,195 440,195 C 405,200 390,220 390,240 C 390,260 420,265 450,250 C 470,240 480,225 485,210" />
-              <!-- Underlying Calligraphic Base Flourish Swash -->
-              <path class="handwritten-stroke" id="stroke-5" d="M 110,275 C 220,295 400,295 510,275 C 540,269 550,255 530,250 C 510,245 470,265 420,280" />
-            </g>
+              <!-- Active Pen Tip Glowing Marker -->
+              <circle id="pen-tip" class="pen-tip" r="4" fill="var(--color-warm-yellow)" filter="url(#tip-glow)"></circle>
+            </svg>
+          </div>
 
-            <!-- Dynamic Writing Pen-Tip Ember Light Particle -->
-            <circle id="pen-tip-spark" class="pen-tip-spark" r="6" fill="url(#spark-glow)" opacity="0" />
-          </svg>
+          <!-- Emotional Subtitle Message -->
+          <div class="subtitle-container" id="subtitle-container" aria-live="polite">
+            <p class="subtitle-text" id="subtitle-text">Someone made something special for you...</p>
+          </div>
         </div>
 
-        <!-- Atmospheric Subtitle Message -->
-        <p id="loading-subtitle" class="loading-subtitle" aria-hidden="true">
-          Someone made something special for you...
-        </p>
+      </section>
 
-      </div>
-    </section>
+      <!-- Blank Dark Prepared Container (Base for Future Scene Mounting) -->
+      <section id="prepared-canvas-scene" class="prepared-canvas-scene" aria-hidden="true">
+        <div class="prepared-status-container" id="prepared-status">
+          <button id="replay-btn" class="replay-btn" aria-label="Replay Intro Experience">
+            <span class="replay-icon">✦</span>
+            <span class="replay-text">Replay Intro</span>
+          </button>
+        </div>
+      </section>
 
-    <!-- Version 1.2 Empty Scene Mounting Container -->
-    <main id="world-container" class="world-container" aria-hidden="true">
-      <!-- Future version scenes (Moonlit Garden, etc.) will mount here dynamically -->
     </main>
 
   </div>
