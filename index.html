@@ -186,6 +186,80 @@
         <!-- Adaptive Living Garden Canvas (Grass & Flower Planting Zone Layer) -->
         <canvas id="grass-canvas" class="grass-canvas"></canvas>
 
+        <!-- Memory Lane Foundation Area (Version 2.5 Environment Layer) -->
+        <div class="memory-lane-foundation" id="memory-lane-foundation" aria-hidden="true">
+          <!-- Organic Soft Winding Pathway -->
+          <div class="pathway-container">
+            <svg class="pathway-svg" viewBox="0 0 1200 360" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="pathGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(180, 160, 130, 0.08)" />
+                  <stop offset="50%" stop-color="rgba(160, 140, 110, 0.22)" />
+                  <stop offset="100%" stop-color="rgba(140, 120, 90, 0.35)" />
+                </linearGradient>
+                <linearGradient id="pathEdgeGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="rgba(230, 202, 133, 0)" />
+                  <stop offset="50%" stop-color="rgba(230, 202, 133, 0.18)" />
+                  <stop offset="100%" stop-color="rgba(230, 202, 133, 0)" />
+                </linearGradient>
+              </defs>
+
+              <path d="M 520,360 C 540,280 580,220 610,170 C 630,130 615,100 600,80 L 612,80 C 628,100 645,130 622,170 C 592,220 558,280 540,360 Z" fill="url(#pathGrad)" />
+              <path d="M 520,360 C 540,280 580,220 610,170 C 630,130 615,100 600,80" fill="none" stroke="url(#pathEdgeGrad)" stroke-width="1.5" />
+            </svg>
+          </div>
+
+          <!-- Warm Glowing Lanterns Along the Pathway -->
+          <div class="lanterns-container">
+            <div class="lantern lantern-1">
+              <div class="lantern-glow"></div>
+              <div class="lantern-body">
+                <div class="lantern-cap"></div>
+                <div class="lantern-glass">
+                  <div class="lantern-flame"></div>
+                </div>
+                <div class="lantern-post"></div>
+              </div>
+            </div>
+            <div class="lantern lantern-2">
+              <div class="lantern-glow"></div>
+              <div class="lantern-body">
+                <div class="lantern-cap"></div>
+                <div class="lantern-glass">
+                  <div class="lantern-flame"></div>
+                </div>
+                <div class="lantern-post"></div>
+              </div>
+            </div>
+            <div class="lantern lantern-3">
+              <div class="lantern-glow"></div>
+              <div class="lantern-body">
+                <div class="lantern-cap"></div>
+                <div class="lantern-glass">
+                  <div class="lantern-flame"></div>
+                </div>
+                <div class="lantern-post"></div>
+              </div>
+            </div>
+            <div class="lantern lantern-4">
+              <div class="lantern-glow"></div>
+              <div class="lantern-body">
+                <div class="lantern-cap"></div>
+                <div class="lantern-glass">
+                  <div class="lantern-flame"></div>
+                </div>
+                <div class="lantern-post"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Atmospheric Ground Fog Layers -->
+          <div class="ground-fog-container">
+            <div class="ground-fog fog-1"></div>
+            <div class="ground-fog fog-2"></div>
+          </div>
+        </div>
+
         <!-- Subtle Background Dimming Focus Overlay -->
         <div class="scroll-focus-overlay" id="scroll-focus-overlay" aria-hidden="true"></div>
 
@@ -261,12 +335,6 @@
             <span class="replay-icon">✦</span>
             <span class="replay-text">Replay Intro</span>
           </button>
-        </div>
-
-        <!-- Temporary Status Notification Toast for Continue Click -->
-        <div class="status-toast" id="status-toast" aria-live="polite">
-          <span class="toast-icon">✦</span>
-          <span class="toast-text">Memory Lane opens in Version 2.5...</span>
         </div>
 
       </section>
