@@ -1,18 +1,17 @@
 /**
- * A Little World Made Just for Her - Version 1.5 (Updated) Responsive Environment Engine
+ * A Little World Made Just for Her - Version 1.6 Scroll Entrance
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
  * - Config: Dynamic palette definitions, stroke vectors, species configurations.
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
- * - ResponsiveSystem (Environment Engine): Adaptive viewport layout, meadow proportions (28-36%),
+ * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
- * - ParticleSystem: Optimized canvas engine for stars, shooting stars, ultra-slow stationary dust & fireflies.
- * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135, 
- *   flower scaling 0.75-1.0 with guaranteed blossom visibility).
+ * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
+ * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting and smooth cinematic scene transitions.
- * - TimelineManager: Story narrative sequence controller.
+ * - SceneManager: Scene mounting, scroll arrival, and focus overlay controller.
+ * - TimelineManager: Story narrative sequence controller (Steps 1 to 9).
  */
 
 /* ==================================================
@@ -105,7 +104,8 @@ const Config = {
     glowDelay: 400,          // Delay after writing before soft glow
     subtitleDelay: 800,      // Delay before subtitle fades in
     subtitleHold: 3500,      // Hold time for subtitle reading
-    fadeSceneDuration: 2200  // Transition duration into moonlit garden
+    fadeSceneDuration: 2200, // Transition duration into moonlit garden
+    gardenAdmirePause: 2500  // Visitor quiet pause in garden before scroll arrives
   }
 };
 
@@ -257,7 +257,6 @@ class ResponsiveSystem {
     const meadowPct = this.getMeadowHeightPct();
     const grassCanvasHeight = this.height * meadowPct;
 
-    // Update Adaptive CSS Custom Variable for Backdrop Elements
     document.documentElement.style.setProperty('--meadow-height', `${grassCanvasHeight}px`);
 
     if (this.particleCanvas) {
@@ -336,7 +335,6 @@ class ParticleSystem {
         x: Math.random() * this.width,
         y: Math.random() * this.height,
         radius: Utils.randomRange(1.2, 2.8),
-        // Ultra-slow stationary micro-drift
         vx: Utils.randomRange(-0.015, 0.015),
         vy: Utils.randomRange(-0.03, -0.005),
         baseAlpha: Utils.randomRange(0.2, 0.7),
@@ -534,7 +532,7 @@ class ParticleSystem {
       this.ctx.restore();
     }
 
-    // 3. Render Ambient Floating Particles (Stationary Micro-Drift)
+    // 3. Render Ambient Floating Particles
     for (let p of this.particles) {
       if (!isReduced) {
         p.x += p.vx;
@@ -749,9 +747,6 @@ class GrassSystem {
       if (layer === 2) layerScale = Utils.randomRange(1.05, 1.25);
 
       const combinedScale = layerScale * this.flowerScaleGlobal;
-
-      // Flower Planting Zone Strategy:
-      // Flowers originate in middle-to-lower meadow region above bottom safe inset so blossom heads always rest proudly in upper meadow without clipping!
       const plantZoneOffset = Utils.randomRange(18, 48);
 
       this.flowers.push({
@@ -918,7 +913,6 @@ class GrassSystem {
     const isReduced = Utils.prefersReducedMotion();
 
     const globalWind = isReduced ? 0 : Math.sin(now * 0.0008) * 9 + Math.cos(now * 0.0018) * 4;
-    // Account for safe-area insets at bottom of screen
     const basePadding = Math.max(10, this.safeBottomInset + 6);
     const grassBaseY = this.height - basePadding;
 
@@ -1130,12 +1124,14 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER FOUNDATION
+   7. SCENE MANAGER & SCROLL CONTROLLER
    ================================================== */
 class SceneManager {
   constructor() {
     this.loadingScene = document.getElementById('loading-scene');
     this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
+    this.scrollContainer = document.getElementById('scroll-container');
+    this.focusOverlay = document.getElementById('scroll-focus-overlay');
     this.activeScene = 'loading';
   }
 
@@ -1154,7 +1150,25 @@ class SceneManager {
     this.activeScene = 'moonlit-sky';
   }
 
+  async bringInScroll() {
+    if (!this.scrollContainer) return;
+
+    // Slight background dimming focus effect
+    if (this.focusOverlay) {
+      this.focusOverlay.classList.add('active');
+    }
+
+    // Rolled Scroll Entrance: Gravity-like slide from top with soft settling
+    this.scrollContainer.classList.add('arrived');
+  }
+
   resetToLoading() {
+    if (this.scrollContainer) {
+      this.scrollContainer.classList.remove('arrived');
+    }
+    if (this.focusOverlay) {
+      this.focusOverlay.classList.remove('active');
+    }
     if (this.moonlitSkyScene) {
       this.moonlitSkyScene.classList.remove('active');
     }
@@ -1211,6 +1225,12 @@ class TimelineManager {
 
     // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
+
+    // Step 9: Allow visitor to admire the garden atmosphere quiet moment (2.5s)
+    await Utils.wait(Config.timings.gardenAdmirePause);
+
+    // Step 10: Ancient Parchment Scroll Arrives (Version 1.6)
+    await this.sceneManager.bringInScroll();
 
     this.isExecuting = false;
   }
