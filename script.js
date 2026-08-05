@@ -1,17 +1,17 @@
 /**
- * A Little World Made Just for Her - Version 2.3 Birthday Letter Update
+ * A Little World Made Just for Her - Version 2.4 Complete Letter Experience & Continue Interaction
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
- * - Config: Dynamic palette definitions, stroke vectors, species configurations.
+ * - Config: Dynamic palette definitions, stroke vectors, species configurations, fluid timing sequence.
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
  * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
  * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, focus overlay & letter reveal controller.
- * - TimelineManager: Story narrative sequence controller (Steps 1 to 13).
+ * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, focus overlay, letter reveal & Continue interaction controller.
+ * - TimelineManager: Story narrative sequence controller (Steps 1 to 16).
  */
 
 /* ==================================================
@@ -99,17 +99,18 @@ const Config = {
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
   timings: {
-    initialPause: 1200,      // Pause after load before pen starts writing
-    interStrokeDelay: 150,   // Delay between individual path strokes
-    glowDelay: 400,          // Delay after writing before soft glow
-    subtitleDelay: 800,      // Delay before subtitle fades in
-    subtitleHold: 3500,      // Hold time for subtitle reading
-    fadeSceneDuration: 2200, // Transition duration into moonlit garden
-    gardenAdmirePause: 2500, // Visitor quiet pause in garden before paper roll arrives
-    rollPauseBeforeUnfurl: 1000, // 1-second pause at center before vertical opening
-    unfurlDuration: 2600,    // Duration of paper vertical unfurling
-    pauseBeforeLetterReveal: 1000, // 1-second pause after opening before text reveals
-    lineRevealInterval: 1100 // Delay between individual line reveals
+    initialPause: 1000,            // Fast loading pause
+    interStrokeDelay: 120,         // Faster stroke transition
+    glowDelay: 350,                // Delay after writing before glow
+    subtitleDelay: 600,            // Subtitle fade in delay
+    subtitleHold: 3000,            // Subtitle reading pause
+    fadeSceneDuration: 1800,       // Fluid scene fade duration
+    gardenAdmirePause: 1200,       // Garden visible for ~1.2s before scroll slides in
+    rollPauseBeforeUnfurl: 500,    // Pause ~0.5s at center before opening
+    unfurlDuration: 2200,          // Parchment opens smoothly in ~2.2s
+    pauseBeforeLetterReveal: 400,  // Pause ~0.4s before text reveals
+    lineRevealInterval: 750,       // Line reveal pacing ~0.75s per line
+    pauseBeforeContinue: 500       // Wait ~0.5s after last line before "Continue →" appears
   }
 };
 
@@ -1128,7 +1129,7 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER & LETTER REVEAL CONTROLLER
+   7. SCENE MANAGER & INTERACTIVE CONTROLLER
    ================================================== */
 class SceneManager {
   constructor() {
@@ -1137,7 +1138,18 @@ class SceneManager {
     this.paperContainer = document.getElementById('paper-container');
     this.focusOverlay = document.getElementById('scroll-focus-overlay');
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
+    this.continueContainer = document.getElementById('continue-container');
+    this.continueBtn = document.getElementById('continue-btn');
+    this.statusToast = document.getElementById('status-toast');
     this.activeScene = 'loading';
+
+    this.initEvents();
+  }
+
+  initEvents() {
+    if (this.continueBtn) {
+      this.continueBtn.addEventListener('click', () => this.handleContinueClick());
+    }
   }
 
   async fadeOutLoadingScene() {
@@ -1187,7 +1199,29 @@ class SceneManager {
     }
   }
 
+  async showContinueInteraction() {
+    if (!this.continueContainer) return;
+    this.continueContainer.classList.add('visible');
+  }
+
+  handleContinueClick() {
+    // Version 2.4 Interaction Architecture:
+    // Display elegant placeholder status toast ready for Version 2.5 Memory Lane transition
+    if (this.statusToast) {
+      this.statusToast.classList.add('visible');
+      setTimeout(() => {
+        this.statusToast.classList.remove('visible');
+      }, 3500);
+    }
+  }
+
   resetToLoading() {
+    if (this.continueContainer) {
+      this.continueContainer.classList.remove('visible');
+    }
+    if (this.statusToast) {
+      this.statusToast.classList.remove('visible');
+    }
     if (this.letterLines) {
       this.letterLines.forEach(el => el.classList.remove('visible'));
     }
@@ -1255,21 +1289,29 @@ class TimelineManager {
     // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
 
-    // Step 9: Allow visitor to admire garden atmosphere quiet moment (~2.5s)
+    // Step 9: Allow visitor to admire garden atmosphere quiet moment (~1.2s)
     await Utils.wait(Config.timings.gardenAdmirePause);
 
-    // Step 10: Simple Elegant Rolled Paper slides into center & comes to rest
+    // Step 10: Parchment with Wooden Rollers slides into center
     await this.sceneManager.bringInPaperRoll();
 
-    // Step 11: Brief 1-second pause at center
+    // Step 11: Brief 0.5s pause at center
     await Utils.wait(Config.timings.rollPauseBeforeUnfurl);
 
-    // Step 12: Paper unfurls vertically from both ends
+    // Step 12: Parchment unfurls vertically from both ends
     await this.sceneManager.unfurlPaper();
 
-    // Step 13: Pause ~1 second after opening, then begin line-by-line birthday letter reveal
+    // Step 13: Pause 0.4s after opening
     await Utils.wait(Config.timings.pauseBeforeLetterReveal);
+
+    // Step 14: Birthday letter reveals line by line with fluid pacing
     await this.sceneManager.revealLetterLineByLine();
+
+    // Step 15: Pause 0.5s after final line reveals
+    await Utils.wait(Config.timings.pauseBeforeContinue);
+
+    // Step 16: Interactive "Continue →" fades in, glows & pulses
+    await this.sceneManager.showContinueInteraction();
 
     this.isExecuting = false;
   }
@@ -1284,7 +1326,7 @@ class TimelineManager {
     this.handwriting.reset();
     this.sceneManager.resetToLoading();
 
-    await Utils.wait(400);
+    await Utils.wait(300);
     this.runSequence();
   }
 }
