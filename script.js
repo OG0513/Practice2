@@ -1,11 +1,10 @@
-
 /**
- * A Little World Made Just for Her - Version 4.0 Dynamic Memory Data Engine
+ * A Little World Made Just for Her - Version 3.5 Image System Update (Images/photoXX.jpg)
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
  * - Config: Dynamic palette definitions, stroke vectors, species configurations, fluid timing sequence,
- *   and JavaScript Memory Data Array (supports 20+ photos dynamically from assets/images/).
+ *   and JavaScript Memory Data Array configured with 'Images/photo01.jpg' ... 'Images/photo10.jpg' paths.
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
  * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
@@ -101,97 +100,127 @@ const Config = {
     color: "rgba(252, 232, 158, 0.95)",
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
-  // Dynamic Memory Data Array - Supports 20+ Photos Automatically
+  // Dynamic Memory Data Array - Updated Image Path 'Images/' and Extension '.jpg'
   memories: [
     {
       id: 1,
-      image: "/Images/photo01.jpg",
+      image: "Images/photo01.jpg",
       caption: "A quiet night under the stars...",
       type: "polaroid",
       accent: "tape-top-right",
       number: "No. 01",
-      fallbackRoman: "I"
+      fallbackRoman: "I",
+      rotation: -2.8,
+      offsetY: -16,
+      scale: 1.02
     },
     {
       id: 2,
-      image: "assets/images/photo02.webp",
+      image: "Images/photo02.jpg",
       caption: "Sweet laughter & gentle breeze",
       type: "postcard",
       accent: "postmark",
       number: "No. 02",
-      fallbackRoman: "II"
+      fallbackRoman: "II",
+      rotation: 2.2,
+      offsetY: 14,
+      scale: 0.98
     },
     {
       id: 3,
-      image: "assets/images/photo03.webp",
+      image: "Images/photo03.jpg",
       caption: "Unforgettable warm moments",
       type: "polaroid",
       accent: "pressed-flower",
       number: "No. 03",
-      fallbackRoman: "III"
+      fallbackRoman: "III",
+      rotation: -1.5,
+      offsetY: -8,
+      scale: 1.04
     },
     {
       id: 4,
-      image: "assets/images/photo04.webp",
+      image: "Images/photo04.jpg",
       caption: "Walking through the moonlight",
       type: "polaroid",
       accent: "tape-top-left",
       number: "No. 04",
-      fallbackRoman: "IV"
+      fallbackRoman: "IV",
+      rotation: 3.2,
+      offsetY: 18,
+      scale: 0.96
     },
     {
       id: 5,
-      image: "assets/images/photo05.webp",
+      image: "Images/photo05.jpg",
       caption: "A smile that brightens the day",
       type: "postcard",
       accent: "stamp-air",
       number: "No. 05",
-      fallbackRoman: "V"
+      fallbackRoman: "V",
+      rotation: -2.4,
+      offsetY: -12,
+      scale: 1.01
     },
     {
       id: 6,
-      image: "assets/images/photo06.webp",
+      image: "Images/photo06.jpg",
       caption: "Forever in our hearts",
       type: "polaroid",
       accent: "pressed-leaf",
       number: "No. 06",
-      fallbackRoman: "VI"
+      fallbackRoman: "VI",
+      rotation: 1.8,
+      offsetY: 10,
+      scale: 0.99
     },
     {
       id: 7,
-      image: "assets/images/photo07.webp",
+      image: "Images/photo07.jpg",
       caption: "Whispers of joy and light",
       type: "postcard",
       accent: "tape-top-right",
       number: "No. 07",
-      fallbackRoman: "VII"
+      fallbackRoman: "VII",
+      rotation: -3.1,
+      offsetY: -15,
+      scale: 1.03
     },
     {
       id: 8,
-      image: "assets/images/photo08.webp",
+      image: "Images/photo08.jpg",
       caption: "Surrounded by nature’s grace",
       type: "postcard",
       accent: "stamp-wish",
       number: "No. 08",
-      fallbackRoman: "VIII"
+      fallbackRoman: "VIII",
+      rotation: 2.5,
+      offsetY: 12,
+      scale: 0.97
     },
     {
       id: 9,
-      image: "assets/images/photo09.webp",
+      image: "Images/photo09.jpg",
       caption: "Moments that shine forever",
       type: "polaroid",
       accent: "pressed-flower-pink",
       number: "No. 09",
-      fallbackRoman: "IX"
+      fallbackRoman: "IX",
+      rotation: -1.9,
+      offsetY: -10,
+      scale: 1.02
     },
     {
       id: 10,
-      image: "assets/images/photo10.webp",
+      image: "Images/photo10.jpg",
       caption: "A story made just for her",
       type: "postcard",
       accent: "tape-top-left",
       number: "No. 10",
-      fallbackRoman: "X"
+      fallbackRoman: "X",
+      rotation: 2.9,
+      offsetY: 16,
+      scale: 0.98
     }
   ],
   timings: {
@@ -1258,7 +1287,7 @@ class SceneManager {
     }
   }
 
-  // Version 4.0 Dynamic Memory Data DOM Generator
+  // Dynamic Memory Data DOM Generator (Version 3.5 Image System Update)
   buildScrapbookDOM() {
     if (!this.scrapbookTrack || !Config.memories) return;
 
@@ -1324,11 +1353,11 @@ class SceneManager {
     this.memoryLaneScrapbook.addEventListener('wheel', (e) => {
       if (this.memoryLaneScrapbook.classList.contains('active')) {
         e.preventDefault();
-        this.memoryLaneScrapbook.scrollLeft += e.deltaY + e.deltaX;
+        this.memoryLaneScrapbook.scrollLeft += (e.deltaY || e.deltaX) * 1.2;
       }
     }, { passive: false });
 
-    // IntersectionObserver to animate memory cards ONCE when entering viewport (400-500ms entrance)
+    // IntersectionObserver to animate memory cards ONCE when entering viewport (350-450ms entrance)
     if ('IntersectionObserver' in window) {
       const cardObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
