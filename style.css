@@ -628,7 +628,7 @@ html, body {
 @keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
 
 /* ==================================================
-   MEMORY LANE DYNAMIC MEMORY DATA SCRAPBOOK (VERSION 4.0)
+   MEMORY LANE DYNAMIC SCRAPBOOK (VERSION 3.5 IMAGES SYSTEM UPDATE)
    ================================================== */
 
 .memory-lane-scrapbook {
@@ -673,27 +673,15 @@ html, body {
   position: relative;
   flex-shrink: 0;
   opacity: 0;
-  transform: translateY(35px) scale(0.94);
-  transition: opacity 0.45s var(--ease-cinematic), transform 0.45s var(--ease-cinematic);
+  transform: translateY(30px) scale(0.94);
+  transition: opacity 0.4s var(--ease-cinematic), transform 0.4s var(--ease-cinematic);
   will-change: opacity, transform;
 }
 
-/* Card Animates ONLY ONCE when entering viewport */
+/* Card Animates ONLY ONCE when entering viewport (350-450ms entrance) */
 .memory-card.in-view {
   opacity: 1;
 }
-
-/* Organic Handmade Rotation, Offset & Scale Variations */
-.memory-1.in-view { transform: translateY(-16px) rotate(-2.8deg) scale(1.02); }
-.memory-2.in-view { transform: translateY(14px) rotate(2.2deg) scale(0.98); }
-.memory-3.in-view { transform: translateY(-8px) rotate(-1.5deg) scale(1.04); }
-.memory-4.in-view { transform: translateY(18px) rotate(3.2deg) scale(0.96); }
-.memory-5.in-view { transform: translateY(-12px) rotate(-2.4deg) scale(1.01); }
-.memory-6.in-view { transform: translateY(10px) rotate(1.8deg) scale(0.99); }
-.memory-7.in-view { transform: translateY(-15px) rotate(-3.1deg) scale(1.03); }
-.memory-8.in-view { transform: translateY(12px) rotate(2.5deg) scale(0.97); }
-.memory-9.in-view { transform: translateY(-10px) rotate(-1.9deg) scale(1.02); }
-.memory-10.in-view { transform: translateY(16px) rotate(2.9deg) scale(0.98); }
 
 /* Polaroid Frame Design */
 .card-polaroid {
@@ -784,7 +772,7 @@ html, body {
   pointer-events: none;
 }
 
-/* Photo Area & Glare - Preserving Aspect Ratio & Subtle Warmth Treatment */
+/* Photo Area & Glare - Preserving Aspect Ratio & Subtle Warm Tone Treatment */
 .photo-wrapper {
   position: relative;
   width: 100%;
