@@ -189,12 +189,19 @@
         <!-- Subtle Background Dimming Focus Overlay -->
         <div class="scroll-focus-overlay" id="scroll-focus-overlay" aria-hidden="true"></div>
 
-        <!-- Vintage Parchment Paper & Birthday Letter Container -->
+        <!-- Vintage Parchment Paper & Birthday Letter Container with Wooden Rollers -->
         <div class="paper-container" id="paper-container" aria-label="Vintage Parchment Letter">
-          <!-- Upper Naturally Curled Paper Roll Edge -->
-          <div class="paper-roll roll-top">
-            <div class="roll-edge-shadow"></div>
-            <div class="roll-inner-curl"></div>
+          
+          <!-- Top Wooden Roller Assembly -->
+          <div class="roller-assembly assembly-top">
+            <div class="wood-cap cap-left"></div>
+            <div class="wood-bar">
+              <div class="wood-grain-overlay"></div>
+            </div>
+            <div class="wood-cap cap-right"></div>
+            <div class="paper-roll roll-top">
+              <div class="roll-edge-shadow"></div>
+            </div>
           </div>
 
           <!-- Unfurlable Parchment Paper Sheet Body -->
@@ -217,6 +224,14 @@
                 <p class="letter-line letter-highlight">May your year ahead be as gentle and bright as this garden.</p>
                 <div class="letter-divider"></div>
                 <p class="letter-line letter-closing">Happy Birthday ✦</p>
+
+                <!-- Interactive Handwritten Continue Button -->
+                <div class="continue-container" id="continue-container">
+                  <button class="continue-btn" id="continue-btn" aria-label="Continue Birthday Experience">
+                    <span class="continue-text">Continue</span>
+                    <span class="continue-arrow">→</span>
+                  </button>
+                </div>
               </div>
 
               <div class="letter-corner corner-bottom-left"></div>
@@ -224,10 +239,16 @@
             </div>
           </div>
 
-          <!-- Lower Naturally Curled Paper Roll Edge -->
-          <div class="paper-roll roll-bottom">
-            <div class="roll-edge-shadow"></div>
-            <div class="roll-inner-curl"></div>
+          <!-- Bottom Wooden Roller Assembly -->
+          <div class="roller-assembly assembly-bottom">
+            <div class="wood-cap cap-left"></div>
+            <div class="wood-bar">
+              <div class="wood-grain-overlay"></div>
+            </div>
+            <div class="wood-cap cap-right"></div>
+            <div class="paper-roll roll-bottom">
+              <div class="roll-edge-shadow"></div>
+            </div>
           </div>
 
           <!-- Soft Floor Drop Shadow Beneath Paper -->
@@ -241,6 +262,13 @@
             <span class="replay-text">Replay Intro</span>
           </button>
         </div>
+
+        <!-- Temporary Status Notification Toast for Continue Click -->
+        <div class="status-toast" id="status-toast" aria-live="polite">
+          <span class="toast-icon">✦</span>
+          <span class="toast-text">Memory Lane opens in Version 2.5...</span>
+        </div>
+
       </section>
 
     </main>
