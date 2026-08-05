@@ -29,6 +29,11 @@
   --wood-light: #a46d46;
   --wood-accent: #8c5a38;
 
+  /* Scrapbook Frame Palette */
+  --polaroid-bg: #fdfbf7;
+  --postcard-bg: #f7eed9;
+  --frame-shadow: rgba(10, 14, 28, 0.38);
+
   /* Flower Species Palette */
   --flower-daisy: #fcf8f2;
   --flower-daisy-center: #e6ca85;
@@ -493,7 +498,6 @@ html, body {
 
 .memory-lane-foundation.active {
   opacity: 1;
-  pointer-events: auto;
 }
 
 .pathway-container {
@@ -622,6 +626,157 @@ html, body {
 
 @keyframes fog-drift-1 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 @keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+/* ==================================================
+   MEMORY LANE HORIZONTALLY SCROLLABLE SCRAPBOOK (VERSION 3.0)
+   ================================================== */
+
+.memory-lane-scrapbook {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2.2s var(--ease-cinematic);
+  scrollbar-width: none; /* Hide scrollbars for storybook aesthetic */
+}
+
+.memory-lane-scrapbook::-webkit-scrollbar {
+  display: none;
+}
+
+.memory-lane-scrapbook.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scrapbook-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  padding: 0 clamp(4rem, 12vw, 10rem);
+  height: 100%;
+  width: max-content;
+}
+
+/* Individual Memory Card Frames */
+.memory-card {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateY(40px) scale(0.92);
+  transition: opacity 0.65s var(--ease-cinematic), transform 0.65s var(--ease-cinematic);
+  will-change: opacity, transform;
+}
+
+.memory-card.in-view {
+  opacity: 1;
+}
+
+/* Organic Handmade Rotation & Vertical Offset Variations */
+.memory-1.in-view { transform: translateY(-14px) rotate(-2.5deg); }
+.memory-2.in-view { transform: translateY(16px) rotate(2.0deg); }
+.memory-3.in-view { transform: translateY(-10px) rotate(-1.8deg); }
+.memory-4.in-view { transform: translateY(14px) rotate(2.8deg); }
+.memory-5.in-view { transform: translateY(-18px) rotate(-2.2deg); }
+.memory-6.in-view { transform: translateY(12px) rotate(1.5deg); }
+
+/* Polaroid Frame Design */
+.card-polaroid {
+  width: clamp(240px, 32vw, 320px);
+}
+
+.card-polaroid .frame-body {
+  background: var(--polaroid-bg);
+  padding: 12px 12px 20px 12px;
+  border-radius: 6px;
+  box-shadow: 0 10px 32px var(--frame-shadow),
+              0 2px 6px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(230, 215, 185, 0.6);
+  position: relative;
+}
+
+/* Postcard Design */
+.card-postcard {
+  width: clamp(260px, 34vw, 340px);
+}
+
+.card-postcard .frame-body {
+  background: var(--postcard-bg);
+  padding: 14px 14px 18px 14px;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px var(--frame-shadow),
+              0 2px 5px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(180, 150, 110, 0.45);
+  position: relative;
+}
+
+.postcard-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+  padding-right: 4px;
+}
+
+.postcard-stamp {
+  font-size: 0.8rem;
+  color: var(--color-soft-gold);
+  border: 1px dashed rgba(180, 150, 110, 0.6);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Shared Photo Wrapper & Image */
+.photo-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #252d3a;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+.memory-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-overlay-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 252, 245, 0.15) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+
+/* Captions */
+.caption-area {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.caption-text {
+  font-family: var(--font-serif);
+  font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+  font-style: italic;
+  color: #4a3825;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 1px rgba(255, 252, 245, 0.6);
+}
 
 /* ==================================================
    SUBTLE BACKGROUND FOCUS OVERLAY
@@ -1123,6 +1278,8 @@ html, body {
   .continue-container,
   .continue-btn,
   .memory-lane-foundation,
+  .memory-lane-scrapbook,
+  .memory-card,
   .paper-ground-shadow,
   .replay-btn {
     transition: none !important;
@@ -1140,7 +1297,9 @@ html, body {
   .letter-line,
   .letter-divider,
   .continue-container,
-  .memory-lane-foundation {
+  .memory-lane-foundation,
+  .memory-lane-scrapbook,
+  .memory-card {
     opacity: 1;
     transform: none;
   }
