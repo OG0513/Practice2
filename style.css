@@ -14,12 +14,14 @@
   --color-soft-gold: #e6ca85;
   --color-warm-yellow: #fce89e;
 
-  /* Paper Roll Palette (Pure Paper - No Wood / No Caps) */
-  --paper-cream: #fcf8f2;
-  --paper-base: #faf4e8;
-  --paper-shade: #f2e6d6;
-  --paper-dark: #e8d9c5;
-  --paper-shadow: rgba(12, 16, 32, 0.28);
+  /* Vintage Parchment Palette (Refined Warm Vintage Yellow) */
+  --parchment-vintage-top: #fdf8ec;
+  --parchment-vintage-mid: #f8eed8;
+  --parchment-vintage-shade: #f1e2c3;
+  --parchment-vintage-bottom: #e8d5b0;
+  --parchment-border: #d3be9a;
+  --parchment-ink: #3b2a1a;
+  --parchment-ink-dark: #2e1d0f;
 
   /* Flower Species Palette */
   --flower-daisy: #fcf8f2;
@@ -488,8 +490,8 @@ html, body {
 }
 
 /* ==================================================
-   PURE HTML/CSS PAPER ROLL & VERTICAL UNFURLING
-   (NO WOODEN ROLLERS / END CAPS / BANDS)
+   VINTAGE PARCHMENT PAPER & BIRTHDAY LETTER
+   (NO WOODEN ROLLERS / NO END CAPS / NO BANDS)
    ================================================== */
 
 .paper-container {
@@ -497,9 +499,9 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -160vh); /* Start off-screen above viewport */
-  width: clamp(260px, 76vw, 360px);
+  width: clamp(270px, 78vw, 380px);
   z-index: 20;
-  pointer-events: none; /* No interaction in this version */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -511,13 +513,13 @@ html, body {
 /* Responsive Size Tiering across devices */
 @media (min-width: 600px) {
   .paper-container {
-    width: clamp(300px, 48vw, 460px);
+    width: clamp(320px, 50vw, 480px);
   }
 }
 
 @media (min-width: 1024px) {
   .paper-container {
-    width: clamp(340px, 38vw, 520px);
+    width: clamp(360px, 40vw, 540px);
   }
 }
 
@@ -530,21 +532,22 @@ html, body {
 .paper-roll {
   position: relative;
   width: 100%;
-  height: 18px;
-  border-radius: 9px;
-  background: linear-gradient(180deg, #ede1d1 0%, #faf4e8 50%, #d8c7b5 100%);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #e6d2b2 0%, #faf0df 45%, #d4be9c 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   z-index: 5;
   transition: transform 2.6s var(--ease-unfurl), opacity 2.6s ease;
   will-change: transform, opacity;
+  overflow: hidden;
 }
 
 .roll-top {
-  margin-bottom: -9px;
+  margin-bottom: -10px;
 }
 
 .roll-bottom {
-  margin-top: -9px;
+  margin-top: -10px;
 }
 
 .roll-edge-shadow {
@@ -553,21 +556,31 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 9px;
-  background: linear-gradient(90deg, rgba(12, 16, 32, 0.25) 0%, transparent 8%, transparent 92%, rgba(12, 16, 32, 0.25) 100%);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(110, 75, 35, 0.3) 0%, transparent 8%, transparent 92%, rgba(110, 75, 35, 0.3) 100%);
 }
 
-/* Unfurlable Paper Sheet Body */
+.roll-inner-curl {
+  position: absolute;
+  top: 2px;
+  left: 3%;
+  width: 94%;
+  height: 2px;
+  background: rgba(255, 252, 245, 0.6);
+  border-radius: 1px;
+}
+
+/* Unfurlable Vintage Parchment Paper Body */
 .paper-sheet {
   width: 100%;
   height: 10px; /* Tightly rolled initially */
-  background: linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-base) 50%, var(--paper-shade) 100%);
+  background: linear-gradient(180deg, var(--parchment-vintage-top) 0%, var(--parchment-vintage-mid) 35%, var(--parchment-vintage-shade) 70%, var(--parchment-vintage-bottom) 100%);
   border-radius: 8px;
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1),
-              inset 0 -2px 6px rgba(0, 0, 0, 0.12),
-              0 8px 30px rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 2px 8px rgba(110, 75, 35, 0.15),
+              inset 0 -2px 8px rgba(110, 75, 35, 0.18),
+              0 10px 35px rgba(0, 0, 0, 0.28);
   transition: height 2.6s var(--ease-unfurl);
   will-change: height;
   z-index: 3;
@@ -575,27 +588,27 @@ html, body {
 
 /* Unfurled State Physics (Vertical Opening) */
 .paper-container.unfurled .paper-sheet {
-  height: clamp(300px, 48vh, 480px);
+  height: clamp(320px, 52vh, 500px);
 }
 
 .paper-container.unfurled .roll-top {
-  transform: translateY(-2px) scaleY(0.45);
-  opacity: 0.55;
+  transform: translateY(-2px) scaleY(0.48);
+  opacity: 0.65;
 }
 
 .paper-container.unfurled .roll-bottom {
-  transform: translateY(2px) scaleY(0.45);
-  opacity: 0.55;
+  transform: translateY(2px) scaleY(0.48);
+  opacity: 0.65;
 }
 
 /* Mobile Landscape Height Adaptation */
 @media (max-height: 500px) {
   .paper-container.unfurled .paper-sheet {
-    height: clamp(200px, 68vh, 280px);
+    height: clamp(210px, 72vh, 290px);
   }
 }
 
-/* Pure CSS Paper Texture & Inner Lighting */
+/* Pure CSS Paper Texture & Vignette Lighting */
 .paper-texture {
   position: absolute;
   top: 0;
@@ -603,8 +616,8 @@ html, body {
   width: 100%;
   height: 100%;
   background-image: 
-    repeating-linear-gradient(45deg, rgba(140, 90, 56, 0.015) 0px, rgba(140, 90, 56, 0.015) 2px, transparent 2px, transparent 4px),
-    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(210, 185, 150, 0.18) 100%);
+    repeating-linear-gradient(45deg, rgba(140, 90, 56, 0.02) 0px, rgba(140, 90, 56, 0.02) 2px, transparent 2px, transparent 4px),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 253, 245, 0.5) 0%, rgba(210, 180, 140, 0.22) 100%);
   pointer-events: none;
 }
 
@@ -614,20 +627,110 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  box-shadow: inset 0 0 20px rgba(252, 248, 242, 0.6);
+  box-shadow: inset 0 0 22px rgba(255, 252, 240, 0.65);
   pointer-events: none;
 }
 
-.paper-crease-line {
+.paper-edge-vignette {
   position: absolute;
-  top: 50%;
-  left: 5%;
-  width: 90%;
-  height: 1px;
-  background: rgba(140, 90, 56, 0.08);
-  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 25px rgba(110, 75, 35, 0.18);
   pointer-events: none;
 }
+
+/* ==================================================
+   HANDCRAFTED BIRTHDAY LETTER & TYPOGRAPHY
+   ================================================== */
+
+.letter-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: clamp(1.2rem, 3.5vw, 2.2rem) clamp(1.2rem, 4vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.letter-body {
+  width: 100%;
+  text-align: center;
+}
+
+.letter-line {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1.2s var(--ease-cinematic), transform 1.2s var(--ease-cinematic);
+  margin-bottom: clamp(0.35rem, 1.2vh, 0.6rem);
+  font-family: var(--font-serif);
+  font-size: clamp(0.88rem, 1.7vw, 1.15rem);
+  color: var(--parchment-ink);
+  text-shadow: 0 1px 2px rgba(255, 252, 245, 0.8);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
+.letter-line.visible {
+  opacity: 0.95;
+  transform: translateY(0);
+}
+
+.letter-line.letter-salutation {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--parchment-ink-dark);
+  margin-bottom: clamp(0.8rem, 2vh, 1.2rem);
+}
+
+.letter-line.letter-highlight {
+  color: #5c3e12;
+  text-shadow: 0 0 12px rgba(230, 202, 133, 0.4);
+  font-style: italic;
+}
+
+.letter-line.letter-closing {
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--parchment-ink-dark);
+  margin-top: clamp(0.6rem, 1.5vh, 0.9rem);
+  letter-spacing: 0.08em;
+}
+
+.letter-divider {
+  width: 45px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(140, 90, 56, 0.35), transparent);
+  margin: clamp(0.5rem, 1.2vh, 0.8rem) auto;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-cinematic);
+}
+
+.letter-divider.visible {
+  opacity: 1;
+}
+
+/* Minimal Corner Flourishes */
+.letter-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(140, 90, 56, 0.25);
+  pointer-events: none;
+}
+
+.corner-top-left { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+.corner-top-right { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+.corner-bottom-left { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+.corner-bottom-right { bottom: 12px; right: 12px; border-left: none; border-top: none; }
 
 /* Floor Shadow Beneath Paper Container */
 .paper-ground-shadow {
@@ -711,6 +814,8 @@ html, body {
   .paper-sheet,
   .paper-roll,
   .scroll-focus-overlay,
+  .letter-line,
+  .letter-divider,
   .paper-ground-shadow,
   .replay-btn {
     transition: none !important;
@@ -722,7 +827,13 @@ html, body {
   }
 
   .paper-container.unfurled .paper-sheet {
-    height: clamp(300px, 48vh, 480px);
+    height: clamp(320px, 52vh, 500px);
+  }
+
+  .letter-line,
+  .letter-divider {
+    opacity: 1;
+    transform: none;
   }
 
   .subtitle-container {
