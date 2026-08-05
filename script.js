@@ -1,15 +1,15 @@
 /**
- * A Little World Made Just for Her - Version 1.0 Foundation
+ * A Little World Made Just for Her - Version 1.1 Night Sky
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
- * - Config: Application variables and customizable stroke data.
- * - Utils: Easing, math, and SVG/DOM helper functions.
+ * - Config: Global constants, palette mappings, animation timings, sky/star settings.
+ * - Utils: Mathematical, easing, DOM, and SVG utility helpers.
  * - ResponsiveSystem: High-DPI screen and viewport scaling system.
- * - ParticleSystem: Canvas-based floating ambient glowing particle engine.
- * - HandwritingSystem: SVG stroke dashoffset calculation & pen tip sparkle tracer.
- * - SceneManager: Core scene mounting and dissolve transition system.
- * - TimelineManager: Sequential story narrative timeline (Steps 1 to 8).
+ * - ParticleSystem: Canvas particle engine (ambient floating particles + twinkling stars + shooting stars).
+ * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
+ * - SceneManager: Core scene mounting and smooth cinematic scene transitions.
+ * - TimelineManager: Sequential story narrative timeline controller (Steps 1 to 8).
  */
 
 /* ==================================================
@@ -65,13 +65,23 @@ const Config = {
     ],
     stardustColor: "rgba(252, 232, 158, 0.9)"
   },
+  sky: {
+    starCount: 140,
+    starColors: [
+      "rgba(252, 248, 242, 0.9)",  // Cream
+      "rgba(230, 202, 133, 0.95)", // Soft Gold
+      "rgba(247, 214, 208, 0.85)", // Blush Pink
+      "rgba(200, 221, 242, 0.85)", // Baby Blue
+      "rgba(226, 216, 238, 0.85)"  // Lavender
+    ]
+  },
   timings: {
-    initialPause: 1200,      // Pause after load before pen starts writing
-    interStrokeDelay: 150,   // Natural delay between individual strokes
-    glowDelay: 400,          // Delay after writing completes before glow appears
+    initialPause: 1200,      // Pause after screen load before writing
+    interStrokeDelay: 150,   // Delay between individual path strokes
+    glowDelay: 400,          // Delay after writing before soft glow
     subtitleDelay: 800,      // Delay before subtitle fades in
-    subtitleHold: 3500,      // Hold duration for reading subtitle
-    fadeSceneDuration: 2200  // Transition duration into empty dark canvas
+    subtitleHold: 3500,      // Hold time for subtitle reading
+    fadeSceneDuration: 2200  // Transition duration into moonlit night sky
   }
 };
 
@@ -140,20 +150,24 @@ class ResponsiveSystem {
 }
 
 /* ==================================================
-   4. PARTICLE ENGINE SYSTEM
+   4. PARTICLE & NIGHT SKY STARFIELD ENGINE
    ================================================== */
 class ParticleSystem {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.particles = [];
+    this.stars = [];
     this.stardustSparks = [];
+    this.shootingStars = [];
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.isRunning = false;
     this.animFrameId = null;
+    this.lastShootingStarTime = performance.now();
 
     this.initParticles();
+    this.initStars();
   }
 
   initParticles() {
@@ -176,6 +190,26 @@ class ParticleSystem {
     }
   }
 
+  initStars() {
+    this.stars = [];
+    const count = Config.sky.starCount;
+
+    for (let i = 0; i < count; i++) {
+      const isSparkle = Math.random() < 0.12; // 12% 4-point sparkle stars
+      this.stars.push({
+        x: Math.random() * this.width,
+        y: Math.random() * this.height,
+        radius: isSparkle ? Utils.randomRange(1.8, 3.0) : Utils.randomRange(0.7, 1.8),
+        baseAlpha: Utils.randomRange(0.3, 0.9),
+        alpha: Utils.randomRange(0.3, 0.9),
+        twinkleSpeed: Utils.randomRange(0.01, 0.035),
+        phase: Math.random() * Math.PI * 2,
+        isSparkle: isSparkle,
+        color: Config.sky.starColors[Math.floor(Math.random() * Config.sky.starColors.length)]
+      });
+    }
+  }
+
   addStardustSpark(x, y) {
     if (Utils.prefersReducedMotion()) return;
     for (let i = 0; i < 2; i++) {
@@ -192,9 +226,29 @@ class ParticleSystem {
     }
   }
 
+  triggerShootingStar() {
+    if (Utils.prefersReducedMotion()) return;
+    const startX = Utils.randomRange(this.width * 0.1, this.width * 0.7);
+    const startY = Utils.randomRange(this.height * 0.05, this.height * 0.35);
+    const length = Utils.randomRange(90, 160);
+    const speed = Utils.randomRange(3.5, 6.0);
+
+    this.shootingStars.push({
+      x: startX,
+      y: startY,
+      length: length,
+      vx: speed,
+      vy: speed * 0.55,
+      alpha: 1.0,
+      decay: Utils.randomRange(0.012, 0.022),
+      width: Utils.randomRange(1.5, 2.5)
+    });
+  }
+
   resize(width, height) {
     this.width = width;
     this.height = height;
+    this.initStars();
   }
 
   start() {
@@ -210,13 +264,57 @@ class ParticleSystem {
     }
   }
 
-  loop() {
+  drawSparkleStar(x, y, radius, alpha, color) {
+    this.ctx.save();
+    this.ctx.globalAlpha = alpha;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 0.8;
+
+    // Cross flare lines
+    const size = radius * 3;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x - size, y);
+    this.ctx.lineTo(x + size, y);
+    this.ctx.moveTo(x, y - size);
+    this.ctx.lineTo(x, y + size);
+    this.ctx.stroke();
+
+    // Soft Center Glow
+    this.ctx.fillStyle = color;
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius * 0.8, 0, Math.PI * 2);
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  loop(now = performance.now()) {
     if (!this.isRunning) return;
 
     this.ctx.clearRect(0, 0, this.width, this.height);
     const isReduced = Utils.prefersReducedMotion();
 
-    // Render Ambient Glowing Floating Particles
+    // 1. Render Night Sky Twinkling Stars
+    for (let s of this.stars) {
+      if (!isReduced) {
+        s.phase += s.twinkleSpeed;
+        s.alpha = s.baseAlpha + Math.sin(s.phase) * 0.35;
+        s.alpha = Utils.clamp(s.alpha, 0.15, 0.95);
+      }
+
+      if (s.isSparkle) {
+        this.drawSparkleStar(s.x, s.y, s.radius, s.alpha, s.color);
+      } else {
+        this.ctx.save();
+        this.ctx.globalAlpha = s.alpha;
+        this.ctx.fillStyle = s.color;
+        this.ctx.beginPath();
+        this.ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+      }
+    }
+
+    // 2. Render Ambient Floating Particles
     for (let p of this.particles) {
       if (!isReduced) {
         p.x += p.vx + Math.sin(p.phase) * 0.12;
@@ -231,7 +329,6 @@ class ParticleSystem {
         if (p.x > this.width + 10) p.x = -10;
       }
 
-      // Soft Radial Halo Gradient
       const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
       grad.addColorStop(0, p.color);
       grad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -243,7 +340,6 @@ class ParticleSystem {
       this.ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
       this.ctx.fill();
 
-      // Particle Core
       this.ctx.fillStyle = '#ffffff';
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.radius * 0.6, 0, Math.PI * 2);
@@ -251,28 +347,64 @@ class ParticleSystem {
       this.ctx.restore();
     }
 
-    // Render Trailing Pen Stardust Sparks
+    // 3. Render Trailing Pen Stardust Sparks
     for (let i = this.stardustSparks.length - 1; i >= 0; i--) {
-      const s = this.stardustSparks[i];
-      s.x += s.vx;
-      s.y += s.vy;
-      s.alpha -= s.decay;
+      const sp = this.stardustSparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.alpha -= sp.decay;
 
-      if (s.alpha <= 0) {
+      if (sp.alpha <= 0) {
         this.stardustSparks.splice(i, 1);
         continue;
       }
 
       this.ctx.save();
-      this.ctx.globalAlpha = s.alpha;
-      this.ctx.fillStyle = s.color;
+      this.ctx.globalAlpha = sp.alpha;
+      this.ctx.fillStyle = sp.color;
       this.ctx.beginPath();
-      this.ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      this.ctx.arc(sp.x, sp.y, sp.radius, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.restore();
     }
 
-    this.animFrameId = requestAnimationFrame(() => this.loop());
+    // 4. Periodically Trigger & Render Shooting Stars
+    if (!isReduced && now - this.lastShootingStarTime > 8000) {
+      this.triggerShootingStar();
+      this.lastShootingStarTime = now + Utils.randomRange(-2000, 3000);
+    }
+
+    for (let i = this.shootingStars.length - 1; i >= 0; i--) {
+      const st = this.shootingStars[i];
+      st.x += st.vx;
+      st.y += st.vy;
+      st.alpha -= st.decay;
+
+      if (st.alpha <= 0) {
+        this.shootingStars.splice(i, 1);
+        continue;
+      }
+
+      const tailX = st.x - (st.vx / Math.hypot(st.vx, st.vy)) * st.length;
+      const tailY = st.y - (st.vy / Math.hypot(st.vx, st.vy)) * st.length;
+
+      const grad = this.ctx.createLinearGradient(st.x, st.y, tailX, tailY);
+      grad.addColorStop(0, `rgba(252, 248, 242, ${st.alpha})`);
+      grad.addColorStop(0.3, `rgba(230, 202, 133, ${st.alpha * 0.7})`);
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      this.ctx.save();
+      this.ctx.strokeStyle = grad;
+      this.ctx.lineWidth = st.width;
+      this.ctx.lineCap = 'round';
+      this.ctx.beginPath();
+      this.ctx.moveTo(st.x, st.y);
+      this.ctx.lineTo(tailX, tailY);
+      this.ctx.stroke();
+      this.ctx.restore();
+    }
+
+    this.animFrameId = requestAnimationFrame((timestamp) => this.loop(timestamp));
   }
 }
 
@@ -422,28 +554,30 @@ class HandwritingSystem {
 class SceneManager {
   constructor() {
     this.loadingScene = document.getElementById('loading-scene');
-    this.preparedScene = document.getElementById('prepared-canvas-scene');
+    this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
     this.activeScene = 'loading';
   }
 
   async fadeOutLoadingScene() {
     if (!this.loadingScene) return;
 
+    // Reveal Moonlit Sky scene underneath
+    if (this.moonlitSkyScene) {
+      this.moonlitSkyScene.classList.add('active');
+    }
+
+    // Smoothly dissolve loading intro
     this.loadingScene.classList.add('dissolving');
     await Utils.wait(Config.timings.fadeSceneDuration);
 
     this.loadingScene.style.display = 'none';
     this.loadingScene.classList.remove('dissolving');
-
-    if (this.preparedScene) {
-      this.preparedScene.classList.add('active');
-    }
-    this.activeScene = 'prepared';
+    this.activeScene = 'moonlit-sky';
   }
 
   resetToLoading() {
-    if (this.preparedScene) {
-      this.preparedScene.classList.remove('active');
+    if (this.moonlitSkyScene) {
+      this.moonlitSkyScene.classList.remove('active');
     }
     if (this.loadingScene) {
       this.loadingScene.style.display = 'flex';
@@ -496,7 +630,7 @@ class TimelineManager {
     // Step 7: Contemplative brief pause
     await Utils.wait(Config.timings.subtitleHold);
 
-    // Step 8: Dissolve loading screen into empty dark canvas background
+    // Step 8: Smoothly fade into the Moonlit Night Sky
     await this.sceneManager.fadeOutLoadingScene();
 
     this.isExecuting = false;
