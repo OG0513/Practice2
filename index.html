@@ -16,13 +16,13 @@
   <!-- Cinematic Fullscreen Viewport -->
   <div id="app" class="app-viewport">
     
-    <!-- Floating Ambient Particle Canvas -->
+    <!-- Unified Particle & Starfield Canvas -->
     <canvas id="particle-canvas" class="particle-canvas"></canvas>
 
     <!-- Foundation Scene Container -->
     <main id="scene-container" class="scene-container">
 
-      <!-- Loading Scene (Version 1.0 Primary Screen) -->
+      <!-- Loading Scene (Introductory Storybook Experience) -->
       <section id="loading-scene" class="loading-scene" aria-label="Introductory Experience">
         
         <div class="loading-content">
@@ -67,8 +67,57 @@
 
       </section>
 
-      <!-- Blank Dark Prepared Container (Base for Future Scene Mounting) -->
-      <section id="prepared-canvas-scene" class="prepared-canvas-scene" aria-hidden="true">
+      <!-- Moonlit Sky Scene (Version 1.1 Primary Scene) -->
+      <section id="moonlit-sky-scene" class="moonlit-sky-scene" aria-hidden="true">
+        <!-- Atmospheric Night Sky Gradient Background Layer -->
+        <div class="sky-backdrop"></div>
+
+        <!-- Flat Design 2.0 Illustrated Moon Container -->
+        <div class="moon-container" id="moon-container" aria-label="Moonlit Night Sky Moon">
+          <div class="moon-aura-outer"></div>
+          <div class="moon-aura-inner"></div>
+          
+          <svg class="moon-svg" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <!-- Moon Gradient Palette -->
+              <radialGradient id="moonGradient" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#FCF8F2" />
+                <stop offset="60%" stop-color="#F5E8D3" />
+                <stop offset="100%" stop-color="#E6CA85" />
+              </radialGradient>
+              <!-- Soft Flat Crater Gradient -->
+              <radialGradient id="craterGradient" cx="40%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#E8DBC5" stop-opacity="0.45" />
+                <stop offset="100%" stop-color="#D9C4A5" stop-opacity="0.65" />
+              </radialGradient>
+              <!-- Soft Moon Glow Filter -->
+              <filter id="moonGlowFilter" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="6" result="blur1" />
+                <feGaussianBlur stdDeviation="16" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- Soft Glowing Aura Circle -->
+            <circle cx="100" cy="100" r="82" fill="rgba(230, 202, 133, 0.18)" filter="url(#moonGlowFilter)" />
+
+            <!-- Main Moon Vector Silhouette -->
+            <circle cx="100" cy="100" r="72" fill="url(#moonGradient)" />
+
+            <!-- Soft Organic Flat Craters -->
+            <ellipse cx="70" cy="80" rx="14" ry="11" fill="url(#craterGradient)" transform="rotate(-15 70 80)" />
+            <ellipse cx="120" cy="120" rx="18" ry="14" fill="url(#craterGradient)" transform="rotate(10 120 120)" />
+            <ellipse cx="130" cy="65" rx="10" ry="8" fill="url(#craterGradient)" transform="rotate(-5 130 65)" />
+            <ellipse cx="85" cy="135" rx="12" ry="9" fill="url(#craterGradient)" transform="rotate(20 85 135)" />
+            <ellipse cx="145" cy="95" rx="8" ry="6" fill="url(#craterGradient)" transform="rotate(-10 145 95)" />
+          </svg>
+        </div>
+
+        <!-- Prepared Scene Controls (Replay Button) -->
         <div class="prepared-status-container" id="prepared-status">
           <button id="replay-btn" class="replay-btn" aria-label="Replay Intro Experience">
             <span class="replay-icon">✦</span>
