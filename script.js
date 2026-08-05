@@ -1,5 +1,5 @@
 /**
- * A Little World Made Just for Her - Version 2.4 Complete Letter Experience & Continue Interaction
+ * A Little World Made Just for Her - Version 2.5 Memory Lane Transition & Environment Foundation
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -10,7 +10,7 @@
  * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, focus overlay, letter reveal & Continue interaction controller.
+ * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction & Memory Lane transition controller.
  * - TimelineManager: Story narrative sequence controller (Steps 1 to 16).
  */
 
@@ -1129,7 +1129,7 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER & INTERACTIVE CONTROLLER
+   7. SCENE MANAGER & TRANSITION CONTROLLER
    ================================================== */
 class SceneManager {
   constructor() {
@@ -1137,18 +1137,20 @@ class SceneManager {
     this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
     this.paperContainer = document.getElementById('paper-container');
     this.focusOverlay = document.getElementById('scroll-focus-overlay');
+    this.moonContainer = document.getElementById('moon-container');
+    this.memoryLaneFoundation = document.getElementById('memory-lane-foundation');
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.continueContainer = document.getElementById('continue-container');
     this.continueBtn = document.getElementById('continue-btn');
-    this.statusToast = document.getElementById('status-toast');
     this.activeScene = 'loading';
+    this.isTransitioning = false;
 
     this.initEvents();
   }
 
   initEvents() {
     if (this.continueBtn) {
-      this.continueBtn.addEventListener('click', () => this.handleContinueClick());
+      this.continueBtn.addEventListener('click', (e) => this.handleContinueClick(e));
     }
   }
 
@@ -1204,23 +1206,55 @@ class SceneManager {
     this.continueContainer.classList.add('visible');
   }
 
-  handleContinueClick() {
-    // Version 2.4 Interaction Architecture:
-    // Display elegant placeholder status toast ready for Version 2.5 Memory Lane transition
-    if (this.statusToast) {
-      this.statusToast.classList.add('visible');
-      setTimeout(() => {
-        this.statusToast.classList.remove('visible');
-      }, 3500);
+  async handleContinueClick(e) {
+    if (e) e.preventDefault();
+    if (this.isTransitioning) return;
+    this.isTransitioning = true;
+
+    // 1. Disable Further Clicks & Remove Hover Effects
+    if (this.continueBtn) {
+      this.continueBtn.style.pointerEvents = 'none';
     }
+
+    // 2. Continue text & letter lines slowly fade away
+    if (this.paperContainer) {
+      this.paperContainer.classList.add('rolling-up');
+    }
+
+    // 3. Wait for parchment to curl back up into cylinder (~2.2s)
+    await Utils.wait(2200);
+
+    // 4. Parchment slowly ascends/floats upward into night sky while rotating ~2.8 degrees
+    if (this.paperContainer) {
+      this.paperContainer.classList.add('ascending');
+    }
+
+    // 5. Wait for parchment to float above top viewport and fade (~2.0s)
+    await Utils.wait(2000);
+
+    // 6. Camera / Lighting feel: Slightly dim background (~6%) & enhance moon glow
+    if (this.focusOverlay) {
+      this.focusOverlay.style.opacity = '0.14';
+    }
+    if (this.moonContainer) {
+      this.moonContainer.style.filter = 'drop-shadow(0 0 22px rgba(230, 202, 133, 0.65))';
+    }
+
+    // 7. Slowly introduce Memory Lane Foundation (Environment Only)
+    if (this.memoryLaneFoundation) {
+      this.memoryLaneFoundation.classList.add('active');
+    }
+
+    this.isTransitioning = false;
   }
 
   resetToLoading() {
+    this.isTransitioning = false;
+    if (this.continueBtn) {
+      this.continueBtn.style.pointerEvents = 'auto';
+    }
     if (this.continueContainer) {
       this.continueContainer.classList.remove('visible');
-    }
-    if (this.statusToast) {
-      this.statusToast.classList.remove('visible');
     }
     if (this.letterLines) {
       this.letterLines.forEach(el => el.classList.remove('visible'));
@@ -1228,9 +1262,18 @@ class SceneManager {
     if (this.paperContainer) {
       this.paperContainer.classList.remove('arrived');
       this.paperContainer.classList.remove('unfurled');
+      this.paperContainer.classList.remove('rolling-up');
+      this.paperContainer.classList.remove('ascending');
+    }
+    if (this.memoryLaneFoundation) {
+      this.memoryLaneFoundation.classList.remove('active');
     }
     if (this.focusOverlay) {
+      this.focusOverlay.style.opacity = '';
       this.focusOverlay.classList.remove('active');
+    }
+    if (this.moonContainer) {
+      this.moonContainer.style.filter = '';
     }
     if (this.moonlitSkyScene) {
       this.moonlitSkyScene.classList.remove('active');
