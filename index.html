@@ -189,44 +189,27 @@
         <!-- Subtle Background Dimming Focus Overlay -->
         <div class="scroll-focus-overlay" id="scroll-focus-overlay" aria-hidden="true"></div>
 
-        <!-- Pure HTML/CSS Rolled Ancient Parchment Scroll Container -->
-        <div class="scroll-container" id="scroll-container" aria-label="Rolled Parchment Scroll">
-          <div class="scroll-body-wrapper">
-            <!-- Left Roller -->
-            <div class="scroll-roller roller-left">
-              <div class="wood-cap cap-top"></div>
-              <div class="wood-cylinder">
-                <div class="deco-band band-top"></div>
-                <div class="deco-band band-bottom"></div>
-              </div>
-              <div class="wood-cap cap-bottom"></div>
-            </div>
-
-            <!-- Rolled Parchment Body -->
-            <div class="scroll-parchment">
-              <div class="parchment-texture"></div>
-              <div class="parchment-shadow-left"></div>
-              <div class="parchment-shadow-right"></div>
-              <div class="parchment-crease"></div>
-              <div class="parchment-ribbon-tie">
-                <div class="ribbon-band"></div>
-                <div class="ribbon-knot"></div>
-              </div>
-            </div>
-
-            <!-- Right Roller -->
-            <div class="scroll-roller roller-right">
-              <div class="wood-cap cap-top"></div>
-              <div class="wood-cylinder">
-                <div class="deco-band band-top"></div>
-                <div class="deco-band band-bottom"></div>
-              </div>
-              <div class="wood-cap cap-bottom"></div>
-            </div>
+        <!-- Pure HTML/CSS Rolled Paper & Vertical Unfurl Container (No Wooden Rollers / End Caps / Bands) -->
+        <div class="paper-container" id="paper-container" aria-label="Rolled Paper Sheet">
+          <!-- Upper Paper Roll Edge -->
+          <div class="paper-roll roll-top">
+            <div class="roll-edge-shadow"></div>
           </div>
 
-          <!-- Soft Floor Shadow Beneath Scroll -->
-          <div class="scroll-ground-shadow" id="scroll-shadow"></div>
+          <!-- Unfurlable Paper Sheet Body -->
+          <div class="paper-sheet" id="paper-sheet">
+            <div class="paper-texture"></div>
+            <div class="paper-inner-glow"></div>
+            <div class="paper-crease-line"></div>
+          </div>
+
+          <!-- Lower Paper Roll Edge -->
+          <div class="paper-roll roll-bottom">
+            <div class="roll-edge-shadow"></div>
+          </div>
+
+          <!-- Soft Floor Drop Shadow Beneath Paper -->
+          <div class="paper-ground-shadow" id="paper-shadow"></div>
         </div>
 
         <!-- Safe-Area Responsive Replay Control Button -->
