@@ -146,7 +146,7 @@ html, body {
   flex-direction: column;
   opacity: 1;
   z-index: 30;
-  transition: opacity 1.8s var(--ease-cinematic);
+  transition: opacity 1.5s var(--ease-cinematic);
   will-change: opacity;
 }
 
@@ -179,7 +179,7 @@ html, body {
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 0 4px rgba(230, 202, 133, 0.2));
-  transition: filter 1.8s var(--ease-cinematic);
+  transition: filter 1.5s var(--ease-cinematic);
 }
 
 /* Warm Glow Effect Applied After Handwriting Completes */
@@ -216,7 +216,7 @@ html, body {
   margin-top: 3.5rem;
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity 1.8s var(--ease-cinematic), transform 1.8s var(--ease-cinematic);
+  transition: opacity 1.5s var(--ease-cinematic), transform 1.5s var(--ease-cinematic);
 }
 
 .subtitle-container.visible {
@@ -248,7 +248,7 @@ html, body {
   z-index: 2;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 2.2s var(--ease-cinematic);
+  transition: opacity 1.8s var(--ease-cinematic);
 }
 
 .moonlit-sky-scene.active {
@@ -407,7 +407,7 @@ html, body {
   align-items: center;
   justify-content: center;
   animation: moon-float 8s ease-in-out infinite alternate;
-  transition: filter 2.2s var(--ease-cinematic);
+  transition: filter 1.8s var(--ease-cinematic);
 }
 
 .moon-aura-outer {
@@ -493,7 +493,7 @@ html, body {
   z-index: 5;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 2.8s var(--ease-cinematic);
+  transition: opacity 2.2s var(--ease-cinematic);
 }
 
 .memory-lane-foundation.active {
@@ -628,7 +628,7 @@ html, body {
 @keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
 
 /* ==================================================
-   MEMORY LANE EXPANDED 10-CARD SCRAPBOOK (VERSION 3.2)
+   MEMORY LANE EXPANDED 10-CARD SCRAPBOOK (VERSION 3.3 REFINED)
    ================================================== */
 
 .memory-lane-scrapbook {
@@ -646,7 +646,7 @@ html, body {
   -webkit-overflow-scrolling: touch;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 2.2s var(--ease-cinematic);
+  transition: opacity 1.8s var(--ease-cinematic);
   scrollbar-width: none;
 }
 
@@ -673,12 +673,12 @@ html, body {
   position: relative;
   flex-shrink: 0;
   opacity: 0;
-  transform: translateY(40px) scale(0.92);
-  transition: opacity 0.65s var(--ease-cinematic), transform 0.65s var(--ease-cinematic);
+  transform: translateY(35px) scale(0.94);
+  transition: opacity 0.45s var(--ease-cinematic), transform 0.45s var(--ease-cinematic);
   will-change: opacity, transform;
 }
 
-/* Card Animates ONLY ONCE when entering viewport */
+/* Card Animates ONLY ONCE when entering viewport (400-500ms entrance) */
 .memory-card.in-view {
   opacity: 1;
 }
@@ -784,7 +784,7 @@ html, body {
   pointer-events: none;
 }
 
-/* Photo Area & Glare */
+/* Photo Area & Glare - Preserving Aspect Ratio Without Distortion */
 .photo-wrapper {
   position: relative;
   width: 100%;
@@ -851,7 +851,7 @@ html, body {
   opacity: 0;
   z-index: 15;
   pointer-events: none;
-  transition: opacity 2.2s var(--ease-cinematic);
+  transition: opacity 1.8s var(--ease-cinematic);
 }
 
 .scroll-focus-overlay.active {
@@ -875,7 +875,7 @@ html, body {
   align-items: center;
   justify-content: center;
   will-change: transform, opacity;
-  transition: transform 2.0s var(--ease-scroll-entrance), opacity 2.0s var(--ease-cinematic);
+  transition: transform 1.0s var(--ease-scroll-entrance), opacity 1.0s var(--ease-cinematic);
 }
 
 /* Responsive Size Tiering across devices */
@@ -903,28 +903,28 @@ html, body {
 .paper-container.rolling-up .continue-container {
   opacity: 0 !important;
   transform: translateY(-8px) !important;
-  transition: opacity 0.8s var(--ease-cinematic), transform 0.8s var(--ease-cinematic);
+  transition: opacity 0.6s var(--ease-cinematic), transform 0.6s var(--ease-cinematic);
 }
 
 .paper-container.rolling-up .paper-sheet {
   height: 10px !important;
-  transition: height 2.2s var(--ease-unfurl);
+  transition: height 1.4s var(--ease-unfurl);
 }
 
 .paper-container.rolling-up .assembly-top {
   transform: translateY(0px) rotate(-5deg) !important;
-  transition: transform 2.2s var(--ease-unfurl);
+  transition: transform 1.4s var(--ease-unfurl);
 }
 
 .paper-container.rolling-up .assembly-bottom {
   transform: translateY(0px) rotate(5deg) !important;
-  transition: transform 2.2s var(--ease-unfurl);
+  transition: transform 1.4s var(--ease-unfurl);
 }
 
 .paper-container.ascending {
   transform: translate(-50%, -150vh) rotate(2.8deg) !important;
   opacity: 0;
-  transition: transform 2.2s var(--ease-cinematic), opacity 2.0s var(--ease-cinematic);
+  transition: transform 1.4s var(--ease-cinematic), opacity 1.2s var(--ease-cinematic);
 }
 
 /* Integrated Wooden Roller Assembly (Top & Bottom) */
@@ -935,7 +935,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 6;
-  transition: transform 2.2s var(--ease-unfurl);
+  transition: transform 1.4s var(--ease-unfurl);
 }
 
 .assembly-top {
@@ -997,7 +997,7 @@ html, body {
   background: linear-gradient(180deg, #e6d2b2 0%, #faf0df 45%, #d4be9c 100%);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   z-index: 5;
-  transition: transform 2.2s var(--ease-unfurl), opacity 2.2s ease;
+  transition: transform 1.4s var(--ease-unfurl), opacity 1.4s ease;
   will-change: transform, opacity;
 }
 
@@ -1022,7 +1022,7 @@ html, body {
   box-shadow: inset 0 2px 8px rgba(110, 75, 35, 0.15),
               inset 0 -2px 8px rgba(110, 75, 35, 0.18),
               0 10px 35px rgba(0, 0, 0, 0.28);
-  transition: height 2.2s var(--ease-unfurl);
+  transition: height 1.4s var(--ease-unfurl);
   will-change: height;
   z-index: 3;
 }
@@ -1113,8 +1113,8 @@ html, body {
 
 .letter-line {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.8s var(--ease-cinematic), transform 0.8s var(--ease-cinematic);
+  transform: translateY(10px);
+  transition: opacity 0.55s var(--ease-cinematic), transform 0.55s var(--ease-cinematic);
   margin-bottom: clamp(0.3rem, 1.0vh, 0.55rem);
   font-family: var(--font-serif);
   font-size: clamp(0.88rem, 1.65vw, 1.12rem);
@@ -1160,7 +1160,7 @@ html, body {
   background: linear-gradient(90deg, transparent, rgba(140, 90, 56, 0.35), transparent);
   margin: clamp(0.4rem, 1.0vh, 0.7rem) auto;
   opacity: 0;
-  transition: opacity 0.8s var(--ease-cinematic);
+  transition: opacity 0.55s var(--ease-cinematic);
 }
 
 .letter-divider.visible {
@@ -1188,8 +1188,8 @@ html, body {
 .continue-container {
   margin-top: clamp(0.6rem, 1.6vh, 1.2rem);
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 1.0s var(--ease-cinematic), transform 1.0s var(--ease-cinematic);
+  transform: translateY(10px);
+  transition: opacity 0.8s var(--ease-cinematic), transform 0.8s var(--ease-cinematic);
   display: flex;
   justify-content: center;
 }
@@ -1260,7 +1260,7 @@ html, body {
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.42) 0%, rgba(0, 0, 0, 0) 75%);
   opacity: 0;
   transform: scale(0.5);
-  transition: opacity 2.0s var(--ease-cinematic) 0.8s, transform 2.0s var(--ease-cinematic) 0.8s;
+  transition: opacity 1.8s var(--ease-cinematic) 0.5s, transform 1.8s var(--ease-cinematic) 0.5s;
   pointer-events: none;
 }
 
@@ -1272,48 +1272,6 @@ html, body {
 .paper-container.unfurled .paper-ground-shadow {
   opacity: 1;
   transform: scale(1.05);
-}
-
-/* Safe-Area Responsive Replay Control Button */
-.prepared-status-container {
-  position: absolute;
-  bottom: max(1.2rem, calc(env(safe-area-inset-bottom, 0px) + 0.8rem));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
-
-.replay-btn {
-  background: rgba(252, 248, 242, 0.08);
-  border: 1px solid rgba(230, 202, 133, 0.35);
-  color: var(--color-warm-beige);
-  padding: 0.6rem 1.3rem;
-  min-height: 44px;
-  border-radius: 30px;
-  font-family: var(--font-serif);
-  font-size: clamp(0.82rem, 1.5vw, 0.92rem);
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.4s var(--ease-cinematic);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-}
-
-.replay-btn:hover {
-  background: rgba(252, 248, 242, 0.16);
-  border-color: rgba(230, 202, 133, 0.65);
-  color: var(--color-cream);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 22px rgba(230, 202, 133, 0.2);
-}
-
-.replay-icon {
-  font-size: 0.75rem;
-  color: var(--color-soft-gold);
 }
 
 /* ==================================================
@@ -1338,9 +1296,7 @@ html, body {
   .continue-btn,
   .memory-lane-foundation,
   .memory-lane-scrapbook,
-  .memory-card,
-  .paper-ground-shadow,
-  .replay-btn {
+  .memory-card {
     transition: none !important;
     animation: none !important;
   }
