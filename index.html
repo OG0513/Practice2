@@ -16,7 +16,7 @@
   <!-- Cinematic Fullscreen Viewport Layer with Safe-Area Adaptation -->
   <div id="app" class="app-viewport">
     
-    <!-- Unified Background Canvas (Stars, Particles, Fireflies, Pollen) -->
+    <!-- Unified Background Canvas (Stars, Particles, Fireflies, Pollen, Fireworks) -->
     <canvas id="particle-canvas" class="particle-canvas"></canvas>
 
     <!-- Foundation Scene Container -->
@@ -111,48 +111,51 @@
           </div>
         </div>
 
-        <!-- Responsively Positioned Moon Container (70-78% X, 12-18% Y) -->
+        <!-- Responsively Positioned Realistic Moon Container (Version 4.2 Realistic Lunar Redesign) -->
         <div class="moon-container" id="moon-container" aria-label="Moonlit Night Sky Moon">
+          <!-- Seamless Multi-Layer Atmospheric Bloom -->
           <div class="moon-aura-outer"></div>
           <div class="moon-aura-inner"></div>
           
           <svg class="moon-svg" viewBox="0 0 200 200" aria-hidden="true">
             <defs>
-              <!-- Moon Gradient Palette -->
+              <!-- Realistic Warm Yellowish-White Lunar Gradient -->
               <radialGradient id="moonGradient" cx="35%" cy="35%" r="65%">
-                <stop offset="0%" stop-color="#FCF8F2" />
-                <stop offset="60%" stop-color="#F5E8D3" />
-                <stop offset="100%" stop-color="#E6CA85" />
+                <stop offset="0%" stop-color="#FFFDF5" />
+                <stop offset="45%" stop-color="#F7EED9" />
+                <stop offset="80%" stop-color="#EAD7B2" />
+                <stop offset="100%" stop-color="#D4BF94" />
               </radialGradient>
-              <!-- Soft Flat Crater Gradient -->
+              <!-- Soft Realistic Craters Shading Gradient -->
               <radialGradient id="craterGradient" cx="40%" cy="40%" r="60%">
-                <stop offset="0%" stop-color="#E8DBC5" stop-opacity="0.45" />
-                <stop offset="100%" stop-color="#D9C4A5" stop-opacity="0.65" />
+                <stop offset="0%" stop-color="#CBB38D" stop-opacity="0.32" />
+                <stop offset="100%" stop-color="#A89470" stop-opacity="0.55" />
               </radialGradient>
-              <!-- Soft Moon Glow Filter -->
-              <filter id="moonGlowFilter" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="6" result="blur1" />
-                <feGaussianBlur stdDeviation="16" result="blur2" />
-                <feMerge>
-                  <feMergeNode in="blur2" />
-                  <feMergeNode in="blur1" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
+              <!-- Organic Lunar Surface Texture Overlay Pattern -->
+              <radialGradient id="lunarShadingGrad" cx="30%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.3)" />
+                <stop offset="70%" stop-color="rgba(195,172,138,0.15)" />
+                <stop offset="100%" stop-color="rgba(110,88,58,0.42)" />
+              </radialGradient>
+              <!-- Natural Lunar Edge Blur -->
+              <filter id="moonSoftEdge" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.2" />
               </filter>
             </defs>
 
-            <!-- Soft Glowing Aura Circle -->
-            <circle cx="100" cy="100" r="82" fill="rgba(230, 202, 133, 0.18)" filter="url(#moonGlowFilter)" />
+            <!-- Main Moon Vector Body with Realistic Surface Shading -->
+            <circle cx="100" cy="100" r="74" fill="url(#moonGradient)" filter="url(#moonSoftEdge)" />
 
-            <!-- Main Moon Vector Silhouette -->
-            <circle cx="100" cy="100" r="72" fill="url(#moonGradient)" />
+            <!-- Detailed Organic Flat Craters -->
+            <ellipse cx="68" cy="78" rx="15" ry="12" fill="url(#craterGradient)" transform="rotate(-15 68 78)" />
+            <ellipse cx="124" cy="118" rx="19" ry="15" fill="url(#craterGradient)" transform="rotate(10 124 118)" />
+            <ellipse cx="132" cy="62" rx="11" ry="8" fill="url(#craterGradient)" transform="rotate(-5 132 62)" />
+            <ellipse cx="82" cy="138" rx="13" ry="10" fill="url(#craterGradient)" transform="rotate(20 82 138)" />
+            <ellipse cx="148" cy="92" rx="9" ry="7" fill="url(#craterGradient)" transform="rotate(-10 148 92)" />
+            <ellipse cx="98" cy="92" rx="16" ry="13" fill="url(#craterGradient)" transform="rotate(5 98 92)" />
 
-            <!-- Soft Organic Flat Craters -->
-            <ellipse cx="70" cy="80" rx="14" ry="11" fill="url(#craterGradient)" transform="rotate(-15 70 80)" />
-            <ellipse cx="120" cy="120" rx="18" ry="14" fill="url(#craterGradient)" transform="rotate(10 120 120)" />
-            <ellipse cx="130" cy="65" rx="10" ry="8" fill="url(#craterGradient)" transform="rotate(-5 130 65)" />
-            <ellipse cx="85" cy="135" rx="12" ry="9" fill="url(#craterGradient)" transform="rotate(20 85 135)" />
-            <ellipse cx="145" cy="95" rx="8" ry="6" fill="url(#craterGradient)" transform="rotate(-10 145 95)" />
+            <!-- Realistic Lunar Limb Shading Overlay -->
+            <circle cx="100" cy="100" r="74" fill="url(#lunarShadingGrad)" filter="url(#moonSoftEdge)" />
           </svg>
         </div>
 
@@ -253,7 +256,7 @@
             </div>
           </div>
 
-          <!-- Atmospheric Ground Fog & Ending Mist Layers -->
+          <!-- Atmospheric Ground Fog Layers -->
           <div class="ground-fog-container">
             <div class="ground-fog fog-1"></div>
             <div class="ground-fog fog-2"></div>
@@ -270,6 +273,9 @@
 
         <!-- Subtle Background Dimming Focus Overlay -->
         <div class="scroll-focus-overlay" id="scroll-focus-overlay" aria-hidden="true"></div>
+
+        <!-- Dynamic Firework Explosion Illumination Light Flash Layer -->
+        <div class="firework-flash-overlay" id="firework-flash-overlay" aria-hidden="true"></div>
 
         <!-- Vintage Parchment Paper & Birthday Letter Container with Wooden Rollers -->
         <div class="paper-container" id="paper-container" aria-label="Vintage Parchment Letter">
