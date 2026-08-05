@@ -1,10 +1,11 @@
 
 /**
- * A Little World Made Just for Her - Version 3.3 Optimized Experience & Refined Memory Lane
+ * A Little World Made Just for Her - Version 4.0 Dynamic Memory Data Engine
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
- * - Config: Dynamic palette definitions, stroke vectors, species configurations, fluid timing sequence.
+ * - Config: Dynamic palette definitions, stroke vectors, species configurations, fluid timing sequence,
+ *   and JavaScript Memory Data Array (supports 20+ photos dynamically from assets/images/).
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
  * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
@@ -12,7 +13,7 @@
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
- *   Memory Lane environment transition & 10-Card Scrapbook Scroll controller.
+ *   Memory Lane environment transition & Dynamic Memory Data DOM Generator with 60 FPS Horizontal Scrapbook Engine.
  * - TimelineManager: Story narrative sequence controller.
  */
 
@@ -100,6 +101,99 @@ const Config = {
     color: "rgba(252, 232, 158, 0.95)",
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
+  // Dynamic Memory Data Array - Supports 20+ Photos Automatically
+  memories: [
+    {
+      id: 1,
+      image: "assets/images/photo01.webp",
+      caption: "A quiet night under the stars...",
+      type: "polaroid",
+      accent: "tape-top-right",
+      number: "No. 01",
+      fallbackRoman: "I"
+    },
+    {
+      id: 2,
+      image: "assets/images/photo02.webp",
+      caption: "Sweet laughter & gentle breeze",
+      type: "postcard",
+      accent: "postmark",
+      number: "No. 02",
+      fallbackRoman: "II"
+    },
+    {
+      id: 3,
+      image: "assets/images/photo03.webp",
+      caption: "Unforgettable warm moments",
+      type: "polaroid",
+      accent: "pressed-flower",
+      number: "No. 03",
+      fallbackRoman: "III"
+    },
+    {
+      id: 4,
+      image: "assets/images/photo04.webp",
+      caption: "Walking through the moonlight",
+      type: "polaroid",
+      accent: "tape-top-left",
+      number: "No. 04",
+      fallbackRoman: "IV"
+    },
+    {
+      id: 5,
+      image: "assets/images/photo05.webp",
+      caption: "A smile that brightens the day",
+      type: "postcard",
+      accent: "stamp-air",
+      number: "No. 05",
+      fallbackRoman: "V"
+    },
+    {
+      id: 6,
+      image: "assets/images/photo06.webp",
+      caption: "Forever in our hearts",
+      type: "polaroid",
+      accent: "pressed-leaf",
+      number: "No. 06",
+      fallbackRoman: "VI"
+    },
+    {
+      id: 7,
+      image: "assets/images/photo07.webp",
+      caption: "Whispers of joy and light",
+      type: "postcard",
+      accent: "tape-top-right",
+      number: "No. 07",
+      fallbackRoman: "VII"
+    },
+    {
+      id: 8,
+      image: "assets/images/photo08.webp",
+      caption: "Surrounded by nature’s grace",
+      type: "postcard",
+      accent: "stamp-wish",
+      number: "No. 08",
+      fallbackRoman: "VIII"
+    },
+    {
+      id: 9,
+      image: "assets/images/photo09.webp",
+      caption: "Moments that shine forever",
+      type: "polaroid",
+      accent: "pressed-flower-pink",
+      number: "No. 09",
+      fallbackRoman: "IX"
+    },
+    {
+      id: 10,
+      image: "assets/images/photo10.webp",
+      caption: "A story made just for her",
+      type: "postcard",
+      accent: "tape-top-left",
+      number: "No. 10",
+      fallbackRoman: "X"
+    }
+  ],
   timings: {
     initialPause: 600,             // Fast loading screen start
     interStrokeDelay: 80,          // Rapid handwriting stroke flow
@@ -145,6 +239,11 @@ const Utils = {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  },
+  // Generates inline SVG storybook fallback image string for missing disk assets
+  generateFallbackSVG(romanNumber) {
+    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23e8dec8"/><circle cx="200" cy="130" r="45" fill="%23d4c5a9"/><path d="M80,240 Q160,170 240,240 T400,240 L400,300 L80,300 Z" fill="%23bba88a"/><text x="50%" y="270" font-family="serif" font-size="16" fill="%2378654c" text-anchor="middle" font-style="italic">Memory ${romanNumber}</text></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svgStr)}`;
   }
 };
 
@@ -1143,7 +1242,6 @@ class SceneManager {
     this.memoryLaneFoundation = document.getElementById('memory-lane-foundation');
     this.memoryLaneScrapbook = document.getElementById('memory-lane-scrapbook');
     this.scrapbookTrack = document.getElementById('scrapbook-track');
-    this.memoryCards = document.querySelectorAll('.memory-card');
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.continueContainer = document.getElementById('continue-container');
     this.continueBtn = document.getElementById('continue-btn');
@@ -1151,13 +1249,72 @@ class SceneManager {
     this.isTransitioning = false;
 
     this.initEvents();
-    this.initScrapbookScroll();
+    this.buildScrapbookDOM();
   }
 
   initEvents() {
     if (this.continueBtn) {
       this.continueBtn.addEventListener('click', (e) => this.handleContinueClick(e));
     }
+  }
+
+  // Version 4.0 Dynamic Memory Data DOM Generator
+  buildScrapbookDOM() {
+    if (!this.scrapbookTrack || !Config.memories) return;
+
+    this.scrapbookTrack.innerHTML = '';
+
+    Config.memories.forEach((mem, idx) => {
+      const card = document.createElement('article');
+      const isPolaroid = mem.type === 'polaroid';
+      card.className = `memory-card ${isPolaroid ? 'card-polaroid' : 'card-postcard'} memory-${idx + 1}`;
+      card.setAttribute('data-index', idx);
+
+      let accentHTML = '';
+      if (mem.accent === 'tape-top-right') {
+        accentHTML = '<div class="masking-tape tape-top-right"></div>';
+      } else if (mem.accent === 'tape-top-left') {
+        accentHTML = '<div class="masking-tape tape-top-left"></div>';
+      } else if (mem.accent === 'pressed-flower') {
+        accentHTML = '<div class="pressed-flower-accent">✿</div>';
+      } else if (mem.accent === 'pressed-flower-pink') {
+        accentHTML = '<div class="pressed-flower-accent">🌸</div>';
+      } else if (mem.accent === 'pressed-leaf') {
+        accentHTML = '<div class="pressed-leaf-accent">🍃</div>';
+      }
+
+      let headerHTML = '';
+      if (!isPolaroid) {
+        headerHTML = `
+          <div class="postcard-header">
+            <span class="postmark-circle">✦</span>
+            <span class="postcard-stamp">${mem.accent === 'stamp-air' ? 'AIR' : mem.accent === 'stamp-wish' ? 'WISH' : 'POST'}</span>
+          </div>
+        `;
+      }
+
+      const fallbackSrc = Utils.generateFallbackSVG(mem.fallbackRoman || 'I');
+
+      card.innerHTML = `
+        ${accentHTML}
+        <div class="frame-body">
+          ${headerHTML}
+          <div class="photo-wrapper">
+            <img class="memory-photo" src="${mem.image}" alt="Memory ${mem.id} Photo" loading="lazy" onError="this.onerror=null;this.src='${fallbackSrc}';" />
+            <div class="photo-overlay-glare"></div>
+          </div>
+          <div class="caption-area">
+            <span class="card-number">${mem.number}</span>
+            <p class="caption-text">${mem.caption}</p>
+          </div>
+        </div>
+      `;
+
+      this.scrapbookTrack.appendChild(card);
+    });
+
+    this.memoryCards = document.querySelectorAll('.memory-card');
+    this.initScrapbookScroll();
   }
 
   initScrapbookScroll() {
@@ -1215,7 +1372,7 @@ class SceneManager {
     }
 
     this.paperContainer.classList.add('arrived');
-    await Utils.wait(1000); // 1.0s arrival duration
+    await Utils.wait(1000);
   }
 
   async unfurlPaper() {
@@ -1286,7 +1443,7 @@ class SceneManager {
 
     await Utils.wait(800);
 
-    // 8. Reveal Expanded 10-Card Memory Lane Scrapbook
+    // 8. Reveal Dynamically Populated Memory Lane Scrapbook
     if (this.memoryLaneScrapbook) {
       this.memoryLaneScrapbook.classList.add('active');
     }
