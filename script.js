@@ -1,5 +1,5 @@
 /**
- * A Little World Made Just for Her - Version 2.2 Paper Unfurl Update
+ * A Little World Made Just for Her - Version 2.3 Birthday Letter Update
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -10,8 +10,8 @@
  * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling & focus overlay controller.
- * - TimelineManager: Story narrative sequence controller (Steps 1 to 12).
+ * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, focus overlay & letter reveal controller.
+ * - TimelineManager: Story narrative sequence controller (Steps 1 to 13).
  */
 
 /* ==================================================
@@ -106,7 +106,10 @@ const Config = {
     subtitleHold: 3500,      // Hold time for subtitle reading
     fadeSceneDuration: 2200, // Transition duration into moonlit garden
     gardenAdmirePause: 2500, // Visitor quiet pause in garden before paper roll arrives
-    rollPauseBeforeUnfurl: 1000 // 1-second pause at center before vertical opening
+    rollPauseBeforeUnfurl: 1000, // 1-second pause at center before vertical opening
+    unfurlDuration: 2600,    // Duration of paper vertical unfurling
+    pauseBeforeLetterReveal: 1000, // 1-second pause after opening before text reveals
+    lineRevealInterval: 1100 // Delay between individual line reveals
   }
 };
 
@@ -1125,7 +1128,7 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER & PAPER ROLL CONTROLLER
+   7. SCENE MANAGER & LETTER REVEAL CONTROLLER
    ================================================== */
 class SceneManager {
   constructor() {
@@ -1133,6 +1136,7 @@ class SceneManager {
     this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
     this.paperContainer = document.getElementById('paper-container');
     this.focusOverlay = document.getElementById('scroll-focus-overlay');
+    this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.activeScene = 'loading';
   }
 
@@ -1154,23 +1158,39 @@ class SceneManager {
   async bringInPaperRoll() {
     if (!this.paperContainer) return;
 
-    // Slight background dimming focus effect
     if (this.focusOverlay) {
       this.focusOverlay.classList.add('active');
     }
 
-    // Rolled Paper Entrance: Gravity-like slide from top to center
     this.paperContainer.classList.add('arrived');
   }
 
   async unfurlPaper() {
     if (!this.paperContainer) return;
 
-    // Trigger vertical unfurling from top and bottom rolls
     this.paperContainer.classList.add('unfurled');
+    await Utils.wait(Config.timings.unfurlDuration);
+  }
+
+  async revealLetterLineByLine() {
+    if (!this.letterLines || this.letterLines.length === 0) return;
+
+    const isReduced = Utils.prefersReducedMotion();
+
+    for (let el of this.letterLines) {
+      if (isReduced) {
+        el.classList.add('visible');
+      } else {
+        el.classList.add('visible');
+        await Utils.wait(Config.timings.lineRevealInterval);
+      }
+    }
   }
 
   resetToLoading() {
+    if (this.letterLines) {
+      this.letterLines.forEach(el => el.classList.remove('visible'));
+    }
     if (this.paperContainer) {
       this.paperContainer.classList.remove('arrived');
       this.paperContainer.classList.remove('unfurled');
@@ -1235,7 +1255,7 @@ class TimelineManager {
     // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
 
-    // Step 9: Allow visitor to admire the garden atmosphere quiet moment (~2.5s)
+    // Step 9: Allow visitor to admire garden atmosphere quiet moment (~2.5s)
     await Utils.wait(Config.timings.gardenAdmirePause);
 
     // Step 10: Simple Elegant Rolled Paper slides into center & comes to rest
@@ -1244,8 +1264,12 @@ class TimelineManager {
     // Step 11: Brief 1-second pause at center
     await Utils.wait(Config.timings.rollPauseBeforeUnfurl);
 
-    // Step 12: Paper unfurls vertically from both ends (revealing completely BLANK paper sheet)
+    // Step 12: Paper unfurls vertically from both ends
     await this.sceneManager.unfurlPaper();
+
+    // Step 13: Pause ~1 second after opening, then begin line-by-line birthday letter reveal
+    await Utils.wait(Config.timings.pauseBeforeLetterReveal);
+    await this.sceneManager.revealLetterLineByLine();
 
     this.isExecuting = false;
   }
