@@ -1,14 +1,13 @@
 /**
- * A Little World Made Just for Her - Version 1.3 Moonlit Garden
+ * A Little World Made Just for Her - Version 1.5 Polish & Optimization
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
- * - Config: Application parameters, species palettes, timing, garden settings.
+ * - Config: Application variables, species palettes, timing, particle/garden parameters.
  * - Utils: Math, easing, DOM, and rendering helper functions.
- * - ResponsiveSystem: High-DPI viewport scaler for all rendering canvases.
- * - ParticleSystem: Canvas engine for twinkling stars, shooting stars, and atmospheric pollen particles.
- * - FireflySystem: Dynamic firefly engine (28 fireflies with soft radial illumination and 3D flight paths).
- * - GrassSystem: Dynamic 60 FPS garden engine (550 grass blades + 120 procedural flowers across 3 depth layers).
+ * - ResponsiveSystem: High-DPI viewport scaler with debounced resize handling.
+ * - ParticleSystem: Optimized canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
+ * - GrassSystem: Dynamic 60 FPS garden engine (500 grass blades + 115 procedural flowers across 3 depth layers with bottom padding).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Core scene mounting and smooth cinematic transitions.
  * - TimelineManager: Sequential story narrative controller (Steps 1 to 8).
@@ -56,8 +55,8 @@ const Config = {
     ]
   },
   particles: {
-    minCount: 45,
-    maxCount: 60,
+    minCount: 28,
+    maxCount: 35,
     colors: [
       "rgba(252, 248, 242, 0.75)", // Cream
       "rgba(230, 202, 133, 0.8)",  // Soft Gold
@@ -68,7 +67,7 @@ const Config = {
     stardustColor: "rgba(252, 232, 158, 0.9)"
   },
   sky: {
-    starCount: 140,
+    starCount: 130,
     starColors: [
       "rgba(252, 248, 242, 0.9)",  // Cream
       "rgba(230, 202, 133, 0.95)", // Soft Gold
@@ -78,7 +77,7 @@ const Config = {
     ]
   },
   grass: {
-    bladeCount: 550,
+    bladeCount: 500,
     palette: {
       back: ["#162a24", "#1a332b", "#1f3a32"],
       mid: ["#234338", "#2a4f43", "#315b4d"],
@@ -87,7 +86,7 @@ const Config = {
     moonlightTip: "rgba(230, 202, 133, 0.4)"
   },
   flowers: {
-    count: 125,
+    count: 115,
     species: ["daisy", "lavender", "cosmos", "bluebell", "buttercup", "violet"],
     palette: {
       daisy: { petal: "#fcf8f2", center: "#e6ca85" },
@@ -99,12 +98,12 @@ const Config = {
     }
   },
   fireflies: {
-    count: 30,
+    count: 26,
     color: "rgba(252, 232, 158, 0.95)",
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
   atmosphere: {
-    pollenCount: 40
+    pollenCount: 25
   },
   timings: {
     initialPause: 1200,      // Pause after load before pen starts writing
@@ -134,6 +133,17 @@ const Utils = {
   },
   prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  },
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   }
 };
 
@@ -150,12 +160,13 @@ class ResponsiveSystem {
     this.height = window.innerHeight;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
+    this.debouncedResize = Utils.debounce(() => this.handleResize(), 150);
     this.init();
   }
 
   init() {
     this.updateDimensions();
-    window.addEventListener('resize', () => this.handleResize());
+    window.addEventListener('resize', this.debouncedResize);
   }
 
   updateDimensions() {
@@ -174,7 +185,7 @@ class ResponsiveSystem {
     }
 
     if (this.grassCanvas) {
-      const grassHeight = this.height * 0.34;
+      const grassHeight = this.height * 0.38; // Raised height for comfortable framing
       this.grassCanvas.width = this.width * this.dpr;
       this.grassCanvas.height = grassHeight * this.dpr;
       this.grassCanvas.style.width = `${this.width}px`;
@@ -191,13 +202,13 @@ class ResponsiveSystem {
       this.particleSystem.resize(this.width, this.height);
     }
     if (this.grassSystem) {
-      this.grassSystem.resize(this.width, this.height * 0.34);
+      this.grassSystem.resize(this.width, this.height * 0.38);
     }
   }
 }
 
 /* ==================================================
-   4. PARTICLE, FIREFLY & ATMOSPHERE ENGINE
+   4. OPTIMIZED PARTICLE & ATMOSPHERE ENGINE
    ================================================== */
 class ParticleSystem {
   constructor(canvas) {
@@ -223,19 +234,20 @@ class ParticleSystem {
 
   initParticles() {
     this.particles = [];
-    const count = Math.floor(Utils.randomRange(Config.particles.minCount, Config.particles.maxCount));
+    const count = Config.particles.minCount;
 
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        radius: Utils.randomRange(1.2, 3.2),
-        vx: Utils.randomRange(-0.15, 0.15),
-        vy: Utils.randomRange(-0.3, -0.08),
-        baseAlpha: Utils.randomRange(0.2, 0.75),
-        alpha: Utils.randomRange(0.2, 0.75),
+        radius: Utils.randomRange(1.2, 2.8),
+        // Minimizing drift movement to save CPU/GPU calculations
+        vx: Utils.randomRange(-0.02, 0.02),
+        vy: Utils.randomRange(-0.04, -0.01),
+        baseAlpha: Utils.randomRange(0.2, 0.7),
+        alpha: Utils.randomRange(0.2, 0.7),
         phase: Math.random() * Math.PI * 2,
-        pulseSpeed: Utils.randomRange(0.008, 0.02),
+        pulseSpeed: Utils.randomRange(0.003, 0.008),
         color: Config.particles.colors[Math.floor(Math.random() * Config.particles.colors.length)]
       });
     }
@@ -250,10 +262,10 @@ class ParticleSystem {
       this.stars.push({
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        radius: isSparkle ? Utils.randomRange(1.8, 3.0) : Utils.randomRange(0.7, 1.8),
+        radius: isSparkle ? Utils.randomRange(1.8, 2.8) : Utils.randomRange(0.7, 1.6),
         baseAlpha: Utils.randomRange(0.3, 0.9),
         alpha: Utils.randomRange(0.3, 0.9),
-        twinkleSpeed: Utils.randomRange(0.01, 0.035),
+        twinkleSpeed: Utils.randomRange(0.01, 0.03),
         phase: Math.random() * Math.PI * 2,
         isSparkle: isSparkle,
         color: Config.sky.starColors[Math.floor(Math.random() * Config.sky.starColors.length)]
@@ -268,16 +280,14 @@ class ParticleSystem {
     for (let i = 0; i < count; i++) {
       this.fireflies.push({
         x: Math.random() * this.width,
-        y: Utils.randomRange(this.height * 0.35, this.height * 0.92),
-        baseX: Math.random() * this.width,
-        baseY: Utils.randomRange(this.height * 0.35, this.height * 0.92),
-        radius: Utils.randomRange(1.8, 3.2),
-        glowRadius: Utils.randomRange(16, 28),
-        vx: Utils.randomRange(-0.4, 0.4),
-        vy: Utils.randomRange(-0.3, 0.3),
+        y: Utils.randomRange(this.height * 0.35, this.height * 0.88),
+        radius: Utils.randomRange(1.8, 2.8),
+        glowRadius: Utils.randomRange(14, 24),
+        vx: Utils.randomRange(-0.25, 0.25),
+        vy: Utils.randomRange(-0.2, 0.2),
         phase: Math.random() * Math.PI * 2,
-        pulseSpeed: Utils.randomRange(0.012, 0.03),
-        alpha: Utils.randomRange(0.2, 0.9),
+        pulseSpeed: Utils.randomRange(0.01, 0.025),
+        alpha: Utils.randomRange(0.2, 0.85),
         wanderTimer: 0
       });
     }
@@ -291,12 +301,12 @@ class ParticleSystem {
       this.pollen.push({
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        radius: Utils.randomRange(0.8, 2.0),
-        vx: Utils.randomRange(-0.25, 0.25),
-        vy: Utils.randomRange(-0.2, 0.1),
+        radius: Utils.randomRange(0.8, 1.8),
+        vx: Utils.randomRange(-0.03, 0.03),
+        vy: Utils.randomRange(-0.03, 0.01),
         phase: Math.random() * Math.PI * 2,
-        pulseSpeed: Utils.randomRange(0.005, 0.015),
-        alpha: Utils.randomRange(0.15, 0.65),
+        pulseSpeed: Utils.randomRange(0.003, 0.008),
+        alpha: Utils.randomRange(0.15, 0.55),
         color: Config.particles.colors[Math.floor(Math.random() * Config.particles.colors.length)]
       });
     }
@@ -306,13 +316,13 @@ class ParticleSystem {
     if (Utils.prefersReducedMotion()) return;
     for (let i = 0; i < 2; i++) {
       this.stardustSparks.push({
-        x: x + Utils.randomRange(-3, 3),
-        y: y + Utils.randomRange(-3, 3),
-        radius: Utils.randomRange(1.5, 3.5),
-        vx: Utils.randomRange(-0.6, 0.6),
-        vy: Utils.randomRange(-0.6, 0.6),
+        x: x + Utils.randomRange(-2, 2),
+        y: y + Utils.randomRange(-2, 2),
+        radius: Utils.randomRange(1.2, 3.0),
+        vx: Utils.randomRange(-0.5, 0.5),
+        vy: Utils.randomRange(-0.5, 0.5),
         alpha: 0.95,
-        decay: Utils.randomRange(0.018, 0.035),
+        decay: Utils.randomRange(0.02, 0.04),
         color: Config.particles.stardustColor
       });
     }
@@ -322,8 +332,8 @@ class ParticleSystem {
     if (Utils.prefersReducedMotion()) return;
     const startX = Utils.randomRange(this.width * 0.1, this.width * 0.7);
     const startY = Utils.randomRange(this.height * 0.05, this.height * 0.35);
-    const length = Utils.randomRange(90, 160);
-    const speed = Utils.randomRange(3.5, 6.0);
+    const length = Utils.randomRange(80, 140);
+    const speed = Utils.randomRange(3.5, 5.5);
 
     this.shootingStars.push({
       x: startX,
@@ -332,8 +342,8 @@ class ParticleSystem {
       vx: speed,
       vy: speed * 0.55,
       alpha: 1.0,
-      decay: Utils.randomRange(0.012, 0.022),
-      width: Utils.randomRange(1.5, 2.5)
+      decay: Utils.randomRange(0.014, 0.024),
+      width: Utils.randomRange(1.4, 2.2)
     });
   }
 
@@ -362,9 +372,9 @@ class ParticleSystem {
     this.ctx.save();
     this.ctx.globalAlpha = alpha;
     this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = 0.8;
+    this.ctx.lineWidth = 0.75;
 
-    const size = radius * 3;
+    const size = radius * 2.8;
     this.ctx.beginPath();
     this.ctx.moveTo(x - size, y);
     this.ctx.lineTo(x + size, y);
@@ -374,7 +384,7 @@ class ParticleSystem {
 
     this.ctx.fillStyle = color;
     this.ctx.beginPath();
-    this.ctx.arc(x, y, radius * 0.8, 0, Math.PI * 2);
+    this.ctx.arc(x, y, radius * 0.7, 0, Math.PI * 2);
     this.ctx.fill();
     this.ctx.restore();
   }
@@ -406,13 +416,13 @@ class ParticleSystem {
       }
     }
 
-    // 2. Render Atmospheric Pollen Particles
+    // 2. Render Atmospheric Pollen (Optimized Minimal Drift)
     for (let pol of this.pollen) {
       if (!isReduced) {
-        pol.x += pol.vx + Math.sin(pol.phase) * 0.15;
+        pol.x += pol.vx;
         pol.y += pol.vy;
         pol.phase += pol.pulseSpeed;
-        pol.alpha = 0.15 + (Math.sin(pol.phase) * 0.5 + 0.5) * 0.5;
+        pol.alpha = 0.15 + (Math.sin(pol.phase) * 0.5 + 0.5) * 0.4;
 
         if (pol.y < -10) pol.y = this.height + 10;
         if (pol.x < -10) pol.x = this.width + 10;
@@ -428,21 +438,21 @@ class ParticleSystem {
       this.ctx.restore();
     }
 
-    // 3. Render Ambient Floating Particles
+    // 3. Render Ambient Floating Particles (Optimized Minimal Drift)
     for (let p of this.particles) {
       if (!isReduced) {
-        p.x += p.vx + Math.sin(p.phase) * 0.12;
+        p.x += p.vx;
         p.y += p.vy;
         p.phase += p.pulseSpeed;
-        p.alpha = p.baseAlpha + Math.sin(p.phase) * 0.2;
-        p.alpha = Utils.clamp(p.alpha, 0.1, 0.9);
+        p.alpha = p.baseAlpha + Math.sin(p.phase) * 0.15;
+        p.alpha = Utils.clamp(p.alpha, 0.1, 0.85);
 
         if (p.y < -10) p.y = this.height + 10;
         if (p.x < -10) p.x = this.width + 10;
         if (p.x > this.width + 10) p.x = -10;
       }
 
-      const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
+      const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.2);
       grad.addColorStop(0, p.color);
       grad.addColorStop(1, 'rgba(0,0,0,0)');
 
@@ -450,12 +460,12 @@ class ParticleSystem {
       this.ctx.globalAlpha = p.alpha;
       this.ctx.fillStyle = grad;
       this.ctx.beginPath();
-      this.ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
+      this.ctx.arc(p.x, p.y, p.radius * 3.2, 0, Math.PI * 2);
       this.ctx.fill();
 
       this.ctx.fillStyle = '#ffffff';
       this.ctx.beginPath();
-      this.ctx.arc(p.x, p.y, p.radius * 0.6, 0, Math.PI * 2);
+      this.ctx.arc(p.x, p.y, p.radius * 0.5, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.restore();
     }
@@ -464,28 +474,24 @@ class ParticleSystem {
     for (let ff of this.fireflies) {
       if (!isReduced) {
         ff.phase += ff.pulseSpeed;
-        ff.alpha = 0.25 + (Math.sin(ff.phase) * 0.5 + 0.5) * 0.7;
+        ff.alpha = 0.25 + (Math.sin(ff.phase) * 0.5 + 0.5) * 0.65;
 
-        // Smooth 3D Organic Flight Movement
-        ff.x += ff.vx + Math.sin(ff.phase * 0.8) * 0.35;
-        ff.y += ff.vy + Math.cos(ff.phase * 0.6) * 0.25;
+        ff.x += ff.vx + Math.sin(ff.phase * 0.8) * 0.25;
+        ff.y += ff.vy + Math.cos(ff.phase * 0.6) * 0.18;
 
-        // Random directional drift shift
         ff.wanderTimer += 0.016;
-        if (ff.wanderTimer > 3) {
-          ff.vx = Utils.randomRange(-0.4, 0.4);
-          ff.vy = Utils.randomRange(-0.3, 0.3);
+        if (ff.wanderTimer > 3.5) {
+          ff.vx = Utils.randomRange(-0.25, 0.25);
+          ff.vy = Utils.randomRange(-0.2, 0.2);
           ff.wanderTimer = 0;
         }
 
-        // Screen Boundaries
-        if (ff.y < this.height * 0.2) ff.vy += 0.05;
-        if (ff.y > this.height * 0.95) ff.vy -= 0.05;
-        if (ff.x < 10) ff.vx += 0.05;
-        if (ff.x > this.width - 10) ff.vx -= 0.05;
+        if (ff.y < this.height * 0.25) ff.vy += 0.04;
+        if (ff.y > this.height * 0.90) ff.vy -= 0.04;
+        if (ff.x < 10) ff.vx += 0.04;
+        if (ff.x > this.width - 10) ff.vx -= 0.04;
       }
 
-      // Soft Spatial Radial Glow Gradient
       const fireflyGrad = this.ctx.createRadialGradient(ff.x, ff.y, 0, ff.x, ff.y, ff.glowRadius);
       fireflyGrad.addColorStop(0, Config.fireflies.color);
       fireflyGrad.addColorStop(0.35, Config.fireflies.glowColor);
@@ -498,10 +504,9 @@ class ParticleSystem {
       this.ctx.arc(ff.x, ff.y, ff.glowRadius, 0, Math.PI * 2);
       this.ctx.fill();
 
-      // Bright Core Dot
       this.ctx.fillStyle = '#ffffff';
       this.ctx.beginPath();
-      this.ctx.arc(ff.x, ff.y, ff.radius * 0.8, 0, Math.PI * 2);
+      this.ctx.arc(ff.x, ff.y, ff.radius * 0.75, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.restore();
     }
@@ -527,8 +532,8 @@ class ParticleSystem {
       this.ctx.restore();
     }
 
-    // 6. Periodically Trigger & Render Shooting Stars
-    if (!isReduced && now - this.lastShootingStarTime > 8000) {
+    // 6. Trigger & Render Shooting Stars
+    if (!isReduced && now - this.lastShootingStarTime > 8500) {
       this.triggerShootingStar();
       this.lastShootingStarTime = now + Utils.randomRange(-2000, 3000);
     }
@@ -568,14 +573,14 @@ class ParticleSystem {
 }
 
 /* ==================================================
-   5. LIVING GARDEN ENGINE (GRASS & PROCEDURAL FLOWERS)
+   5. OPTIMIZED GARDEN ENGINE (GRASS & FLOWERS)
    ================================================== */
 class GrassSystem {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.width = window.innerWidth;
-    this.height = window.innerHeight * 0.34;
+    this.height = window.innerHeight * 0.38;
     this.blades = [];
     this.flowers = [];
     this.isRunning = false;
@@ -600,17 +605,17 @@ class GrassSystem {
       else if (layerRoll > 0.28) layer = 1;
 
       const x = Math.random() * this.width;
-      let height = Utils.randomRange(22, 42);
-      let baseWidth = Utils.randomRange(1.2, 2.0);
+      let height = Utils.randomRange(22, 40);
+      let baseWidth = Utils.randomRange(1.2, 1.8);
       let colorArray = Config.grass.palette.back;
 
       if (layer === 1) {
-        height = Utils.randomRange(40, 68);
-        baseWidth = Utils.randomRange(2.0, 3.0);
+        height = Utils.randomRange(38, 62);
+        baseWidth = Utils.randomRange(1.8, 2.8);
         colorArray = Config.grass.palette.mid;
       } else if (layer === 2) {
-        height = Utils.randomRange(60, 95);
-        baseWidth = Utils.randomRange(2.8, 3.8);
+        height = Utils.randomRange(55, 85); // Tuned for non-clipping visibility
+        baseWidth = Utils.randomRange(2.5, 3.5);
         colorArray = Config.grass.palette.front;
       }
 
@@ -619,9 +624,9 @@ class GrassSystem {
         layer: layer,
         height: height,
         baseWidth: baseWidth,
-        naturalCurve: Utils.randomRange(-10, 10),
-        flexibility: Utils.randomRange(0.6, 1.4),
-        freq: Utils.randomRange(0.0012, 0.0028),
+        naturalCurve: Utils.randomRange(-8, 8),
+        flexibility: Utils.randomRange(0.6, 1.3),
+        freq: Utils.randomRange(0.0012, 0.0025),
         phase: Math.random() * Math.PI * 2,
         color: colorArray[Math.floor(Math.random() * colorArray.length)],
         hasHighlight: layer === 2 && Math.random() < 0.65
@@ -640,18 +645,18 @@ class GrassSystem {
       let layer = Math.floor(Math.random() * 3);
       const x = Math.random() * this.width;
 
-      let scale = Utils.randomRange(0.6, 0.9);
-      if (layer === 1) scale = Utils.randomRange(0.85, 1.15);
-      if (layer === 2) scale = Utils.randomRange(1.1, 1.45);
+      let scale = Utils.randomRange(0.65, 0.88);
+      if (layer === 1) scale = Utils.randomRange(0.85, 1.10);
+      if (layer === 2) scale = Utils.randomRange(1.05, 1.35);
 
       this.flowers.push({
         x: x,
         layer: layer,
         species: species,
-        stemHeight: Utils.randomRange(30, 75) * scale,
-        stemCurve: Utils.randomRange(-12, 12),
+        stemHeight: Utils.randomRange(28, 68) * scale,
+        stemCurve: Utils.randomRange(-10, 10),
         scale: scale,
-        windFactor: species === 'lavender' || species === 'cosmos' ? 0.55 : 0.38,
+        windFactor: species === 'lavender' || species === 'cosmos' ? 0.5 : 0.35,
         freq: Utils.randomRange(0.001, 0.002),
         phase: Math.random() * Math.PI * 2,
         color: Config.flowers.palette[species]
@@ -680,7 +685,7 @@ class GrassSystem {
     }
   }
 
-  drawFlower(flower, tipX, tipY, sway) {
+  drawFlower(flower, tipX, tipY) {
     const ctx = this.ctx;
     const s = flower.scale;
 
@@ -689,7 +694,6 @@ class GrassSystem {
 
     switch (flower.species) {
       case 'daisy': {
-        // Petals
         const petalCount = 10;
         ctx.fillStyle = flower.color.petal;
         for (let i = 0; i < petalCount; i++) {
@@ -697,38 +701,34 @@ class GrassSystem {
           ctx.save();
           ctx.rotate(angle);
           ctx.beginPath();
-          ctx.ellipse(0, -9 * s, 3 * s, 8 * s, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -8.5 * s, 2.8 * s, 7.5 * s, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          // Reflected Moonlight Edge Highlight
           ctx.strokeStyle = "rgba(230, 202, 133, 0.35)";
           ctx.lineWidth = 0.5;
           ctx.stroke();
           ctx.restore();
         }
-        // Center
         ctx.fillStyle = flower.color.center;
         ctx.beginPath();
-        ctx.arc(0, 0, 4.5 * s, 0, Math.PI * 2);
+        ctx.arc(0, 0, 4.2 * s, 0, Math.PI * 2);
         ctx.fill();
         break;
       }
 
       case 'lavender': {
-        // Lavender Spike Florets
         ctx.fillStyle = flower.color.floret;
         for (let i = 0; i < 6; i++) {
-          const yOff = -i * 5.5 * s;
+          const yOff = -i * 5 * s;
           ctx.beginPath();
-          ctx.ellipse(-3 * s, yOff, 3.5 * s, 2.5 * s, -0.2, 0, Math.PI * 2);
-          ctx.ellipse(3 * s, yOff, 3.5 * s, 2.5 * s, 0.2, 0, Math.PI * 2);
+          ctx.ellipse(-2.8 * s, yOff, 3.2 * s, 2.3 * s, -0.2, 0, Math.PI * 2);
+          ctx.ellipse(2.8 * s, yOff, 3.2 * s, 2.3 * s, 0.2, 0, Math.PI * 2);
           ctx.fill();
         }
         break;
       }
 
       case 'cosmos': {
-        // Cosmos Wide Petals
         ctx.fillStyle = flower.color.petal;
         const petals = 8;
         for (let i = 0; i < petals; i++) {
@@ -736,25 +736,24 @@ class GrassSystem {
           ctx.save();
           ctx.rotate(angle);
           ctx.beginPath();
-          ctx.ellipse(0, -10 * s, 4.8 * s, 9 * s, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -9.5 * s, 4.5 * s, 8.5 * s, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
         ctx.fillStyle = flower.color.center;
         ctx.beginPath();
-        ctx.arc(0, 0, 4 * s, 0, Math.PI * 2);
+        ctx.arc(0, 0, 3.8 * s, 0, Math.PI * 2);
         ctx.fill();
         break;
       }
 
       case 'bluebell': {
-        // Drooping Bluebell Florets
         ctx.fillStyle = flower.color.petal;
         for (let i = 0; i < 3; i++) {
           ctx.save();
-          ctx.translate(-i * 3 * s, i * 6 * s);
+          ctx.translate(-i * 2.8 * s, i * 5.5 * s);
           ctx.beginPath();
-          ctx.arc(0, 0, 5 * s, 0, Math.PI);
+          ctx.arc(0, 0, 4.5 * s, 0, Math.PI);
           ctx.fill();
           ctx.restore();
         }
@@ -762,39 +761,37 @@ class GrassSystem {
       }
 
       case 'buttercup': {
-        // Cup-shaped Petals
         ctx.fillStyle = flower.color.petal;
         for (let i = 0; i < 5; i++) {
           const angle = (i * Math.PI * 2) / 5;
           ctx.save();
           ctx.rotate(angle);
           ctx.beginPath();
-          ctx.ellipse(0, -6 * s, 4 * s, 6 * s, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -5.5 * s, 3.8 * s, 5.5 * s, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
         ctx.fillStyle = flower.color.center;
         ctx.beginPath();
-        ctx.arc(0, 0, 3 * s, 0, Math.PI * 2);
+        ctx.arc(0, 0, 2.8 * s, 0, Math.PI * 2);
         ctx.fill();
         break;
       }
 
       case 'violet': {
-        // Wild Violet Asymmetric Petals
         ctx.fillStyle = flower.color.petal;
         for (let i = 0; i < 5; i++) {
           const angle = (i * Math.PI * 2) / 5;
           ctx.save();
           ctx.rotate(angle);
           ctx.beginPath();
-          ctx.ellipse(0, -5 * s, 3.2 * s, 5.5 * s, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -4.8 * s, 3.0 * s, 5.2 * s, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
         ctx.fillStyle = flower.color.center;
         ctx.beginPath();
-        ctx.arc(0, 0, 2 * s, 0, Math.PI * 2);
+        ctx.arc(0, 0, 1.8 * s, 0, Math.PI * 2);
         ctx.fill();
         break;
       }
@@ -809,16 +806,18 @@ class GrassSystem {
     this.ctx.clearRect(0, 0, this.width, this.height);
     const isReduced = Utils.prefersReducedMotion();
 
-    const globalWind = isReduced ? 0 : Math.sin(now * 0.0008) * 12 + Math.cos(now * 0.0018) * 6;
+    const globalWind = isReduced ? 0 : Math.sin(now * 0.0008) * 10 + Math.cos(now * 0.0018) * 5;
+    // Bottom offset to guarantee blade bases and flower stems never clip at canvas edge
+    const bottomPadding = 12;
+    const baseY = this.height - bottomPadding;
 
-    // Render by Depth Layer (Layer 0 -> Layer 1 -> Layer 2)
+    // Render Layer 0 -> Layer 1 -> Layer 2
     for (let layer = 0; layer < 3; layer++) {
-      // 1. Grass Blades in Layer
+      // 1. Render Grass Blades in Layer
       const layerBlades = this.blades.filter(b => b.layer === layer);
       for (let blade of layerBlades) {
-        const baseY = this.height;
-        const gustWave = isReduced ? 0 : Math.sin(now * 0.0012 - blade.x * 0.0025) * 10;
-        const bladeSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * blade.freq + blade.phase) * 4) * blade.flexibility;
+        const gustWave = isReduced ? 0 : Math.sin(now * 0.0012 - blade.x * 0.0025) * 8;
+        const bladeSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * blade.freq + blade.phase) * 3.5) * blade.flexibility;
 
         const totalOffset = blade.naturalCurve + bladeSway;
         const tipX = blade.x + totalOffset;
@@ -838,7 +837,7 @@ class GrassSystem {
 
         if (blade.hasHighlight) {
           this.ctx.strokeStyle = Config.grass.moonlightTip;
-          this.ctx.lineWidth = 0.85;
+          this.ctx.lineWidth = 0.8;
           this.ctx.beginPath();
           this.ctx.moveTo(ctrlX, ctrlY);
           this.ctx.quadraticCurveTo(ctrlX + totalOffset * 0.2, tipY + blade.height * 0.15, tipX, tipY);
@@ -847,12 +846,11 @@ class GrassSystem {
         this.ctx.restore();
       }
 
-      // 2. Flowers in Layer
+      // 2. Render Flowers in Layer
       const layerFlowers = this.flowers.filter(f => f.layer === layer);
       for (let flower of layerFlowers) {
-        const baseY = this.height;
-        const gustWave = isReduced ? 0 : Math.sin(now * 0.001 - flower.x * 0.002) * 8;
-        const flowerSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * flower.freq + flower.phase) * 3) * flower.windFactor;
+        const gustWave = isReduced ? 0 : Math.sin(now * 0.001 - flower.x * 0.002) * 6;
+        const flowerSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * flower.freq + flower.phase) * 2.5) * flower.windFactor;
 
         const totalOffset = flower.stemCurve + flowerSway;
         const tipX = flower.x + totalOffset;
@@ -860,18 +858,16 @@ class GrassSystem {
         const ctrlX = flower.x + totalOffset * 0.5;
         const ctrlY = baseY - flower.stemHeight * 0.5;
 
-        // Draw Stem
         this.ctx.save();
         this.ctx.strokeStyle = "#254238";
-        this.ctx.lineWidth = 1.6 * flower.scale;
+        this.ctx.lineWidth = 1.5 * flower.scale;
         this.ctx.beginPath();
         this.ctx.moveTo(flower.x, baseY);
         this.ctx.quadraticCurveTo(ctrlX, ctrlY, tipX, tipY);
         this.ctx.stroke();
         this.ctx.restore();
 
-        // Draw Flower Blossom
-        this.drawFlower(flower, tipX, tipY, flowerSway);
+        this.drawFlower(flower, tipX, tipY);
       }
     }
 
