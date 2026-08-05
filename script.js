@@ -1,21 +1,22 @@
 
 /**
- * A Little World Made Just for Her - Version 4.2 Grand Firework Celebration & Environmental Realism
+ * A Little World Made Just for Her - Version 4.3 Final Birthday Conclusion
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
  * - Config: Dynamic palette definitions, stroke vectors, species configurations, fluid timing sequence,
- *   and JavaScript Memory Data Array configured with 'Images/photo01.jpg' ... 'Images/photo10.jpg' paths.
+ *   JavaScript Memory Data Array ('Images/photo01.jpg' ... 'Images/photo10.jpg'),
+ *   AND Configurable Final Birthday Message (`recipientName` and `signature`).
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
  * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
  * - ParticleSystem & FireworkEngine: Canvas engine for stars, shooting stars, ultra-slow dust, fireflies,
- *   high-sky gathering, AND multi-shell realistic physics fireworks with dynamic ambient lighting & smoke.
- * - GrassSystem: Layered Planting Zone flower & grass engine (220-380 grass blades across 3 depth layers,
- *   32-80 enlarged flowers with moonlight bloom).
+ *   AND multi-shell realistic physics fireworks with golden finale, natural particle/smoke decay, and environment restoration.
+ * - GrassSystem: Layered Planting Zone flower & grass engine (220-380 grass blades, 32-80 enlarged flowers with moonlight bloom).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
- *   Memory Lane environment transition, 10-Card Scrapbook Scroll, and Grand Celebration Firework Trigger.
+ *   Memory Lane environment transition, 10-Card Scrapbook Scroll, Celebration Firework Controller,
+ *   Environment Restoration, AND Line-by-Line Final Birthday Message Reveal into Permanent Resting State.
  * - TimelineManager: Story narrative sequence controller.
  */
 
@@ -112,7 +113,8 @@ const Config = {
       "#fcf8f2", // Cream
       "#e6ca85"  // Warm Moon
     ],
-    types: ["chrysanthemum", "peony", "willow", "ring", "palm", "crackling"]
+    types: ["chrysanthemum", "peony", "willow", "ring", "palm", "crackling"],
+    maxShells: 12
   },
   // Dynamic Memory Data Array
   memories: [
@@ -237,6 +239,28 @@ const Config = {
       scale: 0.98
     }
   ],
+  // Version 4.3 Final Birthday Message Configuration (Easily Editable)
+  finalMessage: {
+    recipientName: "My Dearest",
+    signature: "— Atif",
+    lines: [
+      { text: "Happy Birthday once again,", class: "final-line-salutation" },
+      { text: "{{recipientName}}", class: "final-line-recipient" },
+      { text: "I hope this little journey", class: "" },
+      { text: "brought a smile to your face.", class: "" },
+      { text: "May this year bring you", class: "" },
+      { text: "happiness,", class: "" },
+      { text: "good health,", class: "" },
+      { text: "success,", class: "" },
+      { text: "and countless beautiful memories.", class: "" },
+      { text: "Thank you for being", class: "" },
+      { text: "a wonderful part of my life.", class: "" },
+      { text: "Keep smiling.", class: "" },
+      { text: "Keep shining.", class: "" },
+      { text: "Have the most amazing birthday.", class: "" },
+      { text: "{{signature}}", class: "final-line-signature" }
+    ]
+  },
   timings: {
     initialPause: 600,             // Fast loading screen start
     interStrokeDelay: 80,          // Rapid handwriting stroke flow
@@ -249,7 +273,8 @@ const Config = {
     unfurlDuration: 1400,          // Parchment opens in ~1.4s
     pauseBeforeLetterReveal: 350,  // Pause ~0.35s before text reveals
     lineRevealInterval: 550,       // Rapid line reveal ~0.55s per line
-    pauseBeforeContinue: 400       // Wait ~0.4s before "Continue →" appears
+    pauseBeforeContinue: 400,      // Wait ~0.4s before "Continue →" appears
+    finalLineRevealInterval: 700   // Line reveal interval for final birthday message
   }
 };
 
@@ -317,18 +342,17 @@ class ResponsiveSystem {
     switch (cat) {
       case 'small-phone':
       case 'medium-phone':
-        return 0.35; // 35% on Mobile
+        return 0.35;
       case 'tablet':
-        return 0.32; // 32% on Tablet
+        return 0.32;
       case 'laptop':
-        return 0.30; // 30% on Laptop
+        return 0.30;
       case 'desktop':
       default:
-        return 0.28; // 28% on Desktop
+        return 0.28;
     }
   }
 
-  // Version 4.2 Reduced Grass Density (35-45% Reduction)
   getGrassCount() {
     const cat = this.getViewportCategory();
     switch (cat) {
@@ -340,7 +364,6 @@ class ResponsiveSystem {
     }
   }
 
-  // Version 4.2 Reduced Flower Count (30-40% Reduction)
   getFlowerCount() {
     const cat = this.getViewportCategory();
     switch (cat) {
@@ -352,7 +375,6 @@ class ResponsiveSystem {
     }
   }
 
-  // Version 4.2 Increased Flower Scale (+35% larger blossoms)
   getFlowerScale() {
     const cat = this.getViewportCategory();
     switch (cat) {
@@ -386,19 +408,18 @@ class ResponsiveSystem {
     }
   }
 
-  // Version 4.2 Firework Burst Particle Scaling
   getFireworkParticleCount() {
     const cat = this.getViewportCategory();
     switch (cat) {
       case 'small-phone':
       case 'medium-phone':
-        return 100; // 80–120
+        return 100;
       case 'tablet':
-        return 150; // 120–180
+        return 150;
       case 'laptop':
       case 'desktop':
       default:
-        return 240; // 180–300
+        return 240;
     }
   }
 
@@ -480,7 +501,7 @@ class ParticleSystem {
     this.pollen = [];
     this.fireworks = [];
     this.smokePuffs = [];
-    
+
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.isRunning = false;
@@ -491,6 +512,8 @@ class ParticleSystem {
     this.pollenCount = 30;
     this.isGatheringHigh = false;
     this.isCelebrationActive = false;
+    this.launchedShellsCount = 0;
+    this.hasFinishedAllFireworks = false;
     this.lastFireworkLaunch = performance.now();
 
     this.initParticles();
@@ -519,7 +542,6 @@ class ParticleSystem {
     }
   }
 
-  // Version 4.2 Update 1: Stars immediately visible after loading
   initStars() {
     this.stars = [];
     const count = Config.sky.starCount;
@@ -581,21 +603,24 @@ class ParticleSystem {
     this.isGatheringHigh = enabled;
   }
 
-  // Version 4.2 Firework Celebration Controller
   startCelebration() {
     this.isCelebrationActive = true;
+    this.launchedShellsCount = 0;
+    this.hasFinishedAllFireworks = false;
     this.lastFireworkLaunch = performance.now();
-    this.launchShell(); // Launch initial shell
+    this.launchShell();
   }
 
-  launchShell() {
+  launchShell(isFinale = false) {
     if (Utils.prefersReducedMotion()) return;
 
     const startX = Utils.randomRange(this.width * 0.15, this.width * 0.85);
     const startY = this.height + 20;
     const targetY = Utils.randomRange(this.height * 0.12, this.height * 0.42);
-    const shellType = Config.fireworks.types[Math.floor(Math.random() * Config.fireworks.types.length)];
-    const color = Config.fireworks.colors[Math.floor(Math.random() * Config.fireworks.colors.length)];
+    const shellType = isFinale ? 'chrysanthemum' : Config.fireworks.types[Math.floor(Math.random() * Config.fireworks.types.length)];
+    const color = isFinale ? '#fce89e' : Config.fireworks.colors[Math.floor(Math.random() * Config.fireworks.colors.length)];
+
+    this.launchedShellsCount++;
 
     this.fireworks.push({
       x: startX,
@@ -604,6 +629,7 @@ class ParticleSystem {
       vy: -Utils.randomRange(7.5, 10.5),
       color: color,
       type: shellType,
+      isFinale: isFinale,
       sparks: [],
       isBurst: false
     });
@@ -611,14 +637,14 @@ class ParticleSystem {
 
   explodeShell(fw) {
     fw.isBurst = true;
-    const count = window.appResponsive ? window.appResponsive.getFireworkParticleCount() : 180;
+    const baseCount = window.appResponsive ? window.appResponsive.getFireworkParticleCount() : 180;
+    const count = fw.isFinale ? baseCount * 1.5 : baseCount;
 
-    // Trigger Dynamic Ambient Flash Callback
     if (window.appSceneManager) {
       window.appSceneManager.triggerDynamicLightingFlash(fw.color);
     }
 
-    // Add Smoke Puff at apex
+    // Smoke generation
     for (let s = 0; s < 4; s++) {
       this.smokePuffs.push({
         x: fw.x + Utils.randomRange(-10, 10),
@@ -627,11 +653,10 @@ class ParticleSystem {
         vx: Utils.randomRange(-0.15, 0.15),
         vy: Utils.randomRange(-0.2, -0.05),
         alpha: 0.28,
-        decay: 0.003
+        decay: 0.0025
       });
     }
 
-    // Generate Burst Particles based on Firework Type
     for (let i = 0; i < count; i++) {
       let angle = (i * Math.PI * 2) / count;
       let speed = Utils.randomRange(2.5, 7.5);
@@ -748,7 +773,7 @@ class ParticleSystem {
     this.ctx.clearRect(0, 0, this.width, this.height);
     const isReduced = Utils.prefersReducedMotion();
 
-    // 1. Render Twinkling Night Stars (Immediately visible after loading)
+    // 1. Render Twinkling Night Stars
     for (let s of this.stars) {
       if (!isReduced) {
         s.phase += s.twinkleSpeed;
@@ -894,11 +919,27 @@ class ParticleSystem {
       this.ctx.restore();
     }
 
-    // 6. Trigger & Render Sequential Firework Shells (Version 4.2)
+    // 6. Trigger & Render Sequential Firework Shells with Natural Golden Ending
     if (this.isCelebrationActive && !isReduced) {
-      if (now - this.lastFireworkLaunch > Utils.randomRange(1200, 2200)) {
-        this.launchShell();
-        this.lastFireworkLaunch = now;
+      const maxShells = Config.fireworks.maxShells || 12;
+
+      if (this.launchedShellsCount < maxShells) {
+        if (now - this.lastFireworkLaunch > Utils.randomRange(1400, 2600)) {
+          const isFinale = this.launchedShellsCount === maxShells - 1;
+          this.launchShell(isFinale);
+          this.lastFireworkLaunch = now;
+        }
+      } else if (!this.hasFinishedAllFireworks) {
+        // No more shell launches -> allow existing sparks and smoke to decay
+        if (this.fireworks.length === 0 && this.stardustSparks.length < 5) {
+          this.hasFinishedAllFireworks = true;
+          this.isCelebrationActive = false;
+
+          // Version 4.3 Trigger Environment Restoration & Conclusion
+          if (window.appSceneManager) {
+            window.appSceneManager.handleCelebrationComplete();
+          }
+        }
       }
 
       for (let i = this.fireworks.length - 1; i >= 0; i--) {
@@ -907,7 +948,6 @@ class ParticleSystem {
           fw.y += fw.vy;
           fw.vy += 0.12; // Slow down before apex burst
 
-          // Launch trail spark
           this.stardustSparks.push({
             x: fw.x + Utils.randomRange(-1.5, 1.5),
             y: fw.y,
@@ -919,7 +959,6 @@ class ParticleSystem {
             color: "#fce89e"
           });
 
-          // Burst at apex
           if (fw.vy >= -1.0 || fw.y <= fw.targetY) {
             this.explodeShell(fw);
             this.fireworks.splice(i, 1);
@@ -999,9 +1038,9 @@ class GrassSystem {
     this.ctx = canvas.getContext('2d');
     this.width = window.innerWidth;
     this.height = window.innerHeight * 0.30;
-    this.grassCount = 340; // Version 4.2 Layered Grass (40% Density Reduction)
-    this.flowerCount = 68; // Version 4.2 Larger Flowers (35% Count Reduction)
-    this.flowerScaleGlobal = 1.28; // Version 4.2 Enlarged Blossom Scale
+    this.grassCount = 340;
+    this.flowerCount = 68;
+    this.flowerScaleGlobal = 1.28;
     this.safeBottomInset = 0;
     this.isCalmWind = false;
 
@@ -1022,7 +1061,6 @@ class GrassSystem {
     this.initFlowers();
   }
 
-  // Version 4.2 Update 4: Layered Organic Grass Structure (3 Distinct Depth Layers)
   initGrass() {
     this.blades = [];
 
@@ -1064,7 +1102,6 @@ class GrassSystem {
     this.blades.sort((a, b) => a.layer - b.layer);
   }
 
-  // Version 4.2 Update 3: Reduced Count, Larger Flowers with Moonlight Bloom
   initFlowers() {
     this.flowers = [];
 
@@ -1456,7 +1493,7 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER & TRANSITION CONTROLLER
+   7. SCENE MANAGER, TRANSITION & CONCLUSION CONTROLLER
    ================================================== */
 class SceneManager {
   constructor(particleSystem, grassSystem) {
@@ -1472,6 +1509,9 @@ class SceneManager {
     this.memoryLaneFoundation = document.getElementById('memory-lane-foundation');
     this.memoryLaneScrapbook = document.getElementById('memory-lane-scrapbook');
     this.scrapbookTrack = document.getElementById('scrapbook-track');
+    this.finalMessageContainer = document.getElementById('final-message-container');
+    this.finalMessageContent = document.getElementById('final-message-content');
+    
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.continueContainer = document.getElementById('continue-container');
     this.continueBtn = document.getElementById('continue-btn');
@@ -1480,9 +1520,11 @@ class SceneManager {
     this.isTransitioning = false;
     this.hasReachedEndOfPath = false;
     this.isReadyForCelebration = false;
+    this.isConcluding = false;
 
     this.initEvents();
     this.buildScrapbookDOM();
+    this.buildFinalMessageDOM();
   }
 
   initEvents() {
@@ -1555,6 +1597,28 @@ class SceneManager {
     this.initScrapbookScroll();
   }
 
+  // Version 4.3 Final Message DOM Builder
+  buildFinalMessageDOM() {
+    if (!this.finalMessageContent || !Config.finalMessage) return;
+
+    this.finalMessageContent.innerHTML = '';
+
+    Config.finalMessage.lines.forEach(lineObj => {
+      const p = document.createElement('p');
+      let text = lineObj.text;
+
+      // Replace placeholders
+      text = text.replace('{{recipientName}}', Config.finalMessage.recipientName || 'My Dearest');
+      text = text.replace('{{signature}}', Config.finalMessage.signature || '— Atif');
+
+      p.className = `final-message-line ${lineObj.class || ''}`;
+      p.textContent = text;
+      this.finalMessageContent.appendChild(p);
+    });
+
+    this.finalMessageLines = document.querySelectorAll('.final-message-line');
+  }
+
   initScrapbookScroll() {
     if (!this.memoryLaneScrapbook) return;
 
@@ -1600,12 +1664,11 @@ class SceneManager {
     }
   }
 
-  // Version 4.1 End-of-Path & Version 4.2 Celebration Launch Sequence
   async triggerEndOfPathReaction() {
     if (this.hasReachedEndOfPath) return;
     this.hasReachedEndOfPath = true;
 
-    // 1. Smoothly center Card 10 in viewport
+    // Smoothly center Card 10
     const lastCard = this.memoryCards[this.memoryCards.length - 1];
     if (lastCard && this.memoryLaneScrapbook) {
       const targetScroll = lastCard.offsetLeft - (this.memoryLaneScrapbook.clientWidth - lastCard.clientWidth) / 2;
@@ -1615,7 +1678,6 @@ class SceneManager {
       });
     }
 
-    // 2. Trigger Environmental Reactions (Calm Wind, Fireflies High, Moon Glow)
     if (this.moonlitSkyScene) {
       this.moonlitSkyScene.classList.add('at-end');
     }
@@ -1628,17 +1690,61 @@ class SceneManager {
       this.particleSystem.setGatheringHigh(true);
     }
 
-    // 3. Peaceful Silence Pause (1.8 Seconds)
     await Utils.wait(1800);
 
-    // 4. Version 4.2: Automatically Begin Grand Firework Celebration
+    // Launch Firework Celebration
     this.isReadyForCelebration = true;
     if (this.particleSystem) {
       this.particleSystem.startCelebration();
     }
   }
 
-  // Dynamic Lighting Flash on Firework Explosions
+  // Version 4.3 Environment Restoration & Final Message Conclusion
+  async handleCelebrationComplete() {
+    if (this.isConcluding) return;
+    this.isConcluding = true;
+
+    // 1. Environment Restoration over ~3 seconds
+    if (this.fireworkFlashOverlay) {
+      this.fireworkFlashOverlay.style.opacity = '0';
+    }
+
+    if (this.moonlitSkyScene) {
+      this.moonlitSkyScene.classList.remove('at-end');
+    }
+
+    if (this.grassSystem) {
+      this.grassSystem.setCalmWind(false);
+    }
+
+    if (this.particleSystem) {
+      this.particleSystem.setGatheringHigh(false);
+    }
+
+    // 2. Final Pause (2 Seconds of Peaceful Silence)
+    await Utils.wait(2000);
+
+    // 3. Line-by-Line Reveal of Final Birthday Message
+    await this.revealFinalMessageLineByLine();
+
+    // 4. Enter Permanent Resting State (No controls, continuous gentle garden background)
+  }
+
+  async revealFinalMessageLineByLine() {
+    if (!this.finalMessageLines || this.finalMessageLines.length === 0) return;
+
+    const isReduced = Utils.prefersReducedMotion();
+
+    for (let el of this.finalMessageLines) {
+      if (isReduced) {
+        el.classList.add('visible');
+      } else {
+        el.classList.add('visible');
+        await Utils.wait(Config.timings.finalLineRevealInterval);
+      }
+    }
+  }
+
   triggerDynamicLightingFlash(color) {
     if (!this.fireworkFlashOverlay) return;
     this.fireworkFlashOverlay.style.background = color ? `${color}18` : 'rgba(252, 232, 158, 0.12)';
@@ -1740,60 +1846,6 @@ class SceneManager {
 
     this.isTransitioning = false;
   }
-
-  resetToLoading() {
-    this.isTransitioning = false;
-    this.hasReachedEndOfPath = false;
-    this.isReadyForCelebration = false;
-
-    if (this.grassSystem) this.grassSystem.setCalmWind(false);
-    if (this.particleSystem) {
-      this.particleSystem.setGatheringHigh(false);
-      this.particleSystem.isCelebrationActive = false;
-    }
-
-    if (this.continueBtn) {
-      this.continueBtn.style.pointerEvents = 'auto';
-    }
-    if (this.continueContainer) {
-      this.continueContainer.classList.remove('visible');
-    }
-    if (this.letterLines) {
-      this.letterLines.forEach(el => el.classList.remove('visible'));
-    }
-    if (this.paperContainer) {
-      this.paperContainer.classList.remove('arrived');
-      this.paperContainer.classList.remove('unfurled');
-      this.paperContainer.classList.remove('rolling-up');
-      this.paperContainer.classList.remove('ascending');
-    }
-    if (this.memoryLaneFoundation) {
-      this.memoryLaneFoundation.classList.remove('active');
-    }
-    if (this.memoryLaneScrapbook) {
-      this.memoryLaneScrapbook.classList.remove('active');
-      this.memoryLaneScrapbook.scrollLeft = 0;
-    }
-    if (this.memoryCards) {
-      this.memoryCards.forEach(card => card.classList.remove('in-view'));
-    }
-    if (this.focusOverlay) {
-      this.focusOverlay.style.opacity = '';
-      this.focusOverlay.classList.remove('active');
-    }
-    if (this.moonContainer) {
-      this.moonContainer.style.filter = '';
-    }
-    if (this.moonlitSkyScene) {
-      this.moonlitSkyScene.classList.remove('at-end');
-      this.moonlitSkyScene.classList.remove('active');
-    }
-    if (this.loadingScene) {
-      this.loadingScene.style.display = 'flex';
-      this.loadingScene.style.opacity = '1';
-    }
-    this.activeScene = 'loading';
-  }
 }
 
 /* ==================================================
@@ -1830,7 +1882,7 @@ class TimelineManager {
     // Step 7: Contemplative brief pause
     await Utils.wait(Config.timings.subtitleHold);
 
-    // Step 8: Smoothly fade into the Moonlit Garden (Stars visible immediately)
+    // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
 
     // Step 9: Display garden for ~0.9s before introducing parchment
