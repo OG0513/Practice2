@@ -1,5 +1,5 @@
 /**
- * A Little World Made Just for Her - Version 2.5 Memory Lane Transition & Environment Foundation
+ * A Little World Made Just for Her - Version 3.0 Memory Lane Scrapbook Foundation
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -10,8 +10,9 @@
  * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction & Memory Lane transition controller.
- * - TimelineManager: Story narrative sequence controller (Steps 1 to 16).
+ * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
+ *   Memory Lane environment transition & Horizontal Scrapbook Scroll controller.
+ * - TimelineManager: Story narrative sequence controller.
  */
 
 /* ==================================================
@@ -1139,6 +1140,9 @@ class SceneManager {
     this.focusOverlay = document.getElementById('scroll-focus-overlay');
     this.moonContainer = document.getElementById('moon-container');
     this.memoryLaneFoundation = document.getElementById('memory-lane-foundation');
+    this.memoryLaneScrapbook = document.getElementById('memory-lane-scrapbook');
+    this.scrapbookTrack = document.getElementById('scrapbook-track');
+    this.memoryCards = document.querySelectorAll('.memory-card');
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.continueContainer = document.getElementById('continue-container');
     this.continueBtn = document.getElementById('continue-btn');
@@ -1146,11 +1150,43 @@ class SceneManager {
     this.isTransitioning = false;
 
     this.initEvents();
+    this.initScrapbookScroll();
   }
 
   initEvents() {
     if (this.continueBtn) {
       this.continueBtn.addEventListener('click', (e) => this.handleContinueClick(e));
+    }
+  }
+
+  initScrapbookScroll() {
+    if (!this.memoryLaneScrapbook) return;
+
+    // Convert vertical mouse wheel / trackpad scrolling into smooth horizontal scrolling
+    this.memoryLaneScrapbook.addEventListener('wheel', (e) => {
+      if (this.memoryLaneScrapbook.classList.contains('active')) {
+        e.preventDefault();
+        this.memoryLaneScrapbook.scrollLeft += e.deltaY + e.deltaX;
+      }
+    }, { passive: false });
+
+    // IntersectionObserver to animate memory cards entering viewport (500-700ms entrance)
+    if ('IntersectionObserver' in window) {
+      const cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          }
+        });
+      }, {
+        root: this.memoryLaneScrapbook,
+        threshold: 0.2
+      });
+
+      this.memoryCards.forEach(card => cardObserver.observe(card));
+    } else {
+      // Fallback if IntersectionObserver is unsupported
+      this.memoryCards.forEach(card => card.classList.add('in-view'));
     }
   }
 
@@ -1240,9 +1276,16 @@ class SceneManager {
       this.moonContainer.style.filter = 'drop-shadow(0 0 22px rgba(230, 202, 133, 0.65))';
     }
 
-    // 7. Slowly introduce Memory Lane Foundation (Environment Only)
+    // 7. Slowly introduce Memory Lane Foundation Environment
     if (this.memoryLaneFoundation) {
       this.memoryLaneFoundation.classList.add('active');
+    }
+
+    await Utils.wait(1200);
+
+    // 8. Reveal Horizontally Scrollable Memory Lane Scrapbook
+    if (this.memoryLaneScrapbook) {
+      this.memoryLaneScrapbook.classList.add('active');
     }
 
     this.isTransitioning = false;
@@ -1267,6 +1310,13 @@ class SceneManager {
     }
     if (this.memoryLaneFoundation) {
       this.memoryLaneFoundation.classList.remove('active');
+    }
+    if (this.memoryLaneScrapbook) {
+      this.memoryLaneScrapbook.classList.remove('active');
+      this.memoryLaneScrapbook.scrollLeft = 0;
+    }
+    if (this.memoryCards) {
+      this.memoryCards.forEach(card => card.classList.remove('in-view'));
     }
     if (this.focusOverlay) {
       this.focusOverlay.style.opacity = '';
