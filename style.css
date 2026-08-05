@@ -14,6 +14,16 @@
   --color-soft-gold: #e6ca85;
   --color-warm-yellow: #fce89e;
 
+  /* Parchment Scroll Palette */
+  --parchment-cream: #fcf6ea;
+  --parchment-base: #f3e4d0;
+  --parchment-dark: #e6d3ba;
+  --parchment-shadow: rgba(110, 63, 35, 0.25);
+  --wood-dark: #523018;
+  --wood-mid: #8c5a38;
+  --wood-light: #a46d46;
+  --gold-band: #e6ca85;
+
   /* Flower Species Palette */
   --flower-daisy: #fcf8f2;
   --flower-daisy-center: #e6ca85;
@@ -46,6 +56,7 @@
   /* Easing Curves */
   --ease-cinematic: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-handwriting: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-scroll-entrance: cubic-bezier(0.175, 0.885, 0.32, 1.05);
 }
 
 /* ==================================================
@@ -123,7 +134,7 @@ html, body {
   justify-content: center;
   flex-direction: column;
   opacity: 1;
-  z-index: 10;
+  z-index: 30;
   transition: opacity 2.2s var(--ease-cinematic);
   will-change: opacity;
 }
@@ -457,6 +468,238 @@ html, body {
   z-index: 4;
 }
 
+/* ==================================================
+   SUBTLE BACKGROUND FOCUS OVERLAY
+   ================================================== */
+
+.scroll-focus-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(6, 9, 25, 0.08);
+  opacity: 0;
+  z-index: 15;
+  pointer-events: none;
+  transition: opacity 2.2s var(--ease-cinematic);
+}
+
+.scroll-focus-overlay.active {
+  opacity: 1;
+}
+
+/* ==================================================
+   PURE HTML/CSS ROLLED ANCIENT PARCHMENT SCROLL
+   (VERSION 1.6 - HANDCRAFTED STORYBOOK)
+   ================================================== */
+
+.scroll-container {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -160vh); /* Start off-screen above viewport */
+  width: clamp(280px, 72vw, 540px);
+  z-index: 20;
+  pointer-events: none; /* No interactions in this version */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transition: transform 2.4s var(--ease-scroll-entrance);
+}
+
+/* Responsive Size Tiering */
+@media (min-width: 600px) {
+  .scroll-container {
+    width: clamp(340px, 50vw, 520px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .scroll-container {
+    width: clamp(420px, 42vw, 560px);
+  }
+}
+
+/* Arrived Entrance State */
+.scroll-container.arrived {
+  transform: translate(-50%, -50%);
+}
+
+.scroll-body-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(80px, 13vw, 135px);
+}
+
+/* Wooden Rollers (Left & Right) */
+.scroll-roller {
+  position: relative;
+  width: clamp(16px, 2.6vw, 24px);
+  height: 116%;
+  background: linear-gradient(90deg, var(--wood-dark) 0%, var(--wood-mid) 40%, var(--wood-light) 65%, var(--wood-dark) 100%);
+  border-radius: 4px;
+  z-index: 4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Wooden Roller End Caps */
+.wood-cap {
+  position: absolute;
+  width: 155%;
+  left: -27.5%;
+  height: clamp(12px, 2vw, 18px);
+  background: radial-gradient(ellipse at center, var(--wood-light) 0%, var(--wood-mid) 55%, var(--wood-dark) 100%);
+  border-radius: 50%;
+  border: 1px solid rgba(230, 202, 133, 0.45);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.cap-top {
+  top: -9px;
+}
+
+.cap-bottom {
+  bottom: -9px;
+}
+
+/* Decorative Gold/Brass Roller Bands */
+.wood-cylinder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.deco-band {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #b5945b, var(--gold-band), #b5945b);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.band-top {
+  top: 12%;
+}
+
+.band-bottom {
+  bottom: 12%;
+}
+
+/* Rolled Parchment Paper Body */
+.scroll-parchment {
+  flex: 1;
+  height: 100%;
+  background: linear-gradient(180deg, var(--parchment-cream) 0%, var(--parchment-base) 45%, var(--parchment-dark) 100%);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  z-index: 3;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.15),
+              inset 0 -3px 8px rgba(0, 0, 0, 0.18),
+              0 6px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CSS Grain & Paper Shade Variations */
+.parchment-texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(45deg, rgba(140, 90, 56, 0.025) 0px, rgba(140, 90, 56, 0.025) 2px, transparent 2px, transparent 4px),
+    radial-gradient(ellipse at 50% 50%, rgba(252, 248, 242, 0.5) 0%, rgba(210, 185, 150, 0.2) 100%);
+  pointer-events: none;
+}
+
+/* Inner Roll Curvature Shadows */
+.parchment-shadow-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(82, 48, 24, 0.35) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.parchment-shadow-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14%;
+  height: 100%;
+  background: linear-gradient(-90deg, rgba(82, 48, 24, 0.35) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.parchment-crease {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(140, 90, 56, 0.15);
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Decorative Gold Ribbon Tie */
+.parchment-ribbon-tie {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.ribbon-band {
+  width: 14px;
+  height: clamp(80px, 13vw, 135px);
+  background: linear-gradient(90deg, #d4af37, #fce89e, #d4af37);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+}
+
+.ribbon-knot {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle, #fce89e 0%, #d4af37 70%, #aa8c2c 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Ground Floor Shadow Beneath Settling Scroll */
+.scroll-ground-shadow {
+  position: absolute;
+  bottom: -28px;
+  width: 82%;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 75%);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 1.8s var(--ease-cinematic) 1.0s, transform 1.8s var(--ease-cinematic) 1.0s;
+}
+
+.scroll-container.arrived .scroll-ground-shadow {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Safe-Area Responsive Replay Control Button */
 .prepared-status-container {
   position: absolute;
@@ -511,9 +754,16 @@ html, body {
   .moon-container,
   .moon-aura-outer,
   .cloud,
+  .scroll-container,
+  .scroll-focus-overlay,
+  .scroll-ground-shadow,
   .replay-btn {
     transition: none !important;
     animation: none !important;
+  }
+
+  .scroll-container {
+    transform: translate(-50%, -50%);
   }
 
   .subtitle-container {
