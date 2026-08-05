@@ -67,10 +67,49 @@
 
       </section>
 
-      <!-- Moonlit Sky Scene (Version 1.1 Primary Scene) -->
+      <!-- Moonlit Sky & Meadow Scene (Version 1.2 Primary Scene) -->
       <section id="moonlit-sky-scene" class="moonlit-sky-scene" aria-hidden="true">
         <!-- Atmospheric Night Sky Gradient Background Layer -->
         <div class="sky-backdrop"></div>
+
+        <!-- Pure HTML/CSS Flat Design 2.0 Organic Clouds Layer -->
+        <div class="clouds-container" id="clouds-container" aria-hidden="true">
+          <div class="cloud cloud-1">
+            <div class="cloud-part cloud-base"></div>
+            <div class="cloud-part cloud-puff-1"></div>
+            <div class="cloud-part cloud-puff-2"></div>
+            <div class="cloud-part cloud-puff-3"></div>
+            <div class="cloud-part cloud-moon-rim"></div>
+          </div>
+          <div class="cloud cloud-2">
+            <div class="cloud-part cloud-base"></div>
+            <div class="cloud-part cloud-puff-1"></div>
+            <div class="cloud-part cloud-puff-2"></div>
+            <div class="cloud-part cloud-puff-3"></div>
+            <div class="cloud-part cloud-moon-rim"></div>
+          </div>
+          <div class="cloud cloud-3">
+            <div class="cloud-part cloud-base"></div>
+            <div class="cloud-part cloud-puff-1"></div>
+            <div class="cloud-part cloud-puff-2"></div>
+            <div class="cloud-part cloud-puff-3"></div>
+            <div class="cloud-part cloud-moon-rim"></div>
+          </div>
+          <div class="cloud cloud-4">
+            <div class="cloud-part cloud-base"></div>
+            <div class="cloud-part cloud-puff-1"></div>
+            <div class="cloud-part cloud-puff-2"></div>
+            <div class="cloud-part cloud-puff-3"></div>
+            <div class="cloud-part cloud-moon-rim"></div>
+          </div>
+          <div class="cloud cloud-5">
+            <div class="cloud-part cloud-base"></div>
+            <div class="cloud-part cloud-puff-1"></div>
+            <div class="cloud-part cloud-puff-2"></div>
+            <div class="cloud-part cloud-puff-3"></div>
+            <div class="cloud-part cloud-moon-rim"></div>
+          </div>
+        </div>
 
         <!-- Flat Design 2.0 Illustrated Moon Container -->
         <div class="moon-container" id="moon-container" aria-label="Moonlit Night Sky Moon">
@@ -116,6 +155,36 @@
             <ellipse cx="145" cy="95" rx="8" ry="6" fill="url(#craterGradient)" transform="rotate(-10 145 95)" />
           </svg>
         </div>
+
+        <!-- Meadow Backdrop Layer with Rolling Terrain Curves -->
+        <div class="meadow-backdrop" id="meadow-backdrop" aria-hidden="true">
+          <svg class="meadow-hills-svg" viewBox="0 0 1200 320" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="hillGrad1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#192b2f" stop-opacity="0.85" />
+                <stop offset="100%" stop-color="#0e1a1c" stop-opacity="0.98" />
+              </linearGradient>
+              <linearGradient id="hillGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#142628" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#0b1617" stop-opacity="1" />
+              </linearGradient>
+              <linearGradient id="moonRidgeGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="rgba(230, 202, 133, 0)" />
+                <stop offset="50%" stop-color="rgba(230, 202, 133, 0.28)" />
+                <stop offset="100%" stop-color="rgba(230, 202, 133, 0)" />
+              </linearGradient>
+            </defs>
+
+            <!-- Background Rolling Terrain Hill -->
+            <path d="M 0,180 Q 300,110 650,150 T 1200,120 L 1200,320 L 0,320 Z" fill="url(#hillGrad1)" />
+            <!-- Midground Rolling Terrain Hill with Soft Moonlight Ridge -->
+            <path d="M 0,210 Q 400,160 850,200 T 1200,170 L 1200,320 L 0,320 Z" fill="url(#hillGrad2)" />
+            <path d="M 0,210 Q 400,160 850,200 T 1200,170" fill="none" stroke="url(#moonRidgeGrad)" stroke-width="2" />
+          </svg>
+        </div>
+
+        <!-- Foreground Grass Canvas Layer -->
+        <canvas id="grass-canvas" class="grass-canvas"></canvas>
 
         <!-- Prepared Scene Controls (Replay Button) -->
         <div class="prepared-status-container" id="prepared-status">
