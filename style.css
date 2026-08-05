@@ -274,6 +274,20 @@ html, body {
   filter: brightness(0.95);
 }
 
+/* Firework Burst Dynamic Ambient Lighting Flash Layer */
+.firework-flash-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(252, 232, 158, 0.08);
+  opacity: 0;
+  z-index: 6;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-cinematic);
+}
+
 /* ==================================================
    PURE HTML/CSS CLOUDS (ADAPTIVE DRIFT)
    ================================================== */
@@ -398,7 +412,7 @@ html, body {
 @keyframes cloud-drift-5 { 0% { transform: translateX(-250px); } 100% { transform: translateX(105vw); } }
 
 /* ==================================================
-   RESPONSIVE MOON (70-78% WIDTH, 12-18% HEIGHT)
+   REALISTIC MOON & NATURAL ATMOSPHERIC BLOOM (VERSION 4.2)
    ================================================== */
 
 .moon-container {
@@ -416,7 +430,35 @@ html, body {
   transition: filter 2.2s var(--ease-cinematic);
 }
 
-/* Environment Reaction State when at End of Path (Enhanced Glow & Larger Halo) */
+/* Natural Multi-layered Seamless Atmospheric Bloom (No Circular Hard Rings) */
+.moon-aura-outer {
+  position: absolute;
+  width: 280%;
+  height: 280%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 248, 242, 0.22) 0%, rgba(230, 202, 133, 0.14) 30%, rgba(247, 214, 208, 0.06) 60%, rgba(0, 0, 0, 0) 80%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.moon-aura-inner {
+  position: absolute;
+  width: 180%;
+  height: 180%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 248, 242, 0.35) 0%, rgba(230, 202, 133, 0.18) 45%, rgba(0, 0, 0, 0) 75%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.moon-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 20px rgba(230, 202, 133, 0.45));
+}
+
+/* Environment Reaction State when at End of Path */
 .moonlit-sky-scene.at-end .moon-container {
   filter: drop-shadow(0 0 35px rgba(230, 202, 133, 0.85)) drop-shadow(0 0 65px rgba(247, 214, 208, 0.45));
 }
@@ -425,32 +467,6 @@ html, body {
   transform: scale(1.15);
   opacity: 0.95;
   transition: transform 2.2s var(--ease-cinematic), opacity 2.2s var(--ease-cinematic);
-}
-
-.moon-aura-outer {
-  position: absolute;
-  width: 180%;
-  height: 180%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(230, 202, 133, 0.22) 0%, rgba(247, 214, 208, 0.12) 40%, rgba(0, 0, 0, 0) 70%);
-  animation: moon-aura-pulse 6s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.moon-aura-inner {
-  position: absolute;
-  width: 135%;
-  height: 135%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(252, 248, 242, 0.3) 0%, rgba(230, 202, 133, 0.15) 50%, rgba(0, 0, 0, 0) 75%);
-  pointer-events: none;
-}
-
-.moon-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 0 15px rgba(230, 202, 133, 0.35));
 }
 
 @keyframes moon-float {
@@ -661,7 +677,7 @@ html, body {
 @keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
 
 /* ==================================================
-   MEMORY LANE DYNAMIC SCRAPBOOK (VERSION 4.1 END OF PATH)
+   MEMORY LANE DYNAMIC SCRAPBOOK (VERSION 4.2 END OF PATH)
    ================================================== */
 
 .memory-lane-scrapbook {
