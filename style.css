@@ -14,10 +14,13 @@
   --color-soft-gold: #e6ca85;
   --color-warm-yellow: #fce89e;
 
-  /* Loading Background (Midnight Indigo Gradient) */
-  --bg-midnight-deep: #070a1a;
-  --bg-midnight-mid: #0d122b;
-  --bg-midnight-light: #141a3d;
+  /* Loading & Sky Background Palette */
+  --bg-midnight-deep: #060919;
+  --bg-midnight-mid: #0c112b;
+  --bg-midnight-light: #13193a;
+  --bg-sky-top: #050716;
+  --bg-sky-mid: #0d122c;
+  --bg-sky-bottom: #161c42;
 
   /* Particle Palette */
   --particle-gold: rgba(230, 202, 133, 0.85);
@@ -68,7 +71,7 @@ html, body {
   background: radial-gradient(ellipse at 50% 45%, var(--bg-midnight-light) 0%, var(--bg-midnight-mid) 55%, var(--bg-midnight-deep) 100%);
 }
 
-/* Floating Particle Canvas Overlay */
+/* Unified Canvas Overlay */
 .particle-canvas {
   position: absolute;
   top: 0;
@@ -102,6 +105,7 @@ html, body {
   justify-content: center;
   flex-direction: column;
   opacity: 1;
+  z-index: 5;
   transition: opacity 2.2s var(--ease-cinematic);
   will-change: opacity;
 }
@@ -195,33 +199,113 @@ html, body {
 }
 
 /* ==================================================
-   PREPARED CANVAS SCENE (FOUNDATION FOR FUTURE VERSIONS)
+   MOONLIT SKY SCENE (VERSION 1.1)
    ================================================== */
 
-.prepared-canvas-scene {
+.moonlit-sky-scene {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  z-index: 2;
   opacity: 0;
-  transition: opacity 1.5s var(--ease-cinematic);
+  pointer-events: none;
+  transition: opacity 2.5s var(--ease-cinematic);
 }
 
-.prepared-canvas-scene.active {
+.moonlit-sky-scene.active {
   opacity: 1;
   pointer-events: auto;
 }
 
+/* Sky Background Gradient Layer */
+.sky-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bg-sky-top) 0%, var(--bg-sky-mid) 45%, var(--bg-sky-bottom) 100%);
+  opacity: 0.95;
+  z-index: 1;
+}
+
+/* Illustrated Moon Vector Container */
+.moon-container {
+  position: absolute;
+  top: clamp(6vh, 10vh, 14vh);
+  right: clamp(6vw, 12vw, 18vw);
+  width: clamp(120px, 22vw, 240px);
+  height: clamp(120px, 22vw, 240px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: moon-float 8s ease-in-out infinite alternate;
+}
+
+/* Multi-layered Soft Moon Aura Glows */
+.moon-aura-outer {
+  position: absolute;
+  width: 180%;
+  height: 180%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230, 202, 133, 0.22) 0%, rgba(247, 214, 208, 0.12) 40%, rgba(0, 0, 0, 0) 70%);
+  animation: moon-aura-pulse 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.moon-aura-inner {
+  position: absolute;
+  width: 135%;
+  height: 135%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 248, 242, 0.3) 0%, rgba(230, 202, 133, 0.15) 50%, rgba(0, 0, 0, 0) 75%);
+  pointer-events: none;
+}
+
+.moon-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 15px rgba(230, 202, 133, 0.35));
+}
+
+@keyframes moon-float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1.2deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes moon-aura-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(0.96);
+    opacity: 0.65;
+  }
+}
+
+/* Replay Button Container */
 .prepared-status-container {
   position: absolute;
   bottom: 3rem;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
 }
 
 .replay-btn {
@@ -264,6 +348,9 @@ html, body {
   .loading-scene,
   .subtitle-container,
   .initials-svg,
+  .moonlit-sky-scene,
+  .moon-container,
+  .moon-aura-outer,
   .replay-btn {
     transition: none !important;
     animation: none !important;
