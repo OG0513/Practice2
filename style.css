@@ -14,6 +14,15 @@
   --color-soft-gold: #e6ca85;
   --color-warm-yellow: #fce89e;
 
+  /* Flower Species Palette */
+  --flower-daisy: #fcf8f2;
+  --flower-daisy-center: #e6ca85;
+  --flower-lavender: #c5b2db;
+  --flower-cosmos: #f3b1aa;
+  --flower-bluebell: #b3d1ee;
+  --flower-buttercup: #fce89e;
+  --flower-violet: #b590d6;
+
   /* Loading & Sky Background Palette */
   --bg-midnight-deep: #060919;
   --bg-midnight-mid: #0c112b;
@@ -196,7 +205,7 @@ html, body {
 }
 
 /* ==================================================
-   MOONLIT SKY & MEADOW SCENE (VERSION 1.2)
+   MOONLIT GARDEN SCENE (VERSION 1.3)
    ================================================== */
 
 .moonlit-sky-scene {
@@ -408,7 +417,7 @@ html, body {
 }
 
 /* ==================================================
-   MEADOW BACKDROP & TERRAIN (VERSION 1.2)
+   MEADOW & LIVING GARDEN BACKDROP (VERSION 1.3)
    ================================================== */
 
 .meadow-backdrop {
@@ -428,13 +437,13 @@ html, body {
   display: block;
 }
 
-/* Foreground Grass Canvas Layer */
+/* Living Garden Canvas (Grass & Procedural Flowers Layer) */
 .grass-canvas {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 32vh;
+  height: 34vh;
   pointer-events: none;
   z-index: 4;
 }
