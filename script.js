@@ -1,5 +1,6 @@
+
 /**
- * A Little World Made Just for Her - Version 3.2 Memory Lane 10-Card Scrapbook
+ * A Little World Made Just for Her - Version 3.3 Optimized Experience & Refined Memory Lane
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -11,7 +12,7 @@
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
- *   Memory Lane environment transition & Expanded 10-Card Scrapbook Scroll controller.
+ *   Memory Lane environment transition & 10-Card Scrapbook Scroll controller.
  * - TimelineManager: Story narrative sequence controller.
  */
 
@@ -26,7 +27,7 @@ const Config = {
         id: "stroke-1",
         // Cursive 'A' main loop & flourish stem
         d: "M 65,160 C 45,140 45,95 75,70 C 100,50 135,50 138,95 C 142,140 135,185 130,200 C 128,205 120,195 125,165 C 135,115 155,110 175,135 C 185,148 195,160 210,158",
-        duration: 1800,
+        duration: 1100,
         strokeWidth: 3.5,
         color: "var(--color-cream)"
       },
@@ -34,7 +35,7 @@ const Config = {
         id: "stroke-2",
         // Cursive 'A' crossbar
         d: "M 100,128 C 120,120 150,118 175,125",
-        duration: 600,
+        duration: 400,
         strokeWidth: 3.0,
         color: "var(--color-cream)"
       },
@@ -42,7 +43,7 @@ const Config = {
         id: "stroke-3",
         // Elegant Ampersand '&'
         d: "M 300,135 C 315,118 318,100 302,88 C 285,75 265,95 282,122 C 298,150 315,172 278,178 C 258,181 248,162 262,148 C 282,128 308,118 328,152 C 335,165 342,175 348,173",
-        duration: 1400,
+        duration: 900,
         strokeWidth: 3.0,
         color: "var(--color-soft-gold)"
       },
@@ -50,7 +51,7 @@ const Config = {
         id: "stroke-4",
         // Cursive 'M' flourish arches & tail
         d: "M 385,150 C 375,138 372,118 388,95 C 402,72 418,72 418,118 C 418,148 412,185 412,195 C 412,200 418,192 428,165 C 442,125 458,92 468,112 C 475,128 468,178 468,192 C 468,198 474,190 484,165 C 498,125 512,95 522,115 C 528,130 525,165 538,160 C 548,155 558,145 565,140",
-        duration: 2200,
+        duration: 1300,
         strokeWidth: 3.5,
         color: "var(--color-cream)"
       }
@@ -100,18 +101,18 @@ const Config = {
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
   timings: {
-    initialPause: 1000,            // Fast loading pause
-    interStrokeDelay: 120,         // Faster stroke transition
-    glowDelay: 350,                // Delay after writing before glow
-    subtitleDelay: 600,            // Subtitle fade in delay
-    subtitleHold: 3000,            // Subtitle reading pause
-    fadeSceneDuration: 1800,       // Fluid scene fade duration
-    gardenAdmirePause: 1200,       // Garden visible for ~1.2s before scroll slides in
-    rollPauseBeforeUnfurl: 500,    // Pause ~0.5s at center before opening
-    unfurlDuration: 2200,          // Parchment opens smoothly in ~2.2s
-    pauseBeforeLetterReveal: 400,  // Pause ~0.4s before text reveals
-    lineRevealInterval: 750,       // Line reveal pacing ~0.75s per line
-    pauseBeforeContinue: 500       // Wait ~0.5s after last line before "Continue →" appears
+    initialPause: 600,             // Fast loading screen start
+    interStrokeDelay: 80,          // Rapid handwriting stroke flow
+    glowDelay: 200,
+    subtitleDelay: 400,
+    subtitleHold: 1400,            // Loading screen completes naturally in ~1.5s
+    fadeSceneDuration: 1200,       // Garden transition
+    gardenAdmirePause: 900,        // Garden visible ~0.9s before scroll enters
+    rollPauseBeforeUnfurl: 400,    // Pause ~0.4s at center
+    unfurlDuration: 1400,          // Parchment opens in ~1.4s
+    pauseBeforeLetterReveal: 350,  // Pause ~0.35s before text reveals
+    lineRevealInterval: 550,       // Rapid line reveal ~0.55s per line
+    pauseBeforeContinue: 400       // Wait ~0.4s before "Continue →" appears
   }
 };
 
@@ -1170,13 +1171,12 @@ class SceneManager {
       }
     }, { passive: false });
 
-    // IntersectionObserver to animate memory cards ONCE when entering viewport
+    // IntersectionObserver to animate memory cards ONCE when entering viewport (400-500ms entrance)
     if ('IntersectionObserver' in window) {
       const cardObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('in-view');
-            // Unobserve so entrance animation occurs ONCE only
             observer.unobserve(entry.target);
           }
         });
@@ -1215,6 +1215,7 @@ class SceneManager {
     }
 
     this.paperContainer.classList.add('arrived');
+    await Utils.wait(1000); // 1.0s arrival duration
   }
 
   async unfurlPaper() {
@@ -1259,16 +1260,16 @@ class SceneManager {
       this.paperContainer.classList.add('rolling-up');
     }
 
-    // 3. Wait for parchment to curl back up into cylinder (~2.2s)
-    await Utils.wait(2200);
+    // 3. Wait for parchment to curl back up into cylinder (~1.4s)
+    await Utils.wait(1400);
 
     // 4. Parchment slowly ascends/floats upward into night sky while rotating ~2.8 degrees
     if (this.paperContainer) {
       this.paperContainer.classList.add('ascending');
     }
 
-    // 5. Wait for parchment to float above top viewport and fade (~2.0s)
-    await Utils.wait(2000);
+    // 5. Wait for parchment to float above top viewport and fade (~1.4s)
+    await Utils.wait(1400);
 
     // 6. Camera / Lighting feel: Slightly dim background (~6%) & enhance moon glow
     if (this.focusOverlay) {
@@ -1283,7 +1284,7 @@ class SceneManager {
       this.memoryLaneFoundation.classList.add('active');
     }
 
-    await Utils.wait(1200);
+    await Utils.wait(800);
 
     // 8. Reveal Expanded 10-Card Memory Lane Scrapbook
     if (this.memoryLaneScrapbook) {
@@ -1346,23 +1347,14 @@ class TimelineManager {
     this.handwriting = handwritingSystem;
     this.sceneManager = sceneManager;
     this.subtitleContainer = document.getElementById('subtitle-container');
-    this.replayBtn = document.getElementById('replay-btn');
     this.isExecuting = false;
-
-    this.initEvents();
-  }
-
-  initEvents() {
-    if (this.replayBtn) {
-      this.replayBtn.addEventListener('click', () => this.replay());
-    }
   }
 
   async runSequence() {
     if (this.isExecuting) return;
     this.isExecuting = true;
 
-    // Step 1 & 2: Loading screen & moving particles active
+    // Step 1 & 2: Loading screen & moving particles active (1.2-1.8s total loading time)
     await Utils.wait(Config.timings.initialPause);
 
     // Step 3 & 4: Invisible pen draws initials sequentially
@@ -1384,45 +1376,31 @@ class TimelineManager {
     // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
 
-    // Step 9: Allow visitor to admire garden atmosphere quiet moment (~1.2s)
+    // Step 9: Display garden for ~0.9s before introducing parchment
     await Utils.wait(Config.timings.gardenAdmirePause);
 
-    // Step 10: Parchment with Wooden Rollers slides into center
+    // Step 10: Parchment with Wooden Rollers slides into center (0.8-1.2s entrance)
     await this.sceneManager.bringInPaperRoll();
 
-    // Step 11: Brief 0.5s pause at center
+    // Step 11: Brief 0.4s pause at center
     await Utils.wait(Config.timings.rollPauseBeforeUnfurl);
 
-    // Step 12: Parchment unfurls vertically from both ends
+    // Step 12: Parchment unfurls vertically from both ends (1.2-1.6s duration)
     await this.sceneManager.unfurlPaper();
 
-    // Step 13: Pause 0.4s after opening
+    // Step 13: Pause 0.35s after opening
     await Utils.wait(Config.timings.pauseBeforeLetterReveal);
 
-    // Step 14: Birthday letter reveals line by line with fluid pacing
+    // Step 14: Birthday letter reveals line by line with rapid, fluid reading pace
     await this.sceneManager.revealLetterLineByLine();
 
-    // Step 15: Pause 0.5s after final line reveals
+    // Step 15: Pause 0.4s after final line reveals
     await Utils.wait(Config.timings.pauseBeforeContinue);
 
     // Step 16: Interactive "Continue →" fades in, glows & pulses
     await this.sceneManager.showContinueInteraction();
 
     this.isExecuting = false;
-  }
-
-  async replay() {
-    if (this.isExecuting) return;
-
-    if (this.subtitleContainer) {
-      this.subtitleContainer.classList.remove('visible');
-    }
-
-    this.handwriting.reset();
-    this.sceneManager.resetToLoading();
-
-    await Utils.wait(300);
-    this.runSequence();
   }
 }
 
