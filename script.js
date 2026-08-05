@@ -1,5 +1,6 @@
+
 /**
- * A Little World Made Just for Her - Version 3.5 Image System Update (Images/photoXX.jpg)
+ * A Little World Made Just for Her - Version 4.1 Celebration Preparation & Environmental Storytelling
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -8,11 +9,11 @@
  * - Utils: Math, easing, DOM, and debounced window resize utilities.
  * - ResponsiveSystem: Adaptive viewport layout, meadow proportions (28-36%),
  *   safe-area inset handlers, and dynamic object scaling.
- * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
- * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
+ * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust, fireflies, and high-sky gathering.
+ * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135, calm wind option).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
- *   Memory Lane environment transition & Dynamic Memory Data DOM Generator with 60 FPS Horizontal Scrapbook Engine.
+ *   End-of-Path Detection & Alignment, Environmental Reactions, and Celebration Preparation Transition Controller.
  * - TimelineManager: Story narrative sequence controller.
  */
 
@@ -100,11 +101,11 @@ const Config = {
     color: "rgba(252, 232, 158, 0.95)",
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
-  // Dynamic Memory Data Array - Updated Image Path 'Images/' and Extension '.jpg'
+  // Dynamic Memory Data Array
   memories: [
     {
       id: 1,
-      image: "images/photo01.jpg",
+      image: "Images/photo01.jpg",
       caption: "A quiet night under the stars...",
       type: "polaroid",
       accent: "tape-top-right",
@@ -454,6 +455,7 @@ class ParticleSystem {
 
     this.fireflyCount = 28;
     this.pollenCount = 30;
+    this.isGatheringHigh = false; // Version 4.1 Environmental Gathering Flag
 
     this.initParticles();
     this.initStars();
@@ -536,6 +538,11 @@ class ParticleSystem {
         color: Config.particles.colors[Math.floor(Math.random() * Config.particles.colors.length)]
       });
     }
+  }
+
+  // Version 4.1 Environmental Storytelling Reaction
+  setGatheringHigh(enabled) {
+    this.isGatheringHigh = enabled;
   }
 
   addStardustSpark(x, y) {
@@ -705,6 +712,13 @@ class ParticleSystem {
         ff.phase += ff.pulseSpeed;
         ff.alpha = 0.25 + (Math.sin(ff.phase) * 0.5 + 0.5) * 0.65;
 
+        // Fireflies gather higher above garden in Version 4.1 ending reaction
+        const targetMinY = this.isGatheringHigh ? this.height * 0.15 : this.height * 0.35;
+        const targetMaxY = this.isGatheringHigh ? this.height * 0.65 : this.height * 0.88;
+
+        if (ff.y > targetMaxY) ff.vy -= 0.03;
+        if (ff.y < targetMinY) ff.vy += 0.03;
+
         ff.x += ff.vx + Math.sin(ff.phase * 0.8) * 0.25;
         ff.y += ff.vy + Math.cos(ff.phase * 0.6) * 0.18;
 
@@ -715,8 +729,6 @@ class ParticleSystem {
           ff.wanderTimer = 0;
         }
 
-        if (ff.y < this.height * 0.25) ff.vy += 0.04;
-        if (ff.y > this.height * 0.90) ff.vy -= 0.04;
         if (ff.x < 10) ff.vx += 0.04;
         if (ff.x > this.width - 10) ff.vx -= 0.04;
       }
@@ -814,6 +826,7 @@ class GrassSystem {
     this.flowerCount = 95;
     this.flowerScaleGlobal = 0.92;
     this.safeBottomInset = 0;
+    this.isCalmWind = false; // Version 4.1 Wind Reaction
 
     this.blades = [];
     this.flowers = [];
@@ -821,6 +834,10 @@ class GrassSystem {
     this.animFrameId = null;
 
     this.initGarden();
+  }
+
+  setCalmWind(enabled) {
+    this.isCalmWind = enabled;
   }
 
   initGarden() {
@@ -1047,7 +1064,9 @@ class GrassSystem {
     this.ctx.clearRect(0, 0, this.width, this.height);
     const isReduced = Utils.prefersReducedMotion();
 
-    const globalWind = isReduced ? 0 : Math.sin(now * 0.0008) * 9 + Math.cos(now * 0.0018) * 4;
+    // Wind multiplier reduces by 50% during calmer end-of-path reaction
+    const windMult = this.isCalmWind ? 0.45 : 1.0;
+    const globalWind = isReduced ? 0 : (Math.sin(now * 0.0008) * 9 + Math.cos(now * 0.0018) * 4) * windMult;
     const basePadding = Math.max(10, this.safeBottomInset + 6);
     const grassBaseY = this.height - basePadding;
 
@@ -1056,7 +1075,7 @@ class GrassSystem {
       // 1. Render Grass Blades in Layer
       const layerBlades = this.blades.filter(b => b.layer === layer);
       for (let blade of layerBlades) {
-        const gustWave = isReduced ? 0 : Math.sin(now * 0.0012 - blade.x * 0.0025) * 7;
+        const gustWave = isReduced ? 0 : Math.sin(now * 0.0012 - blade.x * 0.0025) * 7 * windMult;
         const bladeSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * blade.freq + blade.phase) * 3) * blade.flexibility;
 
         const totalOffset = blade.naturalCurve + bladeSway;
@@ -1090,7 +1109,7 @@ class GrassSystem {
       const layerFlowers = this.flowers.filter(f => f.layer === layer);
       for (let flower of layerFlowers) {
         const flowerBaseY = grassBaseY - flower.plantZoneOffset;
-        const gustWave = isReduced ? 0 : Math.sin(now * 0.001 - flower.x * 0.002) * 5;
+        const gustWave = isReduced ? 0 : Math.sin(now * 0.001 - flower.x * 0.002) * 5 * windMult;
         const flowerSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * flower.freq + flower.phase) * 2) * flower.windFactor;
 
         const totalOffset = flower.stemCurve + flowerSway;
@@ -1262,7 +1281,10 @@ class HandwritingSystem {
    7. SCENE MANAGER & TRANSITION CONTROLLER
    ================================================== */
 class SceneManager {
-  constructor() {
+  constructor(particleSystem, grassSystem) {
+    this.particleSystem = particleSystem;
+    this.grassSystem = grassSystem;
+
     this.loadingScene = document.getElementById('loading-scene');
     this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
     this.paperContainer = document.getElementById('paper-container');
@@ -1274,8 +1296,11 @@ class SceneManager {
     this.letterLines = document.querySelectorAll('.letter-line, .letter-divider');
     this.continueContainer = document.getElementById('continue-container');
     this.continueBtn = document.getElementById('continue-btn');
+    
     this.activeScene = 'loading';
     this.isTransitioning = false;
+    this.hasReachedEndOfPath = false;
+    this.isReadyForCelebration = false; // Version 4.1 Celebration Transition State
 
     this.initEvents();
     this.buildScrapbookDOM();
@@ -1287,7 +1312,6 @@ class SceneManager {
     }
   }
 
-  // Dynamic Memory Data DOM Generator (Version 3.5 Image System Update)
   buildScrapbookDOM() {
     if (!this.scrapbookTrack || !Config.memories) return;
 
@@ -1342,22 +1366,33 @@ class SceneManager {
       this.scrapbookTrack.appendChild(card);
     });
 
+    // Version 4.1 End-of-Path Open Spacer (~18% Viewport Width)
+    const endSpacer = document.createElement('div');
+    endSpacer.className = 'end-of-path-spacer';
+    endSpacer.id = 'end-of-path-spacer';
+    endSpacer.innerHTML = '<div class="path-fade-end"></div>';
+    this.scrapbookTrack.appendChild(endSpacer);
+
     this.memoryCards = document.querySelectorAll('.memory-card');
     this.initScrapbookScroll();
   }
 
+  // Version 4.1 End-of-Memory Detection & Centering Engine
   initScrapbookScroll() {
     if (!this.memoryLaneScrapbook) return;
 
-    // Convert vertical mouse wheel / trackpad scrolling into smooth horizontal scrolling
     this.memoryLaneScrapbook.addEventListener('wheel', (e) => {
       if (this.memoryLaneScrapbook.classList.contains('active')) {
         e.preventDefault();
         this.memoryLaneScrapbook.scrollLeft += (e.deltaY || e.deltaX) * 1.2;
+        this.checkScrollEnd();
       }
     }, { passive: false });
 
-    // IntersectionObserver to animate memory cards ONCE when entering viewport (350-450ms entrance)
+    this.memoryLaneScrapbook.addEventListener('scroll', Utils.debounce(() => {
+      this.checkScrollEnd();
+    }, 80));
+
     if ('IntersectionObserver' in window) {
       const cardObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -1373,9 +1408,57 @@ class SceneManager {
 
       this.memoryCards.forEach(card => cardObserver.observe(card));
     } else {
-      // Fallback if IntersectionObserver is unsupported
       this.memoryCards.forEach(card => card.classList.add('in-view'));
     }
+  }
+
+  checkScrollEnd() {
+    if (!this.memoryLaneScrapbook || this.hasReachedEndOfPath || !this.memoryCards || this.memoryCards.length === 0) return;
+
+    const maxScroll = this.memoryLaneScrapbook.scrollWidth - this.memoryLaneScrapbook.clientWidth;
+    const currentScroll = this.memoryLaneScrapbook.scrollLeft;
+
+    // Detect when scrolling arrives near the last card
+    if (currentScroll >= maxScroll - 60) {
+      this.triggerEndOfPathReaction();
+    }
+  }
+
+  // Version 4.1 Environmental Reaction & Celebration Preparation
+  async triggerEndOfPathReaction() {
+    if (this.hasReachedEndOfPath) return;
+    this.hasReachedEndOfPath = true;
+
+    // 1. Smoothly center the last card (Card 10) in viewport
+    const lastCard = this.memoryCards[this.memoryCards.length - 1];
+    if (lastCard && this.memoryLaneScrapbook) {
+      const targetScroll = lastCard.offsetLeft - (this.memoryLaneScrapbook.clientWidth - lastCard.clientWidth) / 2;
+      this.memoryLaneScrapbook.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth'
+      });
+    }
+
+    // 2. Trigger Moonlit Garden Environmental Reactions
+    if (this.moonlitSkyScene) {
+      this.moonlitSkyScene.classList.add('at-end');
+    }
+
+    // Calm wind in grass/flowers
+    if (this.grassSystem) {
+      this.grassSystem.setCalmWind(true);
+    }
+
+    // Fireflies drift higher above garden
+    if (this.particleSystem) {
+      this.particleSystem.setGatheringHigh(true);
+    }
+
+    // 3. Peaceful Silence Pause (1.8 Seconds)
+    await Utils.wait(1800);
+
+    // 4. Set Internal Transition State ready for Version 4.2 Celebration
+    this.isReadyForCelebration = true;
   }
 
   async fadeOutLoadingScene() {
@@ -1436,43 +1519,34 @@ class SceneManager {
     if (this.isTransitioning) return;
     this.isTransitioning = true;
 
-    // 1. Disable Further Clicks & Remove Hover Effects
+    // Disable further clicks
     if (this.continueBtn) {
       this.continueBtn.style.pointerEvents = 'none';
     }
 
-    // 2. Continue text & letter lines slowly fade away
+    // Parchment rolls back up and floats upward
     if (this.paperContainer) {
       this.paperContainer.classList.add('rolling-up');
     }
 
-    // 3. Wait for parchment to curl back up into cylinder (~1.4s)
     await Utils.wait(1400);
 
-    // 4. Parchment slowly ascends/floats upward into night sky while rotating ~2.8 degrees
     if (this.paperContainer) {
       this.paperContainer.classList.add('ascending');
     }
 
-    // 5. Wait for parchment to float above top viewport and fade (~1.4s)
     await Utils.wait(1400);
 
-    // 6. Camera / Lighting feel: Slightly dim background (~6%) & enhance moon glow
     if (this.focusOverlay) {
       this.focusOverlay.style.opacity = '0.14';
     }
-    if (this.moonContainer) {
-      this.moonContainer.style.filter = 'drop-shadow(0 0 22px rgba(230, 202, 133, 0.65))';
-    }
 
-    // 7. Slowly introduce Memory Lane Foundation Environment
     if (this.memoryLaneFoundation) {
       this.memoryLaneFoundation.classList.add('active');
     }
 
     await Utils.wait(800);
 
-    // 8. Reveal Dynamically Populated Memory Lane Scrapbook
     if (this.memoryLaneScrapbook) {
       this.memoryLaneScrapbook.classList.add('active');
     }
@@ -1482,6 +1556,12 @@ class SceneManager {
 
   resetToLoading() {
     this.isTransitioning = false;
+    this.hasReachedEndOfPath = false;
+    this.isReadyForCelebration = false;
+
+    if (this.grassSystem) this.grassSystem.setCalmWind(false);
+    if (this.particleSystem) this.particleSystem.setGatheringHigh(false);
+
     if (this.continueBtn) {
       this.continueBtn.style.pointerEvents = 'auto';
     }
@@ -1515,6 +1595,7 @@ class SceneManager {
       this.moonContainer.style.filter = '';
     }
     if (this.moonlitSkyScene) {
+      this.moonlitSkyScene.classList.remove('at-end');
       this.moonlitSkyScene.classList.remove('active');
     }
     if (this.loadingScene) {
@@ -1540,7 +1621,7 @@ class TimelineManager {
     if (this.isExecuting) return;
     this.isExecuting = true;
 
-    // Step 1 & 2: Loading screen & moving particles active (1.2-1.8s total loading time)
+    // Step 1 & 2: Loading screen & moving particles active
     await Utils.wait(Config.timings.initialPause);
 
     // Step 3 & 4: Invisible pen draws initials sequentially
@@ -1565,19 +1646,19 @@ class TimelineManager {
     // Step 9: Display garden for ~0.9s before introducing parchment
     await Utils.wait(Config.timings.gardenAdmirePause);
 
-    // Step 10: Parchment with Wooden Rollers slides into center (0.8-1.2s entrance)
+    // Step 10: Parchment with Wooden Rollers slides into center
     await this.sceneManager.bringInPaperRoll();
 
     // Step 11: Brief 0.4s pause at center
     await Utils.wait(Config.timings.rollPauseBeforeUnfurl);
 
-    // Step 12: Parchment unfurls vertically from both ends (1.2-1.6s duration)
+    // Step 12: Parchment unfurls vertically from both ends
     await this.sceneManager.unfurlPaper();
 
     // Step 13: Pause 0.35s after opening
     await Utils.wait(Config.timings.pauseBeforeLetterReveal);
 
-    // Step 14: Birthday letter reveals line by line with rapid, fluid reading pace
+    // Step 14: Birthday letter reveals line by line
     await this.sceneManager.revealLetterLineByLine();
 
     // Step 15: Pause 0.4s after final line reveals
@@ -1604,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const grassSystem = new GrassSystem(grassCanvas);
   const responsiveSystem = new ResponsiveSystem(particleCanvas, grassCanvas, particleSystem, grassSystem);
   const handwritingSystem = new HandwritingSystem(svg, penTip, particleSystem);
-  const sceneManager = new SceneManager();
+  const sceneManager = new SceneManager(particleSystem, grassSystem);
   const timelineManager = new TimelineManager(handwritingSystem, sceneManager);
 
   // Trigger initial dimensions setup
