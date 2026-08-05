@@ -1,5 +1,5 @@
 /**
- * A Little World Made Just for Her - Version 3.0 Memory Lane Scrapbook Foundation
+ * A Little World Made Just for Her - Version 3.2 Memory Lane 10-Card Scrapbook
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -11,7 +11,7 @@
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling, letter reveal, Continue interaction,
- *   Memory Lane environment transition & Horizontal Scrapbook Scroll controller.
+ *   Memory Lane environment transition & Expanded 10-Card Scrapbook Scroll controller.
  * - TimelineManager: Story narrative sequence controller.
  */
 
@@ -1170,17 +1170,19 @@ class SceneManager {
       }
     }, { passive: false });
 
-    // IntersectionObserver to animate memory cards entering viewport (500-700ms entrance)
+    // IntersectionObserver to animate memory cards ONCE when entering viewport
     if ('IntersectionObserver' in window) {
-      const cardObserver = new IntersectionObserver((entries) => {
+      const cardObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('in-view');
+            // Unobserve so entrance animation occurs ONCE only
+            observer.unobserve(entry.target);
           }
         });
       }, {
         root: this.memoryLaneScrapbook,
-        threshold: 0.2
+        threshold: 0.15
       });
 
       this.memoryCards.forEach(card => cardObserver.observe(card));
@@ -1283,7 +1285,7 @@ class SceneManager {
 
     await Utils.wait(1200);
 
-    // 8. Reveal Horizontally Scrollable Memory Lane Scrapbook
+    // 8. Reveal Expanded 10-Card Memory Lane Scrapbook
     if (this.memoryLaneScrapbook) {
       this.memoryLaneScrapbook.classList.add('active');
     }
