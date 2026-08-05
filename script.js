@@ -1,12 +1,13 @@
 /**
- * A Little World Made Just for Her - Version 1.1 Night Sky
+ * A Little World Made Just for Her - Version 1.2 Moonlit Meadow
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
- * - Config: Global constants, palette mappings, animation timings, sky/star settings.
+ * - Config: Global constants, palette mappings, animation timings, sky/star/meadow/grass settings.
  * - Utils: Mathematical, easing, DOM, and SVG utility helpers.
- * - ResponsiveSystem: High-DPI screen and viewport scaling system.
- * - ParticleSystem: Canvas particle engine (ambient floating particles + twinkling stars + shooting stars).
+ * - ResponsiveSystem: High-DPI screen and viewport scaling system for all canvases.
+ * - ParticleSystem: Canvas engine for ambient floating particles, twinkling stars & shooting stars.
+ * - GrassSystem: Dynamic 60 FPS grass engine (550 blades across 3 depth layers with reusable wind wave system).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
  * - SceneManager: Core scene mounting and smooth cinematic scene transitions.
  * - TimelineManager: Sequential story narrative timeline controller (Steps 1 to 8).
@@ -75,6 +76,15 @@ const Config = {
       "rgba(226, 216, 238, 0.85)"  // Lavender
     ]
   },
+  grass: {
+    bladeCount: 550,
+    palette: {
+      back: ["#162a24", "#1a332b", "#1f3a32"],
+      mid: ["#234338", "#2a4f43", "#315b4d"],
+      front: ["#345e52", "#3e6f61", "#487e70"]
+    },
+    moonlightTip: "rgba(230, 202, 133, 0.4)"
+  },
   timings: {
     initialPause: 1200,      // Pause after screen load before writing
     interStrokeDelay: 150,   // Delay between individual path strokes
@@ -110,9 +120,11 @@ const Utils = {
    3. RESPONSIVE UTILITIES
    ================================================== */
 class ResponsiveSystem {
-  constructor(canvas, particleSystem) {
-    this.canvas = canvas;
+  constructor(particleCanvas, grassCanvas, particleSystem, grassSystem) {
+    this.particleCanvas = particleCanvas;
+    this.grassCanvas = grassCanvas;
     this.particleSystem = particleSystem;
+    this.grassSystem = grassSystem;
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -130,13 +142,24 @@ class ResponsiveSystem {
     this.height = window.innerHeight;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    if (this.canvas) {
-      this.canvas.width = this.width * this.dpr;
-      this.canvas.height = this.height * this.dpr;
-      this.canvas.style.width = `${this.width}px`;
-      this.canvas.style.height = `${this.height}px`;
+    if (this.particleCanvas) {
+      this.particleCanvas.width = this.width * this.dpr;
+      this.particleCanvas.height = this.height * this.dpr;
+      this.particleCanvas.style.width = `${this.width}px`;
+      this.particleCanvas.style.height = `${this.height}px`;
 
-      const ctx = this.canvas.getContext('2d');
+      const ctx = this.particleCanvas.getContext('2d');
+      ctx.scale(this.dpr, this.dpr);
+    }
+
+    if (this.grassCanvas) {
+      const grassHeight = this.height * 0.32;
+      this.grassCanvas.width = this.width * this.dpr;
+      this.grassCanvas.height = grassHeight * this.dpr;
+      this.grassCanvas.style.width = `${this.width}px`;
+      this.grassCanvas.style.height = `${grassHeight}px`;
+
+      const ctx = this.grassCanvas.getContext('2d');
       ctx.scale(this.dpr, this.dpr);
     }
   }
@@ -145,6 +168,9 @@ class ResponsiveSystem {
     this.updateDimensions();
     if (this.particleSystem) {
       this.particleSystem.resize(this.width, this.height);
+    }
+    if (this.grassSystem) {
+      this.grassSystem.resize(this.width, this.height * 0.32);
     }
   }
 }
@@ -270,7 +296,6 @@ class ParticleSystem {
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = 0.8;
 
-    // Cross flare lines
     const size = radius * 3;
     this.ctx.beginPath();
     this.ctx.moveTo(x - size, y);
@@ -279,7 +304,6 @@ class ParticleSystem {
     this.ctx.lineTo(x, y + size);
     this.ctx.stroke();
 
-    // Soft Center Glow
     this.ctx.fillStyle = color;
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius * 0.8, 0, Math.PI * 2);
@@ -323,7 +347,6 @@ class ParticleSystem {
         p.alpha = p.baseAlpha + Math.sin(p.phase) * 0.2;
         p.alpha = Utils.clamp(p.alpha, 0.1, 0.9);
 
-        // Screen wrap
         if (p.y < -10) p.y = this.height + 10;
         if (p.x < -10) p.x = this.width + 10;
         if (p.x > this.width + 10) p.x = -10;
@@ -409,7 +432,133 @@ class ParticleSystem {
 }
 
 /* ==================================================
-   5. HANDWRITING ANIMATION SYSTEM
+   5. GRASS & WIND ENGINE (VERSION 1.2)
+   ================================================== */
+class GrassSystem {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.width = window.innerWidth;
+    this.height = window.innerHeight * 0.32;
+    this.blades = [];
+    this.isRunning = false;
+    this.animFrameId = null;
+
+    this.initGrass();
+  }
+
+  initGrass() {
+    this.blades = [];
+    const count = Config.grass.bladeCount;
+
+    for (let i = 0; i < count; i++) {
+      // Assign into 3 depth layers: 0 = Back, 1 = Mid, 2 = Front
+      let layer = 0;
+      const layerRoll = Math.random();
+      if (layerRoll > 0.6) layer = 2; // Front
+      else if (layerRoll > 0.28) layer = 1; // Mid
+
+      const x = Math.random() * this.width;
+      let height = Utils.randomRange(22, 42); // Back
+      let baseWidth = Utils.randomRange(1.2, 2.0);
+      let colorArray = Config.grass.palette.back;
+
+      if (layer === 1) {
+        height = Utils.randomRange(40, 68);
+        baseWidth = Utils.randomRange(2.0, 3.0);
+        colorArray = Config.grass.palette.mid;
+      } else if (layer === 2) {
+        height = Utils.randomRange(60, 95);
+        baseWidth = Utils.randomRange(2.8, 3.8);
+        colorArray = Config.grass.palette.front;
+      }
+
+      this.blades.push({
+        x: x,
+        layer: layer,
+        height: height,
+        baseWidth: baseWidth,
+        naturalCurve: Utils.randomRange(-10, 10),
+        flexibility: Utils.randomRange(0.6, 1.4),
+        freq: Utils.randomRange(0.0012, 0.0028),
+        phase: Math.random() * Math.PI * 2,
+        color: colorArray[Math.floor(Math.random() * colorArray.length)],
+        hasHighlight: layer === 2 && Math.random() < 0.65
+      });
+    }
+
+    // Sort blades by layer for proper depth rendering
+    this.blades.sort((a, b) => a.layer - b.layer);
+  }
+
+  resize(width, height) {
+    this.width = width;
+    this.height = height;
+    this.initGrass();
+  }
+
+  start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.loop();
+  }
+
+  stop() {
+    this.isRunning = false;
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+    }
+  }
+
+  loop(now = performance.now()) {
+    if (!this.isRunning) return;
+
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    const isReduced = Utils.prefersReducedMotion();
+
+    // Wind Wave System
+    const globalWind = isReduced ? 0 : Math.sin(now * 0.0008) * 12 + Math.cos(now * 0.0018) * 6;
+
+    for (let blade of this.blades) {
+      const baseY = this.height;
+      const gustWave = isReduced ? 0 : Math.sin(now * 0.0012 - blade.x * 0.0025) * 10;
+      const bladeSway = isReduced ? 0 : (globalWind + gustWave + Math.sin(now * blade.freq + blade.phase) * 4) * blade.flexibility;
+
+      const totalOffset = blade.naturalCurve + bladeSway;
+      const tipX = blade.x + totalOffset;
+      const tipY = baseY - blade.height;
+      const ctrlX = blade.x + totalOffset * 0.5;
+      const ctrlY = baseY - blade.height * 0.55;
+      const halfWidth = blade.baseWidth * 0.5;
+
+      this.ctx.save();
+      this.ctx.fillStyle = blade.color;
+      this.ctx.beginPath();
+      this.ctx.moveTo(blade.x - halfWidth, baseY);
+      this.ctx.quadraticCurveTo(ctrlX - halfWidth * 0.3, ctrlY, tipX, tipY);
+      this.ctx.quadraticCurveTo(ctrlX + halfWidth * 0.3, ctrlY, blade.x + halfWidth, baseY);
+      this.ctx.closePath();
+      this.ctx.fill();
+
+      // Reflected Moonlight Highlight on Upper Blade Tip
+      if (blade.hasHighlight) {
+        this.ctx.strokeStyle = Config.grass.moonlightTip;
+        this.ctx.lineWidth = 0.85;
+        this.ctx.beginPath();
+        this.ctx.moveTo(ctrlX, ctrlY);
+        this.ctx.quadraticCurveTo(ctrlX + totalOffset * 0.2, tipY + blade.height * 0.15, tipX, tipY);
+        this.ctx.stroke();
+      }
+
+      this.ctx.restore();
+    }
+
+    this.animFrameId = requestAnimationFrame((timestamp) => this.loop(timestamp));
+  }
+}
+
+/* ==================================================
+   6. HANDWRITING ANIMATION SYSTEM
    ================================================== */
 class HandwritingSystem {
   constructor(svgElement, penTipElement, particleSystem) {
@@ -549,7 +698,7 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   6. SCENE MANAGER FOUNDATION
+   7. SCENE MANAGER FOUNDATION
    ================================================== */
 class SceneManager {
   constructor() {
@@ -561,12 +710,10 @@ class SceneManager {
   async fadeOutLoadingScene() {
     if (!this.loadingScene) return;
 
-    // Reveal Moonlit Sky scene underneath
     if (this.moonlitSkyScene) {
       this.moonlitSkyScene.classList.add('active');
     }
 
-    // Smoothly dissolve loading intro
     this.loadingScene.classList.add('dissolving');
     await Utils.wait(Config.timings.fadeSceneDuration);
 
@@ -588,7 +735,7 @@ class SceneManager {
 }
 
 /* ==================================================
-   7. TIMELINE NARRATIVE MANAGER
+   8. TIMELINE NARRATIVE MANAGER
    ================================================== */
 class TimelineManager {
   constructor(handwritingSystem, sceneManager) {
@@ -630,7 +777,7 @@ class TimelineManager {
     // Step 7: Contemplative brief pause
     await Utils.wait(Config.timings.subtitleHold);
 
-    // Step 8: Smoothly fade into the Moonlit Night Sky
+    // Step 8: Smoothly fade into the Moonlit Night Sky & Meadow
     await this.sceneManager.fadeOutLoadingScene();
 
     this.isExecuting = false;
@@ -652,22 +799,25 @@ class TimelineManager {
 }
 
 /* ==================================================
-   8. MAIN LIFESTYLE INITIALIZATION
+   9. MAIN LIFESTYLE INITIALIZATION
    ================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('particle-canvas');
+  const particleCanvas = document.getElementById('particle-canvas');
+  const grassCanvas = document.getElementById('grass-canvas');
   const svg = document.getElementById('initials-svg');
   const penTip = document.getElementById('pen-tip');
 
   // Instantiate Logical Systems
-  const particleSystem = new ParticleSystem(canvas);
-  const responsiveSystem = new ResponsiveSystem(canvas, particleSystem);
+  const particleSystem = new ParticleSystem(particleCanvas);
+  const grassSystem = new GrassSystem(grassCanvas);
+  const responsiveSystem = new ResponsiveSystem(particleCanvas, grassCanvas, particleSystem, grassSystem);
   const handwritingSystem = new HandwritingSystem(svg, penTip, particleSystem);
   const sceneManager = new SceneManager();
   const timelineManager = new TimelineManager(handwritingSystem, sceneManager);
 
-  // Start Particle Loop
+  // Start Canvas Engine Loops
   particleSystem.start();
+  grassSystem.start();
 
   // Execute Narrative Sequence
   timelineManager.runSequence();
