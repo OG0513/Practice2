@@ -1,5 +1,5 @@
 /**
- * A Little World Made Just for Her - Version 1.6 Scroll Entrance
+ * A Little World Made Just for Her - Version 2.2 Paper Unfurl Update
  * Cinematic, Interactive Web Experience
  *
  * Logical Systems:
@@ -10,8 +10,8 @@
  * - ParticleSystem: Canvas engine for stars, shooting stars, ultra-slow dust & fireflies.
  * - GrassSystem: Planting Zone flower & grass engine (adaptive grass counts 320-650, flower counts 45-135).
  * - HandwritingSystem: SVG stroke handwriting animation & active pen tip tracker.
- * - SceneManager: Scene mounting, scroll arrival, and focus overlay controller.
- * - TimelineManager: Story narrative sequence controller (Steps 1 to 9).
+ * - SceneManager: Scene mounting, paper roll arrival, vertical unfurling & focus overlay controller.
+ * - TimelineManager: Story narrative sequence controller (Steps 1 to 12).
  */
 
 /* ==================================================
@@ -105,7 +105,8 @@ const Config = {
     subtitleDelay: 800,      // Delay before subtitle fades in
     subtitleHold: 3500,      // Hold time for subtitle reading
     fadeSceneDuration: 2200, // Transition duration into moonlit garden
-    gardenAdmirePause: 2500  // Visitor quiet pause in garden before scroll arrives
+    gardenAdmirePause: 2500, // Visitor quiet pause in garden before paper roll arrives
+    rollPauseBeforeUnfurl: 1000 // 1-second pause at center before vertical opening
   }
 };
 
@@ -1124,13 +1125,13 @@ class HandwritingSystem {
 }
 
 /* ==================================================
-   7. SCENE MANAGER & SCROLL CONTROLLER
+   7. SCENE MANAGER & PAPER ROLL CONTROLLER
    ================================================== */
 class SceneManager {
   constructor() {
     this.loadingScene = document.getElementById('loading-scene');
     this.moonlitSkyScene = document.getElementById('moonlit-sky-scene');
-    this.scrollContainer = document.getElementById('scroll-container');
+    this.paperContainer = document.getElementById('paper-container');
     this.focusOverlay = document.getElementById('scroll-focus-overlay');
     this.activeScene = 'loading';
   }
@@ -1150,21 +1151,29 @@ class SceneManager {
     this.activeScene = 'moonlit-sky';
   }
 
-  async bringInScroll() {
-    if (!this.scrollContainer) return;
+  async bringInPaperRoll() {
+    if (!this.paperContainer) return;
 
     // Slight background dimming focus effect
     if (this.focusOverlay) {
       this.focusOverlay.classList.add('active');
     }
 
-    // Rolled Scroll Entrance: Gravity-like slide from top with soft settling
-    this.scrollContainer.classList.add('arrived');
+    // Rolled Paper Entrance: Gravity-like slide from top to center
+    this.paperContainer.classList.add('arrived');
+  }
+
+  async unfurlPaper() {
+    if (!this.paperContainer) return;
+
+    // Trigger vertical unfurling from top and bottom rolls
+    this.paperContainer.classList.add('unfurled');
   }
 
   resetToLoading() {
-    if (this.scrollContainer) {
-      this.scrollContainer.classList.remove('arrived');
+    if (this.paperContainer) {
+      this.paperContainer.classList.remove('arrived');
+      this.paperContainer.classList.remove('unfurled');
     }
     if (this.focusOverlay) {
       this.focusOverlay.classList.remove('active');
@@ -1226,11 +1235,17 @@ class TimelineManager {
     // Step 8: Smoothly fade into the Moonlit Garden
     await this.sceneManager.fadeOutLoadingScene();
 
-    // Step 9: Allow visitor to admire the garden atmosphere quiet moment (2.5s)
+    // Step 9: Allow visitor to admire the garden atmosphere quiet moment (~2.5s)
     await Utils.wait(Config.timings.gardenAdmirePause);
 
-    // Step 10: Ancient Parchment Scroll Arrives (Version 1.6)
-    await this.sceneManager.bringInScroll();
+    // Step 10: Simple Elegant Rolled Paper slides into center & comes to rest
+    await this.sceneManager.bringInPaperRoll();
+
+    // Step 11: Brief 1-second pause at center
+    await Utils.wait(Config.timings.rollPauseBeforeUnfurl);
+
+    // Step 12: Paper unfurls vertically from both ends (revealing completely BLANK paper sheet)
+    await this.sceneManager.unfurlPaper();
 
     this.isExecuting = false;
   }
