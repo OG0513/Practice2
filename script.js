@@ -105,7 +105,7 @@ const Config = {
   memories: [
     {
       id: 1,
-      image: "/Images/photo01.webp",
+      image: "/Images/photo01.jpg",
       caption: "A quiet night under the stars...",
       type: "polaroid",
       accent: "tape-top-right",
