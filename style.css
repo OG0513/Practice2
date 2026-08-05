@@ -14,15 +14,12 @@
   --color-soft-gold: #e6ca85;
   --color-warm-yellow: #fce89e;
 
-  /* Parchment Scroll Palette */
-  --parchment-cream: #fcf6ea;
-  --parchment-base: #f3e4d0;
-  --parchment-dark: #e6d3ba;
-  --parchment-shadow: rgba(110, 63, 35, 0.25);
-  --wood-dark: #523018;
-  --wood-mid: #8c5a38;
-  --wood-light: #a46d46;
-  --gold-band: #e6ca85;
+  /* Paper Roll Palette (Pure Paper - No Wood / No Caps) */
+  --paper-cream: #fcf8f2;
+  --paper-base: #faf4e8;
+  --paper-shade: #f2e6d6;
+  --paper-dark: #e8d9c5;
+  --paper-shadow: rgba(12, 16, 32, 0.28);
 
   /* Flower Species Palette */
   --flower-daisy: #fcf8f2;
@@ -57,6 +54,7 @@
   --ease-cinematic: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-handwriting: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-scroll-entrance: cubic-bezier(0.175, 0.885, 0.32, 1.05);
+  --ease-unfurl: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==================================================
@@ -490,214 +488,169 @@ html, body {
 }
 
 /* ==================================================
-   PURE HTML/CSS ROLLED ANCIENT PARCHMENT SCROLL
-   (VERSION 1.6 - HANDCRAFTED STORYBOOK)
+   PURE HTML/CSS PAPER ROLL & VERTICAL UNFURLING
+   (NO WOODEN ROLLERS / END CAPS / BANDS)
    ================================================== */
 
-.scroll-container {
+.paper-container {
   position: absolute;
-  top: 48%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -160vh); /* Start off-screen above viewport */
-  width: clamp(280px, 72vw, 540px);
+  width: clamp(260px, 76vw, 360px);
   z-index: 20;
-  pointer-events: none; /* No interactions in this version */
+  pointer-events: none; /* No interaction in this version */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   will-change: transform;
-  transition: transform 2.4s var(--ease-scroll-entrance);
+  transition: transform 2.2s var(--ease-scroll-entrance);
 }
 
-/* Responsive Size Tiering */
+/* Responsive Size Tiering across devices */
 @media (min-width: 600px) {
-  .scroll-container {
-    width: clamp(340px, 50vw, 520px);
+  .paper-container {
+    width: clamp(300px, 48vw, 460px);
   }
 }
 
 @media (min-width: 1024px) {
-  .scroll-container {
-    width: clamp(420px, 42vw, 560px);
+  .paper-container {
+    width: clamp(340px, 38vw, 520px);
   }
 }
 
-/* Arrived Entrance State */
-.scroll-container.arrived {
+/* Arrived State (Resting at Center) */
+.paper-container.arrived {
   transform: translate(-50%, -50%);
 }
 
-.scroll-body-wrapper {
+/* Upper & Lower Rolled Edge Cylinders */
+.paper-roll {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
-  height: clamp(80px, 13vw, 135px);
+  height: 18px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ede1d1 0%, #faf4e8 50%, #d8c7b5 100%);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  z-index: 5;
+  transition: transform 2.6s var(--ease-unfurl), opacity 2.6s ease;
+  will-change: transform, opacity;
 }
 
-/* Wooden Rollers (Left & Right) */
-.scroll-roller {
-  position: relative;
-  width: clamp(16px, 2.6vw, 24px);
-  height: 116%;
-  background: linear-gradient(90deg, var(--wood-dark) 0%, var(--wood-mid) 40%, var(--wood-light) 65%, var(--wood-dark) 100%);
-  border-radius: 4px;
-  z-index: 4;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+.roll-top {
+  margin-bottom: -9px;
 }
 
-/* Wooden Roller End Caps */
-.wood-cap {
+.roll-bottom {
+  margin-top: -9px;
+}
+
+.roll-edge-shadow {
   position: absolute;
-  width: 155%;
-  left: -27.5%;
-  height: clamp(12px, 2vw, 18px);
-  background: radial-gradient(ellipse at center, var(--wood-light) 0%, var(--wood-mid) 55%, var(--wood-dark) 100%);
-  border-radius: 50%;
-  border: 1px solid rgba(230, 202, 133, 0.45);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.cap-top {
-  top: -9px;
-}
-
-.cap-bottom {
-  bottom: -9px;
-}
-
-/* Decorative Gold/Brass Roller Bands */
-.wood-cylinder {
-  position: relative;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  border-radius: 9px;
+  background: linear-gradient(90deg, rgba(12, 16, 32, 0.25) 0%, transparent 8%, transparent 92%, rgba(12, 16, 32, 0.25) 100%);
 }
 
-.deco-band {
-  position: absolute;
+/* Unfurlable Paper Sheet Body */
+.paper-sheet {
   width: 100%;
-  height: 5px;
-  background: linear-gradient(90deg, #b5945b, var(--gold-band), #b5945b);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-}
-
-.band-top {
-  top: 12%;
-}
-
-.band-bottom {
-  bottom: 12%;
-}
-
-/* Rolled Parchment Paper Body */
-.scroll-parchment {
-  flex: 1;
-  height: 100%;
-  background: linear-gradient(180deg, var(--parchment-cream) 0%, var(--parchment-base) 45%, var(--parchment-dark) 100%);
-  border-radius: 5px;
+  height: 10px; /* Tightly rolled initially */
+  background: linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-base) 50%, var(--paper-shade) 100%);
+  border-radius: 8px;
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1),
+              inset 0 -2px 6px rgba(0, 0, 0, 0.12),
+              0 8px 30px rgba(0, 0, 0, 0.22);
+  transition: height 2.6s var(--ease-unfurl);
+  will-change: height;
   z-index: 3;
-  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.15),
-              inset 0 -3px 8px rgba(0, 0, 0, 0.18),
-              0 6px 20px rgba(0, 0, 0, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* CSS Grain & Paper Shade Variations */
-.parchment-texture {
+/* Unfurled State Physics (Vertical Opening) */
+.paper-container.unfurled .paper-sheet {
+  height: clamp(300px, 48vh, 480px);
+}
+
+.paper-container.unfurled .roll-top {
+  transform: translateY(-2px) scaleY(0.45);
+  opacity: 0.55;
+}
+
+.paper-container.unfurled .roll-bottom {
+  transform: translateY(2px) scaleY(0.45);
+  opacity: 0.55;
+}
+
+/* Mobile Landscape Height Adaptation */
+@media (max-height: 500px) {
+  .paper-container.unfurled .paper-sheet {
+    height: clamp(200px, 68vh, 280px);
+  }
+}
+
+/* Pure CSS Paper Texture & Inner Lighting */
+.paper-texture {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background-image: 
-    repeating-linear-gradient(45deg, rgba(140, 90, 56, 0.025) 0px, rgba(140, 90, 56, 0.025) 2px, transparent 2px, transparent 4px),
-    radial-gradient(ellipse at 50% 50%, rgba(252, 248, 242, 0.5) 0%, rgba(210, 185, 150, 0.2) 100%);
+    repeating-linear-gradient(45deg, rgba(140, 90, 56, 0.015) 0px, rgba(140, 90, 56, 0.015) 2px, transparent 2px, transparent 4px),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(210, 185, 150, 0.18) 100%);
   pointer-events: none;
 }
 
-/* Inner Roll Curvature Shadows */
-.parchment-shadow-left {
+.paper-inner-glow {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 14%;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(82, 48, 24, 0.35) 0%, transparent 100%);
-  pointer-events: none;
-}
-
-.parchment-shadow-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 14%;
-  height: 100%;
-  background: linear-gradient(-90deg, rgba(82, 48, 24, 0.35) 0%, transparent 100%);
-  pointer-events: none;
-}
-
-.parchment-crease {
-  position: absolute;
-  top: 50%;
   left: 0;
   width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 20px rgba(252, 248, 242, 0.6);
+  pointer-events: none;
+}
+
+.paper-crease-line {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  width: 90%;
   height: 1px;
-  background: rgba(140, 90, 56, 0.15);
-  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+  background: rgba(140, 90, 56, 0.08);
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
 }
 
-/* Decorative Gold Ribbon Tie */
-.parchment-ribbon-tie {
+/* Floor Shadow Beneath Paper Container */
+.paper-ground-shadow {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-}
-
-.ribbon-band {
-  width: 14px;
-  height: clamp(80px, 13vw, 135px);
-  background: linear-gradient(90deg, #d4af37, #fce89e, #d4af37);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  border-radius: 2px;
-}
-
-.ribbon-knot {
-  position: absolute;
-  width: 18px;
+  bottom: -24px;
+  width: 85%;
   height: 18px;
-  background: radial-gradient(circle, #fce89e 0%, #d4af37 70%, #aa8c2c 100%);
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* Ground Floor Shadow Beneath Settling Scroll */
-.scroll-ground-shadow {
-  position: absolute;
-  bottom: -28px;
-  width: 82%;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 75%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.42) 0%, rgba(0, 0, 0, 0) 75%);
   opacity: 0;
-  transform: scale(0.6);
-  transition: opacity 1.8s var(--ease-cinematic) 1.0s, transform 1.8s var(--ease-cinematic) 1.0s;
+  transform: scale(0.5);
+  transition: opacity 2.0s var(--ease-cinematic) 0.8s, transform 2.0s var(--ease-cinematic) 0.8s;
+  pointer-events: none;
 }
 
-.scroll-container.arrived .scroll-ground-shadow {
+.paper-container.arrived .paper-ground-shadow {
+  opacity: 0.85;
+  transform: scale(0.85);
+}
+
+.paper-container.unfurled .paper-ground-shadow {
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1.05);
 }
 
 /* Safe-Area Responsive Replay Control Button */
@@ -754,16 +707,22 @@ html, body {
   .moon-container,
   .moon-aura-outer,
   .cloud,
-  .scroll-container,
+  .paper-container,
+  .paper-sheet,
+  .paper-roll,
   .scroll-focus-overlay,
-  .scroll-ground-shadow,
+  .paper-ground-shadow,
   .replay-btn {
     transition: none !important;
     animation: none !important;
   }
 
-  .scroll-container {
+  .paper-container {
     transform: translate(-50%, -50%);
+  }
+
+  .paper-container.unfurled .paper-sheet {
+    height: clamp(300px, 48vh, 480px);
   }
 
   .subtitle-container {
