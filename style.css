@@ -402,6 +402,7 @@ html, body {
   align-items: center;
   justify-content: center;
   animation: moon-float 8s ease-in-out infinite alternate;
+  transition: filter 2.2s var(--ease-cinematic);
 }
 
 .moon-aura-outer {
@@ -475,6 +476,154 @@ html, body {
 }
 
 /* ==================================================
+   MEMORY LANE FOUNDATION (VERSION 2.5 ENVIRONMENT LAYER)
+   ================================================== */
+
+.memory-lane-foundation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 2.8s var(--ease-cinematic);
+}
+
+.memory-lane-foundation.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pathway-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--meadow-height, 30dvh);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pathway-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Warm Glowing Lanterns Along Pathway */
+.lanterns-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--meadow-height, 30dvh);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lantern {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lantern-1 { bottom: 22%; left: 45%; transform: scale(0.65); }
+.lantern-2 { bottom: 38%; left: 51%; transform: scale(0.50); }
+.lantern-3 { bottom: 54%; left: 48%; transform: scale(0.38); }
+.lantern-4 { bottom: 68%; left: 50%; transform: scale(0.28); }
+
+.lantern-glow {
+  position: absolute;
+  top: -20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252, 232, 158, 0.45) 0%, rgba(230, 202, 133, 0.18) 45%, rgba(0, 0, 0, 0) 75%);
+  animation: lantern-flicker 4s ease-in-out infinite alternate;
+}
+
+.lantern-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lantern-cap {
+  width: 16px;
+  height: 6px;
+  background: #422612;
+  border-radius: 3px 3px 0 0;
+}
+
+.lantern-glass {
+  width: 12px;
+  height: 14px;
+  background: rgba(252, 232, 158, 0.85);
+  border: 1px solid #422612;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(252, 232, 158, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lantern-flame {
+  width: 4px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #fce89e;
+  animation: flame-pulse 2s ease-in-out infinite alternate;
+}
+
+.lantern-post {
+  width: 3px;
+  height: 24px;
+  background: linear-gradient(180deg, #422612 0%, #1f1207 100%);
+}
+
+@keyframes lantern-flicker {
+  0% { opacity: 0.75; transform: scale(0.95); }
+  50% { opacity: 1.0; transform: scale(1.08); }
+  100% { opacity: 0.82; transform: scale(0.98); }
+}
+
+@keyframes flame-pulse {
+  0% { transform: scale(0.85); }
+  100% { transform: scale(1.15); }
+}
+
+/* Atmospheric Ground Fog */
+.ground-fog-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 25vh;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ground-fog {
+  position: absolute;
+  bottom: 0;
+  width: 200%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(200, 221, 242, 0.08) 0%, rgba(226, 216, 238, 0.04) 45%, rgba(0, 0, 0, 0) 75%);
+  filter: blur(12px);
+}
+
+.fog-1 { animation: fog-drift-1 45s linear infinite; }
+.fog-2 { animation: fog-drift-2 65s linear infinite reverse; opacity: 0.6; }
+
+@keyframes fog-drift-1 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+/* ==================================================
    SUBTLE BACKGROUND FOCUS OVERLAY
    ================================================== */
 
@@ -497,7 +646,6 @@ html, body {
 
 /* ==================================================
    VINTAGE PARCHMENT PAPER & WOODEN ROLLERS
-   (VERSION 2.4 - INTEGRATED WOODEN ROLLERS)
    ================================================== */
 
 .paper-container {
@@ -512,8 +660,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  will-change: transform;
-  transition: transform 2.0s var(--ease-scroll-entrance);
+  will-change: transform, opacity;
+  transition: transform 2.0s var(--ease-scroll-entrance), opacity 2.0s var(--ease-cinematic);
 }
 
 /* Responsive Size Tiering across devices */
@@ -532,7 +680,37 @@ html, body {
 /* Arrived State (Resting at Center) */
 .paper-container.arrived {
   transform: translate(-50%, -50%);
-  pointer-events: auto; /* Enable inner text interactions */
+  pointer-events: auto;
+}
+
+/* Version 2.5 Rolled Paper Exit Animation (Rolling Back Up & Ascending) */
+.paper-container.rolling-up .letter-line,
+.paper-container.rolling-up .letter-divider,
+.paper-container.rolling-up .continue-container {
+  opacity: 0 !important;
+  transform: translateY(-8px) !important;
+  transition: opacity 0.8s var(--ease-cinematic), transform 0.8s var(--ease-cinematic);
+}
+
+.paper-container.rolling-up .paper-sheet {
+  height: 10px !important;
+  transition: height 2.2s var(--ease-unfurl);
+}
+
+.paper-container.rolling-up .assembly-top {
+  transform: translateY(0px) rotate(-5deg) !important;
+  transition: transform 2.2s var(--ease-unfurl);
+}
+
+.paper-container.rolling-up .assembly-bottom {
+  transform: translateY(0px) rotate(5deg) !important;
+  transition: transform 2.2s var(--ease-unfurl);
+}
+
+.paper-container.ascending {
+  transform: translate(-50%, -150vh) rotate(2.8deg) !important;
+  opacity: 0;
+  transition: transform 2.2s var(--ease-cinematic), opacity 2.0s var(--ease-cinematic);
 }
 
 /* Integrated Wooden Roller Assembly (Top & Bottom) */
@@ -543,6 +721,7 @@ html, body {
   align-items: center;
   justify-content: center;
   z-index: 6;
+  transition: transform 2.2s var(--ease-unfurl);
 }
 
 .assembly-top {
@@ -857,37 +1036,6 @@ html, body {
   }
 }
 
-/* Status Toast Notification for Continue Interaction Placeholder */
-.status-toast {
-  position: absolute;
-  bottom: clamp(1.5rem, 4vh, 3.0rem);
-  left: 50%;
-  transform: translate(-50%, 20px);
-  background: rgba(252, 248, 242, 0.12);
-  border: 1px solid rgba(230, 202, 133, 0.4);
-  color: var(--color-warm-beige);
-  padding: 0.6rem 1.4rem;
-  border-radius: 25px;
-  font-family: var(--font-serif);
-  font-size: 0.88rem;
-  letter-spacing: 0.1em;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 25;
-  transition: all 0.6s var(--ease-cinematic);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-toast.visible {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
 /* Floor Shadow Beneath Paper Container */
 .paper-ground-shadow {
   position: absolute;
@@ -974,7 +1122,7 @@ html, body {
   .letter-divider,
   .continue-container,
   .continue-btn,
-  .status-toast,
+  .memory-lane-foundation,
   .paper-ground-shadow,
   .replay-btn {
     transition: none !important;
@@ -991,7 +1139,8 @@ html, body {
 
   .letter-line,
   .letter-divider,
-  .continue-container {
+  .continue-container,
+  .memory-lane-foundation {
     opacity: 1;
     transform: none;
   }
