@@ -628,7 +628,7 @@ html, body {
 @keyframes fog-drift-2 { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
 
 /* ==================================================
-   MEMORY LANE EXPANDED 10-CARD SCRAPBOOK (VERSION 3.3 REFINED)
+   MEMORY LANE DYNAMIC MEMORY DATA SCRAPBOOK (VERSION 4.0)
    ================================================== */
 
 .memory-lane-scrapbook {
@@ -678,7 +678,7 @@ html, body {
   will-change: opacity, transform;
 }
 
-/* Card Animates ONLY ONCE when entering viewport (400-500ms entrance) */
+/* Card Animates ONLY ONCE when entering viewport */
 .memory-card.in-view {
   opacity: 1;
 }
@@ -697,7 +697,7 @@ html, body {
 
 /* Polaroid Frame Design */
 .card-polaroid {
-  width: clamp(230px, 28vw, 310px);
+  width: clamp(230px, 24vw, 300px);
 }
 
 .card-polaroid .frame-body {
@@ -712,7 +712,7 @@ html, body {
 
 /* Postcard Design */
 .card-postcard {
-  width: clamp(250px, 30vw, 330px);
+  width: clamp(250px, 26vw, 320px);
 }
 
 .card-postcard .frame-body {
@@ -784,7 +784,7 @@ html, body {
   pointer-events: none;
 }
 
-/* Photo Area & Glare - Preserving Aspect Ratio Without Distortion */
+/* Photo Area & Glare - Preserving Aspect Ratio & Subtle Warmth Treatment */
 .photo-wrapper {
   position: relative;
   width: 100%;
@@ -800,6 +800,8 @@ html, body {
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: contrast(1.03) saturate(1.05) sepia(0.03);
+  transition: filter 0.4s var(--ease-cinematic);
 }
 
 .photo-overlay-glare {
