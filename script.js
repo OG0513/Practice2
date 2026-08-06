@@ -2,7 +2,6 @@
  * A Little World Made Just for Her
  * Cinematic Interactive Experience with Integrated Canvas Firework Engine
  */
-
 /* ==================================================
    1. CONFIGURATION SYSTEM
    ================================================== */
