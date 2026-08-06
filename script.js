@@ -86,7 +86,7 @@ const Config = {
     glowColor: "rgba(230, 202, 133, 0.28)"
   },
   memories: [
-    { id: 1, image: "Images/photo01.jpg", caption: "A quiet night under the stars...", type: "polaroid", accent: "tape-top-right", number: "No. 01", fallbackRoman: "I" },
+    { id: 1, image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600", caption: "A quiet night under the stars...", type: "polaroid", accent: "tape-top-right", number: "No. 01", fallbackRoman: "I" },
     { id: 2, image: "Images/photo02.jpg", caption: "Sweet laughter & gentle breeze", type: "postcard", accent: "postmark", number: "No. 02", fallbackRoman: "II" },
     { id: 3, image: "Images/photo03.jpg", caption: "Unforgettable warm moments", type: "polaroid", accent: "pressed-flower", number: "No. 03", fallbackRoman: "III" },
     { id: 4, image: "Images/photo04.jpg", caption: "Walking through the moonlight", type: "polaroid", accent: "tape-top-left", number: "No. 04", fallbackRoman: "IV" },
