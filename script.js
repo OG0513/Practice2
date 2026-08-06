@@ -87,15 +87,15 @@ const Config = {
   },
   memories: [
     { id: 1, image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600", caption: "A quiet night under the stars...", type: "polaroid", accent: "tape-top-right", number: "No. 01", fallbackRoman: "I" },
-    { id: 2, image: "Images/photo02.jpg", caption: "Sweet laughter & gentle breeze", type: "postcard", accent: "postmark", number: "No. 02", fallbackRoman: "II" },
-    { id: 3, image: "Images/photo03.jpg", caption: "Unforgettable warm moments", type: "polaroid", accent: "pressed-flower", number: "No. 03", fallbackRoman: "III" },
-    { id: 4, image: "Images/photo04.jpg", caption: "Walking through the moonlight", type: "polaroid", accent: "tape-top-left", number: "No. 04", fallbackRoman: "IV" },
-    { id: 5, image: "Images/photo05.jpg", caption: "A smile that brightens the day", type: "postcard", accent: "stamp-air", number: "No. 05", fallbackRoman: "V" },
-    { id: 6, image: "Images/photo06.jpg", caption: "Forever in our hearts", type: "polaroid", accent: "pressed-leaf", number: "No. 06", fallbackRoman: "VI" },
-    { id: 7, image: "Images/photo07.jpg", caption: "Whispers of joy and light", type: "postcard", accent: "tape-top-right", number: "No. 07", fallbackRoman: "VII" },
-    { id: 8, image: "Images/photo08.jpg", caption: "Surrounded by nature’s grace", type: "postcard", accent: "stamp-wish", number: "No. 08", fallbackRoman: "VIII" },
-    { id: 9, image: "Images/photo09.jpg", caption: "Moments that shine forever", type: "polaroid", accent: "pressed-flower-pink", number: "No. 09", fallbackRoman: "IX" },
-    { id: 10, image: "Images/photo10.jpg", caption: "A story made just for her", type: "postcard", accent: "tape-top-left", number: "No. 10", fallbackRoman: "X" }
+    { id: 2, image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600", caption: "Sweet laughter & gentle breeze", type: "postcard", accent: "postmark", number: "No. 02", fallbackRoman: "II" },
+    { id: 3, image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600", caption: "Unforgettable warm moments", type: "polaroid", accent: "pressed-flower", number: "No. 03", fallbackRoman: "III" },
+    { id: 4, image: "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=600", caption: "Walking through the moonlight", type: "polaroid", accent: "tape-top-left", number: "No. 04", fallbackRoman: "IV" },
+    { id: 5, image: "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?w=600", caption: "A smile that brightens the day", type: "postcard", accent: "stamp-air", number: "No. 05", fallbackRoman: "V" },
+    { id: 6, image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600", caption: "Forever in our hearts", type: "polaroid", accent: "pressed-leaf", number: "No. 06", fallbackRoman: "VI" },
+    { id: 7, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600", caption: "Whispers of joy and light", type: "postcard", accent: "tape-top-right", number: "No. 07", fallbackRoman: "VII" },
+    { id: 8, image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600", caption: "Surrounded by nature’s grace", type: "postcard", accent: "stamp-wish", number: "No. 08", fallbackRoman: "VIII" },
+    { id: 9, image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=600", caption: "Moments that shine forever", type: "polaroid", accent: "pressed-flower-pink", number: "No. 09", fallbackRoman: "IX" },
+    { id: 10, image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600", caption: "A story made just for her", type: "postcard", accent: "tape-top-left", number: "No. 10", fallbackRoman: "X" }
   ],
   finalMessage: {
     recipientName: "My Dearest",
