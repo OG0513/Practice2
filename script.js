@@ -462,7 +462,7 @@ class ParticleSystem {
     this.isGatheringHigh = false;
 
     this.initParticles();
-    this.initStars(); // Persistent starfield
+    this.initStars();
     this.initFireflies();
     this.initPollen();
   }
@@ -1923,12 +1923,19 @@ class SceneManager {
 
       const fallbackSrc = Utils.generateFallbackSVG(mem.fallbackRoman || 'I');
 
+      // Create img natively in JS to avoid inline onerror security blocks
+      const img = document.createElement('img');
+      img.className = 'memory-photo';
+      img.alt = 'Memory Photo';
+      img.loading = 'lazy';
+      img.src = mem.image;
+      img.onerror = () => { img.onerror = null; img.src = fallbackSrc; };
+
       card.innerHTML = `
         ${accentHTML}
         <div class="frame-body">
           ${headerHTML}
           <div class="photo-wrapper">
-            <img class="memory-photo" src="${mem.image}" alt="Memory Photo" loading="lazy" onError="this.onerror=null;this.src='${fallbackSrc}';" />
             <div class="photo-overlay-glare"></div>
           </div>
           <div class="caption-area">
@@ -1938,6 +1945,7 @@ class SceneManager {
         </div>
       `;
 
+      card.querySelector('.photo-wrapper').appendChild(img);
       this.scrapbookTrack.appendChild(card);
     });
 
@@ -1989,7 +1997,7 @@ class SceneManager {
             obs.unobserve(entry.target);
           }
         });
-      }, { root: this.memoryLaneScrapbook, threshold: 0.15 });
+      }, { root: this.memoryLaneScrapbook, threshold: 0.10 });
 
       this.memoryCards.forEach(card => observer.observe(card));
     } else {
@@ -2118,6 +2126,12 @@ class SceneManager {
     await Utils.wait(800);
 
     if (this.memoryLaneScrapbook) this.memoryLaneScrapbook.classList.add('active');
+
+    // Force cards in view when scrapbook becomes active
+    if (this.memoryCards) {
+      this.memoryCards.forEach(card => card.classList.add('in-view'));
+    }
+
     this.isTransitioning = false;
   }
 }
@@ -2180,7 +2194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   timelineManager.runSequence();
 
-  // Resume AudioContext on user gesture
+  // Resume AudioContext on user interaction
   const unlockAudio = () => { soundManager.resume(); };
   window.addEventListener('click', unlockAudio, { once: true });
   window.addEventListener('touchstart', unlockAudio, { once: true });
